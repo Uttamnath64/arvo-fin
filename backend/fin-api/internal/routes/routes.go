@@ -13,14 +13,16 @@ type Routes struct {
 	server *gin.Engine
 	config *config.Config
 	logger *logger.Logger
+	env    *config.AppEnv
 }
 
-func New(ctx context.Context, server *gin.Engine, con *config.Config, logger *logger.Logger) *Routes {
+func New(ctx context.Context, server *gin.Engine, con *config.Config, logger *logger.Logger, env *config.AppEnv) *Routes {
 	return &Routes{
 		ctx:    ctx,
 		server: server,
 		config: con,
 		logger: logger,
+		env:    env,
 	}
 }
 

@@ -10,6 +10,7 @@ func (r *LoginRequest) IsValid() error {
 	usernameErr := Validate.IsValidUsername(r.UsernameEmail)
 	if emailErr != nil && usernameErr != nil {
 		if emailErr != nil {
+
 			return emailErr
 		} else {
 			return usernameErr

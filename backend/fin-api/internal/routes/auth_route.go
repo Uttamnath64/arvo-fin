@@ -3,7 +3,7 @@ package routes
 import "github.com/Uttamnath64/arvo-fin/fin-api/internal/handlers"
 
 func (routes *Routes) AuthRoutes() {
-	authHandler := handlers.NewAuthHandler(routes.config, routes.logger)
+	authHandler := handlers.NewAuthHandler(routes.config, routes.logger, routes.env)
 	userGroup := routes.server.Group("/auth")
 	{
 		userGroup.POST("/login", authHandler.LoginHandler)

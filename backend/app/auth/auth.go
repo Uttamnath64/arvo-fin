@@ -7,15 +7,16 @@ import (
 
 	"github.com/Uttamnath64/arvo-fin/app/config"
 	"github.com/Uttamnath64/arvo-fin/app/models"
-	"github.com/Uttamnath64/arvo-fin/app/services"
+	"github.com/Uttamnath64/arvo-fin/app/repository"
 	"github.com/Uttamnath64/arvo-fin/pkg/logger"
 	"github.com/golang-jwt/jwt"
 )
 
 type Auth struct {
-	config *config.Config
-	env    *config.AppEnv
-	logger *logger.Logger
+	config   *config.Config
+	env      *config.AppEnv
+	logger   *logger.Logger
+	authRepo *repository.AuthRepository
 }
 
 type AuthClaim struct {
@@ -24,11 +25,12 @@ type AuthClaim struct {
 	jwt.StandardClaims
 }
 
-func New(con *config.Config, env *config.AppEnv, logger *logger.Logger) *Auth {
+func New(con *config.Config, env *config.AppEnv, logger *logger.Logger, authRepo *repository.AuthRepository) *Auth {
 	return &Auth{
-		config: con,
-		env:    env,
-		logger: logger,
+		config:   con,
+		env:      env,
+		logger:   logger,
+		authRepo: repository.NewAuthRepository(con, logger),
 	}
 }
 
@@ -84,7 +86,7 @@ func (auth *Auth) GenerateToken(referenceId uint, userType byte, ip string) (str
 		return "", "", err
 	}
 
-	if err := services.NewAuthService(auth.config, auth.logger).AddToken(&models.Token{
+	if err := auth.addToken(&models.Token{
 		ReferenceId: referenceId,
 		UserType:    userType,
 		IP:          ip,
@@ -127,9 +129,31 @@ func (auth *Auth) VerifyRefreshToken(signedToken string) (interface{}, error) {
 		return nil, errors.New("Couldn't parse claims")
 	}
 
-	if err := services.NewAuthService(auth.config, auth.logger).IsValidRefreshToken(claims.ReferenceId, claims.UserType, signedToken); err != nil {
+	if err := auth.isValidRefreshToken(claims.ReferenceId, claims.UserType, signedToken); err != nil {
 		return nil, errors.New("Refresh token is invalid")
 	}
 
 	return claims, nil
+}
+
+func (auth *Auth) isValidRefreshToken(referenceID uint, userType byte, signedToken string) error {
+	token, err := auth.authRepo.GetTokenByReference(referenceID, userType, signedToken)
+	if err != nil {
+		return err
+	}
+
+	// Check if token exists
+	if token == nil {
+		return errors.New("Refresh token not found!")
+	}
+
+	if token.ExpiresAt < time.Now().Unix() {
+		return errors.New("Refresh token is expired!")
+	}
+
+	return nil
+}
+
+func (auth *Auth) addToken(token *models.Token) error {
+	return auth.authRepo.AddToken(token)
 }

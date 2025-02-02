@@ -78,7 +78,7 @@ func (a *Application) Run() {
 	server.Use(cors.New(corsConfig))
 
 	// routers
-	routes.New(a.ctx, server, a.config, a.logger).Handlers()
+	routes.New(a.ctx, server, a.config, a.logger, a.env).Handlers()
 
 	if err := server.Run(":" + a.env.Server.Port); err != nil {
 		a.logger.Error("api-application-server", err.Error())
