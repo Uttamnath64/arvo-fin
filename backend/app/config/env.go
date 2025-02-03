@@ -18,6 +18,7 @@ type AppEnv struct {
 		Port         string `mapstructure:"PORT"`
 		ClientOrigin string `mapstructure:"CLIENT_ORIGIN"`
 		Environment  string `mapstructure:"ENVIRONMENT"`
+		RedisHost    string `mapstructure:"REDIS_HOST"`
 	}
 
 	Auth struct {

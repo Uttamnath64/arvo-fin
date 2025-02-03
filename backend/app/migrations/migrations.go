@@ -44,6 +44,7 @@ func main() {
 		&models.Budget{},
 		&models.Transaction{},
 		&models.RecurringTransaction{},
+		&models.OTP{},
 	)
 	if err != nil {
 		log.Error("app-migrate-config-error", "Failed to migrate the database")

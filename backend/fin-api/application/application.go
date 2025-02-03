@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Uttamnath64/arvo-fin/app/config"
+	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"github.com/Uttamnath64/arvo-fin/fin-api/internal/routes"
 	"github.com/Uttamnath64/arvo-fin/pkg/logger"
 	"github.com/gin-contrib/cors"
@@ -20,12 +21,10 @@ type Application struct {
 
 	// main application context
 	name   string
-	ctx    context.Context
 	cancel context.CancelFunc
 
-	config *config.Config
-	env    *config.AppEnv
-	logger *logger.Logger
+	// di container
+	container *storage.Container
 
 	// shutdownTimeout is the timeout for server. This timeout mean
 	// that all component should be stopped after fetching signal
@@ -38,28 +37,33 @@ func New() *Application {
 }
 
 func (a *Application) Initialize() bool {
-	var (
-		con *config.Config
-		err error
-	)
+	var con *config.Config
 
-	a.ctx = context.Background()
+	ctx := context.Background()
 
 	// load env
-	a.env, err = config.LoadEnv()
+	env, err := config.LoadEnv()
 	if err != nil {
 		logger.New("none").Error("api-application-env", err.Error())
 		return false
 	}
-	a.logger = logger.New(a.env.Server.Environment)
+	log := logger.New(env.Server.Environment)
 
 	// load config DB
-	err = config.LoadConfig(*a.env, con)
+	err = config.LoadConfig(*env, con)
 	if err != nil {
-		a.logger.Error("api-application-config", err.Error())
+		log.Error("api-application-config", err.Error())
 		return false
 	}
-	a.config = con
+
+	// load redis
+	redis, err := storage.NewRedisClient(ctx, env.Server.RedisHost, "", 0)
+	if err != nil {
+		log.Error("api-application-redis", err.Error())
+		return false
+	}
+
+	a.container = storage.NewContainer(ctx, con, log, redis, env)
 
 	return true
 
@@ -70,7 +74,7 @@ func (a *Application) Run() {
 	server := gin.Default()
 
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{a.env.Server.ClientOrigin}
+	corsConfig.AllowOrigins = []string{a.container.Env.Server.ClientOrigin}
 	corsConfig.AllowMethods = []string{"GET", "POST", "PUT"}
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
 	corsConfig.AllowCredentials = true
@@ -78,10 +82,10 @@ func (a *Application) Run() {
 	server.Use(cors.New(corsConfig))
 
 	// routers
-	routes.New(a.ctx, server, a.config, a.logger, a.env).Handlers()
+	routes.New(a.container, server).Handlers()
 
-	if err := server.Run(":" + a.env.Server.Port); err != nil {
-		a.logger.Error("api-application-server", err.Error())
+	if err := server.Run(":" + a.container.Env.Server.Port); err != nil {
+		a.container.Logger.Error("api-application-server", err.Error())
 		return
 	}
 }

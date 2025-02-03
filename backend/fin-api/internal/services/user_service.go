@@ -1,21 +1,18 @@
 package services
 
 import (
-	"github.com/Uttamnath64/arvo-fin/app/config"
 	"github.com/Uttamnath64/arvo-fin/app/repository"
-	"github.com/Uttamnath64/arvo-fin/pkg/logger"
+	"github.com/Uttamnath64/arvo-fin/app/storage"
 )
 
 type UserService struct {
-	config   *config.Config
-	logger   *logger.Logger
-	userRepo *repository.UserRepository
+	container *storage.Container
+	userRepo  *repository.UserRepository
 }
 
-func NewUserService(config *config.Config, logger *logger.Logger) *UserService {
+func NewUserService(container *storage.Container) *UserService {
 	return &UserService{
-		config:   config,
-		logger:   logger,
-		userRepo: repository.NewUserRepository(config, logger),
+		container: container,
+		userRepo:  repository.NewUserRepository(container),
 	}
 }

@@ -21,14 +21,14 @@ func NewOTPService(redisClient *storage.RedisClient, ttl int) *OTPService {
 }
 
 // GenerateOTP generates a random OTP (for simplicity, hardcoded here).
-func (o *OTPService) GenerateOTP() string {
+func (service *OTPService) GenerateOTP() string {
 	return fmt.Sprintf("%06d", time.Now().UnixNano()%1000000) // 6-digit OTP
 }
 
 // StoreOTP stores the OTP in Redis
-func (o *OTPService) StoreOTP(email, otp string) error {
+func (service *OTPService) StoreOTP(email, otp string) error {
 	key := "otp:" + email
-	err := o.RedisClient.SetValue(key, otp, o.TTL)
+	err := service.RedisClient.SetValue(key, otp, service.TTL)
 	if err != nil {
 		return fmt.Errorf("failed to store OTP: %v", err)
 	}
@@ -36,9 +36,9 @@ func (o *OTPService) StoreOTP(email, otp string) error {
 }
 
 // VerifyOTP verifies a user-provided OTP against the stored OTP
-func (o *OTPService) VerifyOTP(email, providedOTP string) error {
+func (service *OTPService) VerifyOTP(email, providedOTP string) error {
 	key := "otp:" + email
-	storedOTP, err := o.RedisClient.GetValue(key)
+	storedOTP, err := service.RedisClient.GetValue(key)
 	if err != nil {
 		return errors.New("OTP not found or expired")
 	}
@@ -48,7 +48,7 @@ func (o *OTPService) VerifyOTP(email, providedOTP string) error {
 	}
 
 	// Delete the OTP after successful verification
-	_ = o.RedisClient.DeleteKey(key)
+	_ = service.RedisClient.DeleteKey(key)
 
 	return nil
 }

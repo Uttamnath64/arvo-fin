@@ -5,18 +5,15 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Uttamnath64/arvo-fin/app/config"
 	"github.com/Uttamnath64/arvo-fin/app/models"
 	"github.com/Uttamnath64/arvo-fin/app/repository"
-	"github.com/Uttamnath64/arvo-fin/pkg/logger"
+	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"github.com/golang-jwt/jwt"
 )
 
 type Auth struct {
-	config   *config.Config
-	env      *config.AppEnv
-	logger   *logger.Logger
-	authRepo *repository.AuthRepository
+	container *storage.Container
+	authRepo  *repository.AuthRepository
 }
 
 type AuthClaim struct {
@@ -25,22 +22,20 @@ type AuthClaim struct {
 	jwt.StandardClaims
 }
 
-func New(con *config.Config, env *config.AppEnv, logger *logger.Logger, authRepo *repository.AuthRepository) *Auth {
+func New(container *storage.Container, authRepo *repository.AuthRepository) *Auth {
 	return &Auth{
-		config:   con,
-		env:      env,
-		logger:   logger,
-		authRepo: repository.NewAuthRepository(con, logger),
+		container: container,
+		authRepo:  repository.NewAuthRepository(container),
 	}
 }
 
 func (auth *Auth) GenerateToken(referenceId uint, userType byte, ip string) (string, string, error) {
 
-	var accessExpiresAt = time.Now().Add(auth.env.Auth.AccessTokenExpired * time.Hour).Unix()
-	var refreshExpiresAt = time.Now().Add(auth.env.Auth.RefreshTokenExpired * time.Hour).Unix()
+	var accessExpiresAt = time.Now().Add(auth.container.Env.Auth.AccessTokenExpired * time.Hour).Unix()
+	var refreshExpiresAt = time.Now().Add(auth.container.Env.Auth.RefreshTokenExpired * time.Hour).Unix()
 
 	// AccessPrivateKey
-	decodedAccessPrivateKey, err := base64.StdEncoding.DecodeString(auth.env.Auth.AccessTokenPrivateKey)
+	decodedAccessPrivateKey, err := base64.StdEncoding.DecodeString(auth.container.Env.Auth.AccessTokenPrivateKey)
 	if err != nil {
 		return "", "", errors.New("Could not decode key: " + err.Error())
 	}
@@ -50,7 +45,7 @@ func (auth *Auth) GenerateToken(referenceId uint, userType byte, ip string) (str
 	}
 
 	// RefreshPrivateKey
-	decodedRefreshPrivateKey, err := base64.StdEncoding.DecodeString(auth.env.Auth.RefreshTokenPrivateKey)
+	decodedRefreshPrivateKey, err := base64.StdEncoding.DecodeString(auth.container.Env.Auth.RefreshTokenPrivateKey)
 	if err != nil {
 		return "", "", errors.New("Could not decode key: " + err.Error())
 	}
@@ -101,7 +96,7 @@ func (auth *Auth) GenerateToken(referenceId uint, userType byte, ip string) (str
 
 func (auth *Auth) VerifyRefreshToken(signedToken string) (interface{}, error) {
 
-	decodedRefreshPublicKey, err := base64.StdEncoding.DecodeString(auth.env.Auth.RefreshTokenPublicKey)
+	decodedRefreshPublicKey, err := base64.StdEncoding.DecodeString(auth.container.Env.Auth.RefreshTokenPublicKey)
 	if err != nil {
 		return nil, errors.New("Could not decode: " + err.Error())
 	}

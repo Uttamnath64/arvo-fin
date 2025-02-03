@@ -5,9 +5,9 @@ import "gorm.io/gorm"
 type Portfolio struct {
 	gorm.Model
 	Name                 string                 `gorm:"column:name;not null"`
-	UserId               string                 `gorm:"column:userId"`
-	Account              []Account              `gorm:"foreignKey:portfolioId"`
-	Budget               []Budget               `gorm:"foreignKey:portfolioId"`
-	Transaction          []Transaction          `gorm:"foreignKey:portfolioId"`
-	RecurringTransaction []RecurringTransaction `gorm:"foreignKey:portfolioId"`
+	UserId               string                 `gorm:"column:user_id"`
+	Account              []Account              `gorm:"foreignKey:portfolio_id"`
+	Budget               []Budget               `gorm:"foreignKey:portfolio_id"`
+	Transaction          []Transaction          `gorm:"foreignKey:portfolio_id"`
+	RecurringTransaction []RecurringTransaction `gorm:"foreignKey:portfolio_id"`
 }

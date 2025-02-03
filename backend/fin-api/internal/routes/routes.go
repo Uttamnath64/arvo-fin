@@ -1,28 +1,19 @@
 package routes
 
 import (
-	"context"
-
-	"github.com/Uttamnath64/arvo-fin/app/config"
-	"github.com/Uttamnath64/arvo-fin/pkg/logger"
+	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"github.com/gin-gonic/gin"
 )
 
 type Routes struct {
-	ctx    context.Context
-	server *gin.Engine
-	config *config.Config
-	logger *logger.Logger
-	env    *config.AppEnv
+	container *storage.Container
+	server    *gin.Engine
 }
 
-func New(ctx context.Context, server *gin.Engine, con *config.Config, logger *logger.Logger, env *config.AppEnv) *Routes {
+func New(container *storage.Container, server *gin.Engine) *Routes {
 	return &Routes{
-		ctx:    ctx,
-		server: server,
-		config: con,
-		logger: logger,
-		env:    env,
+		container: container,
+		server:    server,
 	}
 }
 

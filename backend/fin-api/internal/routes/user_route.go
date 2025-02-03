@@ -4,7 +4,7 @@ import "github.com/Uttamnath64/arvo-fin/fin-api/internal/handlers"
 
 func (routes *Routes) UserRoutes() {
 
-	userHandler := handlers.NewUserHandler(routes.config, routes.logger)
+	userHandler := handlers.NewUserHandler(routes.container)
 	userGroup := routes.server.Group("/users")
 	{
 		userGroup.GET("/", userHandler.GetUsersHandler)         // List all users
