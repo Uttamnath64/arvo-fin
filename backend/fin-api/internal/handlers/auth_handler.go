@@ -18,10 +18,8 @@ type AuthHandler struct {
 
 func NewAuthHandler(container *storage.Container) *AuthHandler {
 	return &AuthHandler{
-		config:      config,
-		logger:      logger,
-		authService: services.NewAuthService(config, logger, env),
-		env:         env,
+		container:   container,
+		authService: services.NewAuthService(container),
 	}
 }
 
@@ -133,14 +131,32 @@ func (handler *AuthHandler) RegisterHandler(ctx *gin.Context) {
 	})
 }
 
-func (handler *AuthHandler) GetOTPHandler(c *gin.Context) {
+func (handler *AuthHandler) GetOTPHandler(ctx *gin.Context) {
+	var payload requests.GetOTPRequest
+
+	// Bind and validate input
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+			Status:  false,
+			Message: "Invalid request payload. Please check the input data format!",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	if err := payload.IsValid(); err != nil {
+		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+			Status:  false,
+			Message: err.Error(),
+		})
+		return
+	}
+}
+
+func (handler *AuthHandler) ForgotPasswordHandler(ctx *gin.Context) {
 
 }
 
-func (handler *AuthHandler) ForgotPasswordHandler(c *gin.Context) {
-
-}
-
-func (handler *AuthHandler) ResetPasswordHandler(c *gin.Context) {
+func (handler *AuthHandler) ResetPasswordHandler(ctx *gin.Context) {
 
 }

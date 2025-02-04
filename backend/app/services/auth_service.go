@@ -120,6 +120,17 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 		}
 	}
 
+	// Verify OTP
+	otpService := NewOTPService(service.container.Redis, 250)
+	err = otpService.VerifyOTP(payload.Email, payload.OTP)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Invalid OTP!",
+			Error:      errors.New("Invalid OTP!"),
+		}
+	}
+
 	// Hash password
 	user.Password, err = Validate.HashPassword(user.Password)
 	if err != nil {

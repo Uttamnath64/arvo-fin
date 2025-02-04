@@ -40,11 +40,11 @@ func (service *OTPService) VerifyOTP(email, providedOTP string) error {
 	key := "otp:" + email
 	storedOTP, err := service.RedisClient.GetValue(key)
 	if err != nil {
-		return errors.New("OTP not found or expired")
+		return errors.New("OTP expired!")
 	}
 
 	if storedOTP != providedOTP {
-		return errors.New("invalid OTP")
+		return errors.New("invalid OTP!")
 	}
 
 	// Delete the OTP after successful verification

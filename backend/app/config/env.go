@@ -19,6 +19,13 @@ type AppEnv struct {
 		ClientOrigin string `mapstructure:"CLIENT_ORIGIN"`
 		Environment  string `mapstructure:"ENVIRONMENT"`
 		RedisHost    string `mapstructure:"REDIS_HOST"`
+		IsLive       bool   `mapstructure:"IS_LIVE"`
+		Smtp         struct {
+			Host     string `mapstructure:"SMTP_HOST"`
+			Port     int    `mapstructure:"SMTP_PORT"`
+			Email    string `mapstructure:"SMTP_EMAIL"`
+			Password string `mapstructure:"SMTP_PASSWORD"`
+		}
 	}
 
 	Auth struct {

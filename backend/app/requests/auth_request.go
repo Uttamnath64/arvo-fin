@@ -14,6 +14,10 @@ type RegisterRequest struct {
 	OTP          string `json:"otp" binding:"required"`
 }
 
+type GetOTPRequest struct {
+	Email string `json:"email" binding:"required"`
+}
+
 func (r *LoginRequest) IsValid() error {
 	emailErr := Validate.IsValidEmail(r.UsernameEmail)
 	usernameErr := Validate.IsValidUsername(r.UsernameEmail)
@@ -48,6 +52,13 @@ func (r *RegisterRequest) IsValid() error {
 		return err
 	}
 	if err := Validate.IsValidOTP(r.OTP); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *GetOTPRequest) IsValid() error {
+	if err := Validate.IsValidEmail(r.Email); err != nil {
 		return err
 	}
 	return nil
