@@ -147,7 +147,7 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 	}
 
 	// Create user
-	err = service.userRepo.CreateUser(&models.User{
+	userId, err := service.userRepo.CreateUser(&models.User{
 		Name:         payload.Name,
 		Username:     payload.Username,
 		Email:        payload.Email,
@@ -165,7 +165,7 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 	// Create Token
 	authRepo := repository.NewAuthRepository(service.container)
 	authHeler := auth.New(service.container, authRepo)
-	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, common.USER_TYPE_USER, ip)
+	accessToken, refreshToken, err := authHeler.GenerateToken(userId, common.USER_TYPE_USER, ip)
 	if err != nil {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
@@ -225,7 +225,7 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest)
 	if err == gorm.ErrRecordNotFound {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
-			Message:    "Email not found!",
+			Message:    "User not found!",
 			Error:      err,
 		}
 	}
@@ -242,7 +242,42 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
 			Message:    "Password is the same as the previous one!",
-			Error:      errors.New("Authentication failed!"),
+			Error:      err,
 		}
+	}
+
+	// Verify OTP
+	err = service.otpService.VerifyOTP(payload.Email, payload.OTP)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Invalid OTP!",
+			Error:      err,
+		}
+	}
+
+	// Hash password
+	password, err := Validate.HashPassword(payload.Password)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      err,
+		}
+	}
+
+	// Update password in user table
+	err = service.userRepo.UpdatePasswordByEmail(payload.Email, password)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      err,
+		}
+	}
+
+	return responses.ServiceResponse{
+		StatusCode: common.StatusSuccess,
+		Message:    "Password updated successfully!",
 	}
 }

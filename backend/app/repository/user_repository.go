@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/Uttamnath64/arvo-fin/app/models"
@@ -48,6 +49,27 @@ func (repo *UserRepository) EmailExists(email string) (bool, error) {
 	return count > 0, nil
 }
 
-func (repo *UserRepository) CreateUser(user *models.User) error {
-	return repo.container.Config.ReadOnlyDB.Create(user).Error
+func (repo *UserRepository) CreateUser(user *models.User) (uint, error) {
+	err := repo.container.Config.ReadWriteDB.Create(user).Error
+	if err != nil {
+		return 0, err
+	}
+	return user.ID, nil
+
+}
+
+func (repo *UserRepository) UpdatePasswordByEmail(email, newPassword string) error {
+	result := repo.container.Config.ReadWriteDB.Model(&models.User{}).
+		Where("email = ?", email).
+		Update("password", newPassword)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return errors.New("No user found!")
+	}
+
+	return nil
 }
