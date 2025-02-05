@@ -2,46 +2,282 @@ package services
 
 import (
 	"errors"
-	"time"
 
-	"github.com/Uttamnath64/arvo-fin/app/config"
+	"github.com/Uttamnath64/arvo-fin/app/auth"
+	"github.com/Uttamnath64/arvo-fin/app/common"
 	"github.com/Uttamnath64/arvo-fin/app/models"
 	"github.com/Uttamnath64/arvo-fin/app/repository"
-	"github.com/Uttamnath64/arvo-fin/pkg/logger"
+	"github.com/Uttamnath64/arvo-fin/app/requests"
+	"github.com/Uttamnath64/arvo-fin/app/responses"
+	"github.com/Uttamnath64/arvo-fin/app/storage"
+	"github.com/Uttamnath64/arvo-fin/app/templates"
+	"gorm.io/gorm"
 )
 
 type AuthService struct {
-	config    *config.Config
-	logger    *logger.Logger
-	tokenRepo *repository.TokenRepository
+	container    *storage.Container
+	userRepo     *repository.UserRepository
+	otpService   *OTPService
+	emailService *EmailService
 }
 
-func NewAuthService(config *config.Config, logger *logger.Logger) *AuthService {
+func NewAuthService(container *storage.Container) *AuthService {
 	return &AuthService{
-		config:    config,
-		logger:    logger,
-		tokenRepo: repository.NewTokenRepository(config, logger),
+		container:    container,
+		userRepo:     repository.NewUserRepository(container),
+		otpService:   NewOTPService(container.Redis, 1000),
+		emailService: NewEmailService(container),
 	}
 }
 
-func (t *AuthService) IsValidRefreshToken(referenceID uint, userType byte, signedToken string) error {
-	token, err := t.tokenRepo.GetTokenByReference(referenceID, userType, signedToken)
+func (service *AuthService) Login(payload requests.LoginRequest, ip string) responses.ServiceResponse {
+	var user models.User
+
+	// Check user
+	err := service.userRepo.GetUser(payload.UsernameEmail, payload.UsernameEmail, &user)
+	if err == gorm.ErrRecordNotFound {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusNotFound,
+			Message:    "Username/Email not found!",
+			Error:      errors.New("Authentication failed!"),
+		}
+	}
+
+	// Database issue
 	if err != nil {
-		return err
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      errors.New("Something went wrong!"),
+		}
 	}
 
-	// Check if token exists
-	if token == nil {
-		return errors.New("Refresh token not found!")
+	// Validate password
+	if err := Validate.VerifyPassword(user.Password, payload.Password); err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Invalid password!",
+			Error:      errors.New("Authentication failed!"),
+		}
 	}
 
-	if token.ExpiresAt < time.Now().Unix() {
-		return errors.New("Refresh token is expired!")
+	// Create Token
+	authRepo := repository.NewAuthRepository(service.container)
+	authHeler := auth.New(service.container, authRepo)
+	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, common.USER_TYPE_USER, ip)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      errors.New("Something went wrong!"),
+		}
 	}
 
-	return nil
+	// Response
+	return responses.ServiceResponse{
+		StatusCode: common.StatusSuccess,
+		Message:    "User login successfully!",
+		Data: responses.AuthResponse{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		},
+	}
 }
 
-func (t *AuthService) AddToken(token *models.Token) error {
-	return t.tokenRepo.AddToken(token)
+func (service *AuthService) Register(payload requests.RegisterRequest, ip string) responses.ServiceResponse {
+	var (
+		err      error
+		isExists bool
+		password string
+	)
+
+	// Check username
+	isExists, err = service.userRepo.UsernameExists(payload.Username)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      errors.New("Something went wrong!"),
+		}
+	}
+	if isExists {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Username already exists!",
+			Error:      errors.New("Username already exists!"),
+		}
+	}
+
+	// Check email
+	isExists, err = service.userRepo.EmailExists(payload.Email)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      errors.New("Something went wrong!"),
+		}
+	}
+	if isExists {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Email already exists!",
+			Error:      errors.New("Email already exists!"),
+		}
+	}
+
+	// Verify OTP
+	otpService := NewOTPService(service.container.Redis, 250)
+	err = otpService.VerifyOTP(payload.Email, payload.OTP)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Invalid OTP!",
+			Error:      errors.New("Invalid OTP!"),
+		}
+	}
+
+	// Hash password
+	password, err = Validate.HashPassword(payload.Password)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      errors.New("Something went wrong!"),
+		}
+	}
+
+	// Create user
+	userId, err := service.userRepo.CreateUser(&models.User{
+		Name:         payload.Name,
+		Username:     payload.Username,
+		Email:        payload.Email,
+		MobileNumber: payload.MobileNumber,
+		Password:     password,
+	})
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      errors.New("Something went wrong!"),
+		}
+	}
+
+	// Create Token
+	authRepo := repository.NewAuthRepository(service.container)
+	authHeler := auth.New(service.container, authRepo)
+	accessToken, refreshToken, err := authHeler.GenerateToken(userId, common.USER_TYPE_USER, ip)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      errors.New("Something went wrong!"),
+		}
+	}
+
+	// Response
+	return responses.ServiceResponse{
+		StatusCode: common.StatusSuccess,
+		Message:    "User login successfully!",
+		Data: responses.AuthResponse{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		},
+	}
+}
+
+func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.ServiceResponse {
+	otp := service.otpService.GenerateOTP()
+	if err := service.otpService.SaveOTP(payload.Email, otp); err != nil {
+		service.container.Logger.Error("auth-service-SentOTP-RedisSaveOTP", err.Error(), payload.Email, otp)
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "OTP generation failed!",
+			Error:      err,
+		}
+	}
+
+	// Send OTP to email
+	data := map[string]string{
+		"OTP":   otp,
+		"Email": payload.Email,
+	}
+	err := service.emailService.SendEmail(payload.Email, "OTP Verification", templates.OTPVerificationEmailTemplate, data, []string{})
+	if err != nil {
+		service.container.Logger.Error("auth.service.SentOTP-EmailSend", err.Error(), "OTP Verification", templates.OTPVerificationEmailTemplate, data)
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Failed to send OTP to email!",
+			Error:      err,
+		}
+	}
+
+	return responses.ServiceResponse{
+		StatusCode: common.StatusSuccess,
+		Message:    "OTP sent successfully to the email address!",
+	}
+}
+
+func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest) responses.ServiceResponse {
+	var user models.User
+
+	// Check user
+	err := service.userRepo.GetUser("", payload.Email, &user)
+	if err == gorm.ErrRecordNotFound {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusNotFound,
+			Message:    "User not found!",
+			Error:      err,
+		}
+	}
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      err,
+		}
+	}
+
+	// Validate password new password
+	if err := Validate.VerifyPassword(user.Password, payload.Password); err == nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Password is the same as the previous one!",
+			Error:      err,
+		}
+	}
+
+	// Verify OTP
+	err = service.otpService.VerifyOTP(payload.Email, payload.OTP)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Invalid OTP!",
+			Error:      err,
+		}
+	}
+
+	// Hash password
+	password, err := Validate.HashPassword(payload.Password)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      err,
+		}
+	}
+
+	// Update password in user table
+	err = service.userRepo.UpdatePasswordByEmail(payload.Email, password)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      err,
+		}
+	}
+
+	return responses.ServiceResponse{
+		StatusCode: common.StatusSuccess,
+		Message:    "Password updated successfully!",
+	}
 }

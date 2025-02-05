@@ -1,30 +1,36 @@
 package services
 
 import (
-	"github.com/Uttamnath64/arvo-fin/app/config"
-	"github.com/Uttamnath64/arvo-fin/app/models"
+	"github.com/Uttamnath64/arvo-fin/app/requests"
+	"github.com/Uttamnath64/arvo-fin/app/responses"
 	"github.com/Uttamnath64/arvo-fin/app/services"
-	"github.com/Uttamnath64/arvo-fin/pkg/logger"
+	"github.com/Uttamnath64/arvo-fin/app/storage"
 )
 
 type AuthService struct {
-	config      *config.Config
-	logger      *logger.Logger
+	container   *storage.Container
 	authService *services.AuthService
 }
 
-func NewAuthService(config *config.Config, logger *logger.Logger) *AuthService {
+func NewAuthService(container *storage.Container) *AuthService {
 	return &AuthService{
-		config:      config,
-		logger:      logger,
-		authService: services.NewAuthService(config, logger),
+		container:   container,
+		authService: services.NewAuthService(container),
 	}
 }
 
-func (service *AuthService) IsValidRefreshToken(referenceID uint, userType byte, signedToken string) error {
-	return service.authService.IsValidRefreshToken(referenceID, userType, signedToken)
+func (service *AuthService) Login(payload requests.LoginRequest, ip string) responses.ServiceResponse {
+	return service.authService.Login(payload, ip)
 }
 
-func (service *AuthService) AddToken(token *models.Token) error {
-	return service.authService.AddToken(token)
+func (service *AuthService) Register(payload requests.RegisterRequest, ip string) responses.ServiceResponse {
+	return service.authService.Register(payload, ip)
+}
+
+func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.ServiceResponse {
+	return service.authService.SentOTP(payload)
+}
+
+func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest) responses.ServiceResponse {
+	return service.authService.ResetPassword(payload)
 }

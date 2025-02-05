@@ -2,7 +2,7 @@ package storage
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -13,7 +13,7 @@ type RedisClient struct {
 	ctx    context.Context
 }
 
-func NewRedisClient(ctx context.Context, addr, password string, db int) *RedisClient {
+func NewRedisClient(ctx context.Context, addr, password string, db int) (*RedisClient, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: password,
@@ -22,10 +22,10 @@ func NewRedisClient(ctx context.Context, addr, password string, db int) *RedisCl
 
 	// Ping to ensure Redis connection is successful
 	if _, err := rdb.Ping(ctx).Result(); err != nil {
-		log.Fatalf("Failed to connect to Redis: %v", err)
+		return nil, fmt.Errorf("Failed to connect to Redis: %v", err)
 	}
 
-	return &RedisClient{Client: rdb, ctx: ctx}
+	return &RedisClient{Client: rdb, ctx: ctx}, nil
 }
 
 // SetValue stores a key-value pair with TTL

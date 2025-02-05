@@ -8,10 +8,13 @@ import (
 )
 
 // regex
-var Email *regexp.Regexp
-var Username *regexp.Regexp
-var Name *regexp.Regexp
-var OTP *regexp.Regexp
+var (
+	Name         *regexp.Regexp
+	Email        *regexp.Regexp
+	Username     *regexp.Regexp
+	MobileNumber *regexp.Regexp
+	OTP          *regexp.Regexp
+)
 
 type Validater struct{}
 
@@ -20,6 +23,7 @@ func New() *Validater {
 	Username = regexp.MustCompile("^[A-Za-z0-9_.]{3,15}$")
 	Name = regexp.MustCompile("^[A-Za-z ]{3,30}$")
 	OTP = regexp.MustCompile("^[0-9]{4}$")
+	MobileNumber = regexp.MustCompile("^[0-9]{10}$")
 	return &Validater{}
 }
 
@@ -29,18 +33,21 @@ func (v *Validater) IsValidEmail(data string) error {
 	}
 	return nil
 }
+
 func (v *Validater) IsValidUsername(data string) error {
 	if !Username.MatchString(data) {
 		return errors.New("Invalid username!")
 	}
 	return nil
 }
+
 func (v *Validater) IsValidName(data string) error {
 	if !Name.MatchString(data) {
 		return errors.New("Invalid name!")
 	}
 	return nil
 }
+
 func (v *Validater) IsValidPassword(data string) error {
 
 	if len(data) < 6 || len(data) > 20 {
@@ -71,9 +78,17 @@ func (v *Validater) IsValidPassword(data string) error {
 
 	return nil
 }
+
 func (v *Validater) IsValidOTP(data string) error {
 	if !OTP.MatchString(data) {
 		return errors.New("Invalid otp!")
+	}
+	return nil
+}
+
+func (v *Validater) IsValidMobileNumber(data string) error {
+	if !MobileNumber.MatchString(data) {
+		return errors.New("Invalid mobile number!")
 	}
 	return nil
 }

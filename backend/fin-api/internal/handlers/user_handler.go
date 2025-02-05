@@ -1,23 +1,20 @@
 package handlers
 
 import (
-	"github.com/Uttamnath64/arvo-fin/app/config"
+	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"github.com/Uttamnath64/arvo-fin/fin-api/internal/services"
-	"github.com/Uttamnath64/arvo-fin/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	config      *config.Config
-	logger      *logger.Logger
+	container   *storage.Container
 	userService *services.UserService
 }
 
-func NewUserHandler(config *config.Config, logger *logger.Logger) *UserHandler {
+func NewUserHandler(container *storage.Container) *UserHandler {
 	return &UserHandler{
-		config:      config,
-		logger:      logger,
-		userService: services.NewUserService(config, logger),
+		container:   container,
+		userService: services.NewUserService(container),
 	}
 }
 
