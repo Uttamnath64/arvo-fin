@@ -26,3 +26,7 @@ func (service *AuthService) Login(payload requests.LoginRequest, ip string) resp
 func (service *AuthService) Register(payload requests.RegisterRequest, ip string) responses.ServiceResponse {
 	return service.authService.Register(payload, ip)
 }
+
+func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.ServiceResponse {
+	return service.authService.SentOTP(payload)
+}

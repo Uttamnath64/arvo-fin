@@ -14,7 +14,7 @@ type RegisterRequest struct {
 	OTP          string `json:"otp" binding:"required"`
 }
 
-type GetOTPRequest struct {
+type SentOTPRequest struct {
 	Email string `json:"email" binding:"required"`
 }
 
@@ -57,7 +57,7 @@ func (r *RegisterRequest) IsValid() error {
 	return nil
 }
 
-func (r *GetOTPRequest) IsValid() error {
+func (r *SentOTPRequest) IsValid() error {
 	if err := Validate.IsValidEmail(r.Email); err != nil {
 		return err
 	}

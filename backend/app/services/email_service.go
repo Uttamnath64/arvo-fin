@@ -1,9 +1,10 @@
 package services
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
-	"log"
+	"html/template"
 
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"github.com/go-gomail/gomail"
@@ -29,12 +30,26 @@ func NewEmailService(container *storage.Container) *EmailService {
 }
 
 // SendEmail sends an email with optional attachments
-func (service *EmailService) SendEmail(to, subject, body string, attachments []string) error {
+func (service *EmailService) SendEmail(to, subject, templateFile string, data map[string]string, attachments []string) error {
+
+	// Load email template
+	tmpl, err := template.ParseFiles(templateFile)
+	if err != nil {
+		return fmt.Errorf("Error loading email template: %v", err)
+	}
+
+	var body bytes.Buffer
+	err = tmpl.Execute(&body, data)
+	if err != nil {
+		return fmt.Errorf("Error executing email template: %v", err)
+	}
+
+	// Set up the email
 	mailer := gomail.NewMessage()
 	mailer.SetHeader("From", service.SenderEmail)
 	mailer.SetHeader("To", to)
 	mailer.SetHeader("Subject", subject)
-	mailer.SetBody("text/html", body)
+	mailer.SetBody("text/html", body.String())
 
 	// Attach files if provided
 	for _, attachment := range attachments {
@@ -51,10 +66,7 @@ func (service *EmailService) SendEmail(to, subject, body string, attachments []s
 
 	// Send the email
 	if err := dialer.DialAndSend(mailer); err != nil {
-		log.Printf("Failed to send email: %v", err)
-		return err
+		return fmt.Errorf("Failed to send email: %v", err)
 	}
-
-	fmt.Println("✅ Email sent successfully to", to)
 	return nil
 }

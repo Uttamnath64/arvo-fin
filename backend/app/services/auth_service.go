@@ -10,18 +10,23 @@ import (
 	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/responses"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
+	"github.com/Uttamnath64/arvo-fin/app/templates"
 	"gorm.io/gorm"
 )
 
 type AuthService struct {
-	container *storage.Container
-	userRepo  *repository.UserRepository
+	container    *storage.Container
+	userRepo     *repository.UserRepository
+	otpService   *OTPService
+	emailService *EmailService
 }
 
 func NewAuthService(container *storage.Container) *AuthService {
 	return &AuthService{
-		container: container,
-		userRepo:  repository.NewUserRepository(container),
+		container:    container,
+		userRepo:     repository.NewUserRepository(container),
+		otpService:   NewOTPService(container.Redis, 1000),
+		emailService: NewEmailService(container),
 	}
 }
 
@@ -161,5 +166,37 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
 		},
+	}
+}
+
+func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.ServiceResponse {
+	otp := service.otpService.GenerateOTP()
+	if err := service.otpService.SaveOTP(payload.Email, otp); err != nil {
+		service.container.Logger.Error("auth-service-SentOTP-RedisSaveOTP", err.Error(), payload.Email, otp)
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "OTP generation failed!",
+			Error:      err,
+		}
+	}
+
+	// Send OTP to email
+	data := map[string]string{
+		"OTP":   otp,
+		"Email": payload.Email,
+	}
+	err := service.emailService.SendEmail(payload.Email, "OTP Verification", templates.OTPVerificationEmailTemplate, data, []string{})
+	if err != nil {
+		service.container.Logger.Error("auth.service.SentOTP-EmailSend", err.Error(), "OTP Verification", templates.OTPVerificationEmailTemplate, data)
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Failed to send OTP to email!",
+			Error:      err,
+		}
+	}
+
+	return responses.ServiceResponse{
+		StatusCode: common.StatusSuccess,
+		Message:    "OTP sent successfully to the email address!",
 	}
 }
