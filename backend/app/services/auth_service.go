@@ -34,7 +34,7 @@ func (service *AuthService) Login(payload requests.LoginRequest, ip string) resp
 	var user models.User
 
 	// Check user
-	err := service.userRepo.GetUser(payload.UsernameEmail, &user)
+	err := service.userRepo.GetUser(payload.UsernameEmail, payload.UsernameEmail, &user)
 	if err == gorm.ErrRecordNotFound {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
@@ -86,9 +86,9 @@ func (service *AuthService) Login(payload requests.LoginRequest, ip string) resp
 
 func (service *AuthService) Register(payload requests.RegisterRequest, ip string) responses.ServiceResponse {
 	var (
-		user     models.User
 		err      error
 		isExists bool
+		password string
 	)
 
 	// Check username
@@ -137,10 +137,26 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 	}
 
 	// Hash password
-	user.Password, err = Validate.HashPassword(user.Password)
+	password, err = Validate.HashPassword(payload.Password)
 	if err != nil {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      errors.New("Something went wrong!"),
+		}
+	}
+
+	// Create user
+	err = service.userRepo.CreateUser(&models.User{
+		Name:         payload.Name,
+		Username:     payload.Username,
+		Email:        payload.Email,
+		MobileNumber: payload.MobileNumber,
+		Password:     password,
+	})
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
 			Error:      errors.New("Something went wrong!"),
 		}
@@ -198,5 +214,35 @@ func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.S
 	return responses.ServiceResponse{
 		StatusCode: common.StatusSuccess,
 		Message:    "OTP sent successfully to the email address!",
+	}
+}
+
+func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest) responses.ServiceResponse {
+	var user models.User
+
+	// Check user
+	err := service.userRepo.GetUser("", payload.Email, &user)
+	if err == gorm.ErrRecordNotFound {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusNotFound,
+			Message:    "Email not found!",
+			Error:      err,
+		}
+	}
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      err,
+		}
+	}
+
+	// Validate password new password
+	if err := Validate.VerifyPassword(user.Password, payload.Password); err == nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Password is the same as the previous one!",
+			Error:      errors.New("Authentication failed!"),
+		}
 	}
 }

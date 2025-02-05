@@ -30,3 +30,7 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.ServiceResponse {
 	return service.authService.SentOTP(payload)
 }
+
+func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest) responses.ServiceResponse {
+	return service.authService.ResetPassword(payload)
+}

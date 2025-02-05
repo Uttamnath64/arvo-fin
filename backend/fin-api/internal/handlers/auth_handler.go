@@ -71,7 +71,7 @@ func (handler *AuthHandler) LoginHandler(ctx *gin.Context) {
 	authR, _ := serviceResponse.Data.(responses.AuthResponse)
 
 	ctx.JSON(http.StatusOK, responses.ApiResponse{
-		Status:   false,
+		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: authR,
 	})
@@ -125,7 +125,7 @@ func (handler *AuthHandler) RegisterHandler(ctx *gin.Context) {
 	authR, _ := serviceResponse.Data.(responses.AuthResponse)
 
 	ctx.JSON(http.StatusOK, responses.ApiResponse{
-		Status:   false,
+		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: authR,
 	})
@@ -172,10 +172,53 @@ func (handler *AuthHandler) SentOTPHandler(ctx *gin.Context) {
 	})
 }
 
-func (handler *AuthHandler) ForgotPasswordHandler(ctx *gin.Context) {
-
-}
-
 func (handler *AuthHandler) ResetPasswordHandler(ctx *gin.Context) {
+	var payload requests.ResetPasswordRequest
 
+	// Bind and validate input
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+			Status:  false,
+			Message: "Invalid request payload. Please check the input data format!",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	if err := payload.IsValid(); err != nil {
+		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+			Status:  false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	// Reset password
+	serviceResponse := handler.authService.ResetPassword(payload)
+
+	if serviceResponse.HasError() {
+		switch serviceResponse.StatusCode {
+		case common.StatusNotFound:
+			ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+				Status:  false,
+				Message: serviceResponse.Error.Error(),
+			})
+		case common.StatusValidationError:
+			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: serviceResponse.Error.Error(),
+			})
+		case common.StatusServerError:
+			ctx.JSON(http.StatusInternalServerError, responses.ApiResponse{
+				Status:  false,
+				Message: serviceResponse.Error.Error(),
+			})
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, responses.ApiResponse{
+		Status:  true,
+		Message: "Password reset successfully!",
+	})
 }

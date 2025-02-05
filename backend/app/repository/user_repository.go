@@ -17,9 +17,9 @@ func NewUserRepository(container *storage.Container) *UserRepository {
 	}
 }
 
-func (repo *UserRepository) GetUser(usernameOrEmail string, user *models.User) error {
+func (repo *UserRepository) GetUser(username string, email string, user *models.User) error {
 	return repo.container.Config.ReadOnlyDB.Model(&models.User{}).
-		Where("username = ? or email = ?", usernameOrEmail, strings.ToLower(usernameOrEmail)).First(user).Error
+		Where("username = ? or email = ?", username, strings.ToLower(email)).First(user).Error
 }
 
 func (repo *UserRepository) UsernameExists(username string) (bool, error) {
@@ -46,4 +46,8 @@ func (repo *UserRepository) EmailExists(email string) (bool, error) {
 	}
 
 	return count > 0, nil
+}
+
+func (repo *UserRepository) CreateUser(user *models.User) error {
+	return repo.container.Config.ReadOnlyDB.Create(user).Error
 }

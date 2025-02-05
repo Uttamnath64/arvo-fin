@@ -18,6 +18,12 @@ type SentOTPRequest struct {
 	Email string `json:"email" binding:"required"`
 }
 
+type ResetPasswordRequest struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	OTP      string `json:"otp" binding:"required"`
+}
+
 func (r *LoginRequest) IsValid() error {
 	emailErr := Validate.IsValidEmail(r.UsernameEmail)
 	usernameErr := Validate.IsValidUsername(r.UsernameEmail)
@@ -59,6 +65,19 @@ func (r *RegisterRequest) IsValid() error {
 
 func (r *SentOTPRequest) IsValid() error {
 	if err := Validate.IsValidEmail(r.Email); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *ResetPasswordRequest) IsValid() error {
+	if err := Validate.IsValidEmail(r.Email); err != nil {
+		return err
+	}
+	if err := Validate.IsValidPassword(r.Password); err != nil {
+		return err
+	}
+	if err := Validate.IsValidOTP(r.OTP); err != nil {
 		return err
 	}
 	return nil
