@@ -165,10 +165,7 @@ func (handler *AuthHandler) GetOTPHandler(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, responses.ApiResponse{
 		Status:  true,
-		Message: "OTP sent successfully!",
-		Metadata: &responses.GetOTPResponse{
-			OTP: otp,
-		},
+		Message: "OTP sent successfully to the email address!",
 	})
 }
 
