@@ -8,3 +8,8 @@ type AuthResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 }
+
+type GetOTPResponse struct {
+	OTP   string `json:"otp"`
+	Email string `json:"email"`
+}

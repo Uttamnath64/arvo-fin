@@ -6,6 +6,7 @@ import (
 	"github.com/Uttamnath64/arvo-fin/app/common"
 	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/responses"
+	appService "github.com/Uttamnath64/arvo-fin/app/services"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"github.com/Uttamnath64/arvo-fin/fin-api/internal/services"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ import (
 type AuthHandler struct {
 	container   *storage.Container
 	authService *services.AuthService
+	otpService  *appService.OTPService
 }
 
 func NewAuthHandler(container *storage.Container) *AuthHandler {
@@ -44,7 +46,7 @@ func (handler *AuthHandler) LoginHandler(ctx *gin.Context) {
 		return
 	}
 
-	// Find user by email
+	// Login
 	serviceResponse := handler.authService.Login(payload, ctx.ClientIP())
 
 	if serviceResponse.HasError() {
@@ -98,7 +100,7 @@ func (handler *AuthHandler) RegisterHandler(ctx *gin.Context) {
 		return
 	}
 
-	// Find user by email
+	// Register
 	serviceResponse := handler.authService.Register(payload, ctx.ClientIP())
 
 	if serviceResponse.HasError() {
@@ -151,6 +153,23 @@ func (handler *AuthHandler) GetOTPHandler(ctx *gin.Context) {
 		})
 		return
 	}
+
+	// Get OTP
+	otp := handler.otpService.GenerateOTP()
+	if err := handler.otpService.SaveOTP(payload.Email, otp); err != nil {
+		ctx.JSON(http.StatusInternalServerError, responses.ApiResponse{
+			Status:  false,
+			Message: "OTP generation failed!",
+			Details: err.Error(),
+		})
+	}
+	ctx.JSON(http.StatusOK, responses.ApiResponse{
+		Status:  true,
+		Message: "OTP sent successfully!",
+		Metadata: &responses.GetOTPResponse{
+			OTP: otp,
+		},
+	})
 }
 
 func (handler *AuthHandler) ForgotPasswordHandler(ctx *gin.Context) {

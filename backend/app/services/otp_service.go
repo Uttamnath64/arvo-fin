@@ -25,12 +25,12 @@ func (service *OTPService) GenerateOTP() string {
 	return fmt.Sprintf("%06d", time.Now().UnixNano()%1000000) // 6-digit OTP
 }
 
-// StoreOTP stores the OTP in Redis
-func (service *OTPService) StoreOTP(email, otp string) error {
+// SaveOTP stores the OTP in Redis
+func (service *OTPService) SaveOTP(email, otp string) error {
 	key := "otp:" + email
 	err := service.RedisClient.SetValue(key, otp, service.TTL)
 	if err != nil {
-		return fmt.Errorf("failed to store OTP: %v", err)
+		return fmt.Errorf("failed to save OTP: %v", err)
 	}
 	return nil
 }
