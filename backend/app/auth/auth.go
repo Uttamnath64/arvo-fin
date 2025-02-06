@@ -81,7 +81,7 @@ func (auth *Auth) GenerateToken(referenceId uint, userType byte, ip string) (str
 		return "", "", err
 	}
 
-	if err := auth.addToken(&models.Token{
+	if err := auth.CreateToken(&models.Token{
 		ReferenceId: referenceId,
 		UserType:    userType,
 		IP:          ip,
@@ -149,6 +149,6 @@ func (auth *Auth) isValidRefreshToken(referenceID uint, userType byte, signedTok
 	return nil
 }
 
-func (auth *Auth) addToken(token *models.Token) error {
-	return auth.authRepo.AddToken(token)
+func (auth *Auth) CreateToken(token *models.Token) error {
+	return auth.authRepo.CreateToken(token)
 }
