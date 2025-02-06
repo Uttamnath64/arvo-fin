@@ -15,7 +15,7 @@ type AppEnv struct {
 	}
 
 	Server struct {
-		Port         string `mapstructure:"PORT"`
+		Port         int    `mapstructure:"PORT"`
 		ClientOrigin string `mapstructure:"CLIENT_ORIGIN"`
 		Environment  string `mapstructure:"ENVIRONMENT"`
 		RedisHost    string `mapstructure:"REDIS_HOST"`
@@ -38,17 +38,22 @@ type AppEnv struct {
 	}
 }
 
-func LoadEnv() (env *AppEnv, err error) {
-	viper.AddConfigPath("env/")
-	viper.SetConfigFile(".env")
+func LoadEnv() (env AppEnv, err error) {
 
-	viper.AutomaticEnv()
+	viper.SetConfigFile("app/config/env/.env")
 
 	err = viper.ReadInConfig()
 	if err != nil {
 		return
 	}
 
-	err = viper.Unmarshal(env)
+	configs := []interface{}{&env.Database, &env.Server, &env.Auth}
+	for _, config := range configs {
+		err = viper.Unmarshal(config)
+		if err != nil {
+			return
+		}
+	}
+
 	return
 }
