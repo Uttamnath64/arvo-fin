@@ -55,7 +55,6 @@ func (repo *UserRepository) CreateUser(user *models.User) (uint, error) {
 		return 0, err
 	}
 	return user.ID, nil
-
 }
 
 func (repo *UserRepository) UpdatePasswordByEmail(email, newPassword string) error {

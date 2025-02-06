@@ -39,16 +39,15 @@ func (service *AuthService) Login(payload requests.LoginRequest, ip string) resp
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
 			Message:    "Username/Email not found!",
-			Error:      errors.New("Authentication failed!"),
+			Error:      err,
 		}
 	}
-
-	// Database issue
 	if err != nil {
+		service.container.Logger.Error("auth.service.Login-GetUser", err.Error(), payload.UsernameEmail)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      errors.New("Something went wrong!"),
+			Error:      err,
 		}
 	}
 
@@ -57,7 +56,7 @@ func (service *AuthService) Login(payload requests.LoginRequest, ip string) resp
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
 			Message:    "Invalid password!",
-			Error:      errors.New("Authentication failed!"),
+			Error:      err,
 		}
 	}
 
@@ -66,10 +65,11 @@ func (service *AuthService) Login(payload requests.LoginRequest, ip string) resp
 	authHeler := auth.New(service.container, authRepo)
 	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, common.USER_TYPE_USER, ip)
 	if err != nil {
+		service.container.Logger.Error("auth.service.Login-GenerateToken", err.Error(), user.ID, common.USER_TYPE_USER, ip)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      errors.New("Something went wrong!"),
+			Error:      err,
 		}
 	}
 
@@ -94,10 +94,11 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 	// Check username
 	isExists, err = service.userRepo.UsernameExists(payload.Username)
 	if err != nil {
+		service.container.Logger.Error("auth.service.Register-UsernameExists", err.Error(), payload.Email)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      errors.New("Something went wrong!"),
+			Error:      err,
 		}
 	}
 	if isExists {
@@ -111,10 +112,11 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 	// Check email
 	isExists, err = service.userRepo.EmailExists(payload.Email)
 	if err != nil {
+		service.container.Logger.Error("auth.service.Register-EmailExists", err.Error(), payload.Email)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      errors.New("Something went wrong!"),
+			Error:      err,
 		}
 	}
 	if isExists {
@@ -139,10 +141,11 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 	// Hash password
 	password, err = Validate.HashPassword(payload.Password)
 	if err != nil {
+		service.container.Logger.Error("auth.service.Register-HashPassword", err.Error(), payload.Email, payload.Password)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
 			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      errors.New("Something went wrong!"),
+			Error:      err,
 		}
 	}
 
@@ -155,10 +158,11 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 		Password:     password,
 	})
 	if err != nil {
+		service.container.Logger.Error("auth.service.Register-CreateUser", err.Error(), payload.Username, payload.Email, password)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      errors.New("Something went wrong!"),
+			Error:      err,
 		}
 	}
 
@@ -167,14 +171,16 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 	authHeler := auth.New(service.container, authRepo)
 	accessToken, refreshToken, err := authHeler.GenerateToken(userId, common.USER_TYPE_USER, ip)
 	if err != nil {
+		service.container.Logger.Error("auth.service.Register-GenerateToken", err.Error(), userId, common.USER_TYPE_USER, ip)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      errors.New("Something went wrong!"),
+			Error:      err,
 		}
 	}
 
 	// Response
+	service.container.Logger.Info("auth.service.Register", "User login successfully!", userId, common.USER_TYPE_USER, ip)
 	return responses.ServiceResponse{
 		StatusCode: common.StatusSuccess,
 		Message:    "User login successfully!",
@@ -186,6 +192,25 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 }
 
 func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.ServiceResponse {
+
+	// Check email
+	isExists, err := service.userRepo.EmailExists(payload.Email)
+	if err != nil {
+		service.container.Logger.Error("auth.service.SentOTP-EmailExists", err.Error(), payload.Email)
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      err,
+		}
+	}
+	if !isExists {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "User not found!",
+			Error:      errors.New("User not found!"),
+		}
+	}
+
 	otp := service.otpService.GenerateOTP()
 	if err := service.otpService.SaveOTP(payload.Email, otp); err != nil {
 		service.container.Logger.Error("auth-service-SentOTP-RedisSaveOTP", err.Error(), payload.Email, otp)
@@ -211,6 +236,7 @@ func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.S
 		}
 	}
 
+	service.container.Logger.Info("auth.service.SentOTP", "OTP sent successfully to the email address!", payload.Email, "OTP Verification", templates.OTPVerificationEmailTemplate, data)
 	return responses.ServiceResponse{
 		StatusCode: common.StatusSuccess,
 		Message:    "OTP sent successfully to the email address!",
@@ -230,6 +256,7 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest)
 		}
 	}
 	if err != nil {
+		service.container.Logger.Error("auth.service.ResetPassword-GetUser", err.Error(), payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
@@ -259,6 +286,7 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest)
 	// Hash password
 	password, err := Validate.HashPassword(payload.Password)
 	if err != nil {
+		service.container.Logger.Error("auth.service.ResetPassword-HashPassword", err.Error(), payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
 			Message:    "Oops! Something went wrong. Please try again later.",
@@ -269,6 +297,7 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest)
 	// Update password in user table
 	err = service.userRepo.UpdatePasswordByEmail(payload.Email, password)
 	if err != nil {
+		service.container.Logger.Error("auth.service.ResetPassword-UpdatePasswordByEmail", err.Error(), payload, password)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",

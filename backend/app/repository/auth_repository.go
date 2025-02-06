@@ -28,6 +28,6 @@ func (repo *AuthRepository) GetTokenByReference(referenceID uint, userType byte,
 	return &token, nil
 }
 
-func (repo *AuthRepository) AddToken(token *models.Token) error {
+func (repo *AuthRepository) CreateToken(token *models.Token) error {
 	return repo.container.Config.ReadOnlyDB.Create(token).Error
 }

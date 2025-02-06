@@ -52,17 +52,17 @@ func (handler *AuthHandler) LoginHandler(ctx *gin.Context) {
 		case common.StatusNotFound:
 			ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
 				Status:  false,
-				Message: serviceResponse.Error.Error(),
+				Message: serviceResponse.Message,
 			})
 		case common.StatusValidationError:
 			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
-				Message: serviceResponse.Error.Error(),
+				Message: serviceResponse.Message,
 			})
 		case common.StatusServerError:
 			ctx.JSON(http.StatusInternalServerError, responses.ApiResponse{
 				Status:  false,
-				Message: serviceResponse.Error.Error(),
+				Message: serviceResponse.Message,
 			})
 		}
 		return
@@ -106,17 +106,17 @@ func (handler *AuthHandler) RegisterHandler(ctx *gin.Context) {
 		case common.StatusNotFound:
 			ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
 				Status:  false,
-				Message: serviceResponse.Error.Error(),
+				Message: serviceResponse.Message,
 			})
 		case common.StatusValidationError:
 			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
-				Message: serviceResponse.Error.Error(),
+				Message: serviceResponse.Message,
 			})
 		case common.StatusServerError:
 			ctx.JSON(http.StatusInternalServerError, responses.ApiResponse{
 				Status:  false,
-				Message: serviceResponse.Error.Error(),
+				Message: serviceResponse.Message,
 			})
 		}
 		return
@@ -157,10 +157,15 @@ func (handler *AuthHandler) SentOTPHandler(ctx *gin.Context) {
 
 	if serviceResponse.HasError() {
 		switch serviceResponse.StatusCode {
+		case common.StatusNotFound:
+			ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+				Status:  false,
+				Message: serviceResponse.Message,
+			})
 		case common.StatusServerError:
 			ctx.JSON(http.StatusInternalServerError, responses.ApiResponse{
 				Status:  false,
-				Message: serviceResponse.Error.Error(),
+				Message: serviceResponse.Message,
 			})
 		}
 		return
@@ -201,17 +206,17 @@ func (handler *AuthHandler) ResetPasswordHandler(ctx *gin.Context) {
 		case common.StatusNotFound:
 			ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
 				Status:  false,
-				Message: serviceResponse.Error.Error(),
+				Message: serviceResponse.Message,
 			})
 		case common.StatusValidationError:
 			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
-				Message: serviceResponse.Error.Error(),
+				Message: serviceResponse.Message,
 			})
 		case common.StatusServerError:
 			ctx.JSON(http.StatusInternalServerError, responses.ApiResponse{
 				Status:  false,
-				Message: serviceResponse.Error.Error(),
+				Message: serviceResponse.Message,
 			})
 		}
 		return
