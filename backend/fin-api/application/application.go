@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -37,7 +38,7 @@ func New() *Application {
 }
 
 func (a *Application) Initialize() bool {
-	var con *config.Config
+	var con config.Config
 
 	ctx := context.Background()
 
@@ -50,7 +51,7 @@ func (a *Application) Initialize() bool {
 	log := logger.New(env.Server.Environment)
 
 	// load config DB
-	err = config.LoadConfig(*env, con)
+	err = config.LoadConfig(env, &con)
 	if err != nil {
 		log.Error("api-application-config", err.Error())
 		return false
@@ -63,7 +64,7 @@ func (a *Application) Initialize() bool {
 		return false
 	}
 
-	a.container = storage.NewContainer(ctx, con, log, redis, env)
+	a.container = storage.NewContainer(ctx, &con, log, redis, &env)
 
 	return true
 
@@ -84,7 +85,7 @@ func (a *Application) Run() {
 	// routers
 	routes.New(a.container, server).Handlers()
 
-	if err := server.Run(":" + a.container.Env.Server.Port); err != nil {
+	if err := server.Run(fmt.Sprint(":", a.container.Env.Server.Port)); err != nil {
 		a.container.Logger.Error("api-application-server", err.Error())
 		return
 	}

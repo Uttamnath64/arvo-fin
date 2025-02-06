@@ -1,4 +1,4 @@
-package migrations
+package main
 
 import (
 	"github.com/Uttamnath64/arvo-fin/app/config"
@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	con *config.Config
-	env *config.AppEnv
+	con config.Config
+	env config.AppEnv
 	log *logger.Logger
 )
 
@@ -25,7 +25,7 @@ func init() {
 	log = logger.New(env.Server.Environment)
 
 	// load config DB
-	err = config.LoadConfig(*env, con)
+	err = config.LoadConfig(env, &con)
 	if err != nil {
 		log.Error("api-application-config", err.Error())
 		return

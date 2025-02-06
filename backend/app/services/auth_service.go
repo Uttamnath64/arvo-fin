@@ -226,7 +226,7 @@ func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.S
 		"OTP":   otp,
 		"Email": payload.Email,
 	}
-	err := service.emailService.SendEmail(payload.Email, "OTP Verification", templates.OTPVerificationEmailTemplate, data, []string{})
+	err = service.emailService.SendEmail(payload.Email, "OTP Verification", templates.OTPVerificationEmailTemplate, data, []string{})
 	if err != nil {
 		service.container.Logger.Error("auth.service.SentOTP-EmailSend", err.Error(), "OTP Verification", templates.OTPVerificationEmailTemplate, data)
 		return responses.ServiceResponse{
