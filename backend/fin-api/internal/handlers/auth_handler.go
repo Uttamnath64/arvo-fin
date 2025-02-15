@@ -247,3 +247,61 @@ func (handler *AuthHandler) ResetPasswordHandler(ctx *gin.Context) {
 		Metadata: authR,
 	})
 }
+
+func (handler *AuthHandler) TokenHandler(ctx *gin.Context) {
+	var payload requests.TokenRequest
+
+	// Bind and validate input
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+			Status:  false,
+			Message: "Invalid request payload. Please check the input data format!",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	if err := payload.IsValid(); err != nil {
+		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+			Status:  false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	// Get token
+	serviceResponse := handler.authService.GetToken(payload, ctx.ClientIP())
+
+	if serviceResponse.HasError() {
+		switch serviceResponse.StatusCode {
+		case common.StatusNotFound:
+			ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+				Status:  false,
+				Message: serviceResponse.Message,
+				Details: serviceResponse.Error.Error(),
+			})
+		case common.StatusValidationError:
+			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: serviceResponse.Message,
+				Details: serviceResponse.Error.Error(),
+			})
+		case common.StatusServerError:
+			ctx.JSON(http.StatusInternalServerError, responses.ApiResponse{
+				Status:  false,
+				Message: serviceResponse.Message,
+				Details: serviceResponse.Error.Error(),
+			})
+		}
+		return
+	}
+
+	authR, _ := serviceResponse.Data.(responses.AuthResponse)
+
+	ctx.JSON(http.StatusOK, responses.ApiResponse{
+		Status:   true,
+		Message:  serviceResponse.Message,
+		Metadata: authR,
+	})
+
+}

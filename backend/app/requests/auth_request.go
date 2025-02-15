@@ -2,33 +2,15 @@ package requests
 
 import (
 	"errors"
+	"strings"
 
-	"github.com/Uttamnath64/arvo-fin/app/common"
+	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 )
 
+// Login payload
 type LoginRequest struct {
 	UsernameEmail string `json:"username_email" binding:"required"`
 	Password      string `json:"password" binding:"required"`
-}
-
-type RegisterRequest struct {
-	Name         string `json:"name" binding:"required"`
-	Email        string `json:"email" binding:"required"`
-	Username     string `json:"username" binding:"required"`
-	MobileNumber string `json:"mobile_number" binding:"required"`
-	Password     string `json:"password" binding:"required"`
-	OTP          string `json:"otp" binding:"required"`
-}
-
-type SentOTPRequest struct {
-	Email string         `json:"email" binding:"required"`
-	Type  common.OtpType `json:"type" binding:"required"`
-}
-
-type ResetPasswordRequest struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	OTP      string `json:"otp" binding:"required"`
 }
 
 func (r LoginRequest) IsValid() error {
@@ -46,6 +28,16 @@ func (r LoginRequest) IsValid() error {
 		return passErr
 	}
 	return nil
+}
+
+// Register payload
+type RegisterRequest struct {
+	Name         string `json:"name" binding:"required"`
+	Email        string `json:"email" binding:"required"`
+	Username     string `json:"username" binding:"required"`
+	MobileNumber string `json:"mobile_number" binding:"required"`
+	Password     string `json:"password" binding:"required"`
+	OTP          string `json:"otp" binding:"required"`
 }
 
 func (r RegisterRequest) IsValid() error {
@@ -70,6 +62,12 @@ func (r RegisterRequest) IsValid() error {
 	return nil
 }
 
+// Send OTP payload
+type SentOTPRequest struct {
+	Email string             `json:"email" binding:"required"`
+	Type  commonType.OtpType `json:"type" binding:"required"`
+}
+
 func (r SentOTPRequest) IsValid() error {
 	if err := Validate.IsValidEmail(r.Email); err != nil {
 		return err
@@ -78,6 +76,13 @@ func (r SentOTPRequest) IsValid() error {
 		return errors.New("Invalid otp type!")
 	}
 	return nil
+}
+
+// Reset Password payload
+type ResetPasswordRequest struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	OTP      string `json:"otp" binding:"required"`
 }
 
 func (r ResetPasswordRequest) IsValid() error {
@@ -89,6 +94,18 @@ func (r ResetPasswordRequest) IsValid() error {
 	}
 	if err := Validate.IsValidOTP(r.OTP); err != nil {
 		return err
+	}
+	return nil
+}
+
+// Token payload
+type TokenRequest struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
+func (r TokenRequest) IsValid() error {
+	if strings.TrimSpace(r.RefreshToken) == "" {
+		return errors.New("Invalid refresh_token!")
 	}
 	return nil
 }
