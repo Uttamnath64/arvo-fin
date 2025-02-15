@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Uttamnath64/arvo-fin/app/common"
+	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 )
 
@@ -27,7 +27,7 @@ func (service *OTPService) GenerateOTP() string {
 }
 
 // SaveOTP stores the OTP in Redis
-func (service *OTPService) SaveOTP(email string, otpType common.OtpType, otp string) error {
+func (service *OTPService) SaveOTP(email string, otpType commonType.OtpType, otp string) error {
 	key := fmt.Sprintf("OTP:email=%s&type=%d", email, otpType)
 	err := service.RedisClient.SetValue(key, otp, service.TTL)
 	if err != nil {
@@ -37,7 +37,7 @@ func (service *OTPService) SaveOTP(email string, otpType common.OtpType, otp str
 }
 
 // VerifyOTP verifies a user-provided OTP against the stored OTP
-func (service *OTPService) VerifyOTP(email string, otpType common.OtpType, providedOTP string) error {
+func (service *OTPService) VerifyOTP(email string, otpType commonType.OtpType, providedOTP string) error {
 	key := fmt.Sprintf("OTP:email=%s&type=%d", email, otpType)
 	storedOTP, err := service.RedisClient.GetValue(key)
 	if err != nil {

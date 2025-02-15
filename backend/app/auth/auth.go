@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/models"
 	"github.com/Uttamnath64/arvo-fin/app/repository"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
@@ -17,8 +18,8 @@ type Auth struct {
 }
 
 type AuthClaim struct {
-	ReferenceId uint `json:"referenceId"`
-	UserType    byte `json:"userType"`
+	ReferenceId uint                `json:"referenceId"`
+	UserType    commonType.UserType `json:"userType"`
 	jwt.StandardClaims
 }
 
@@ -29,7 +30,7 @@ func New(container *storage.Container, authRepo *repository.AuthRepository) *Aut
 	}
 }
 
-func (auth *Auth) GenerateToken(referenceId uint, userType byte, ip string) (string, string, error) {
+func (auth *Auth) GenerateToken(referenceId uint, userType commonType.UserType, ip string) (string, string, error) {
 
 	var accessExpiresAt = time.Now().Add(auth.container.Env.Auth.AccessTokenExpired * time.Hour).Unix()
 	var refreshExpiresAt = time.Now().Add(auth.container.Env.Auth.RefreshTokenExpired * time.Hour).Unix()
@@ -94,21 +95,23 @@ func (auth *Auth) GenerateToken(referenceId uint, userType byte, ip string) (str
 	return accessToken, refreshToken, nil
 }
 
-func (auth *Auth) VerifyRefreshToken(signedToken string) (interface{}, error) {
+func (auth *Auth) VerifyRefreshToken(refreshToken string) (interface{}, error) {
 
 	decodedRefreshPublicKey, err := base64.StdEncoding.DecodeString(auth.container.Env.Auth.RefreshTokenPublicKey)
 	if err != nil {
-		return nil, errors.New("Could not decode: " + err.Error())
+		auth.container.Logger.Error("auth.service.GetToken-VerifyRefreshToken", err.Error())
+		return nil, errors.New("Refresh token is invalid!")
 	}
 
 	RefreshPublicKey, err := jwt.ParseRSAPublicKeyFromPEM(decodedRefreshPublicKey)
 
 	if err != nil {
-		return "", errors.New("Could not parse key: " + err.Error())
+		auth.container.Logger.Error("auth.service.GetToken-VerifyRefreshToken", err.Error())
+		return "", errors.New("Refresh token is invalid!")
 	}
 
 	token, err := jwt.ParseWithClaims(
-		signedToken,
+		refreshToken,
 		&AuthClaim{},
 		func(t *jwt.Token) (interface{}, error) {
 			return RefreshPublicKey, nil
@@ -116,34 +119,34 @@ func (auth *Auth) VerifyRefreshToken(signedToken string) (interface{}, error) {
 	)
 
 	if err != nil {
-		return nil, errors.New("ParseWithClaims Error: " + err.Error())
+		return nil, errors.New("Refresh token is invalid!")
 	}
 
 	claims, ok := token.Claims.(*AuthClaim)
 	if !ok {
-		return nil, errors.New("couldn't parse claims")
+		return nil, errors.New("Refresh token is invalid!")
 	}
 
-	if err := auth.isValidRefreshToken(claims.ReferenceId, claims.UserType, signedToken); err != nil {
-		return nil, errors.New("refresh token is invalid")
+	if err := auth.isValidRefreshToken(claims.ReferenceId, claims.UserType, refreshToken); err != nil {
+		return nil, err
 	}
 
 	return claims, nil
 }
 
-func (auth *Auth) isValidRefreshToken(referenceID uint, userType byte, signedToken string) error {
-	token, err := auth.authRepo.GetTokenByReference(referenceID, userType, signedToken)
+func (auth *Auth) isValidRefreshToken(referenceID uint, userType commonType.UserType, refreshToken string) error {
+	token, err := auth.authRepo.GetTokenByReference(referenceID, userType, refreshToken)
 	if err != nil {
 		return err
 	}
 
 	// Check if token exists
 	if token == nil {
-		return errors.New("refresh token not found")
+		return errors.New("Refresh token not found!")
 	}
 
 	if token.ExpiresAt < time.Now().Unix() {
-		return errors.New("refresh token is expired")
+		return errors.New("Refresh token is expired!")
 	}
 
 	return nil

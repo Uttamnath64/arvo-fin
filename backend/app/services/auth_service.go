@@ -5,6 +5,7 @@ import (
 
 	"github.com/Uttamnath64/arvo-fin/app/auth"
 	"github.com/Uttamnath64/arvo-fin/app/common"
+	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/models"
 	"github.com/Uttamnath64/arvo-fin/app/repository"
 	"github.com/Uttamnath64/arvo-fin/app/requests"
@@ -34,7 +35,7 @@ func (service *AuthService) Login(payload requests.LoginRequest, ip string) resp
 	var user models.User
 
 	// Check user
-	err := service.userRepo.GetUser(payload.UsernameEmail, payload.UsernameEmail, &user)
+	err := service.userRepo.GetUserByUsernameOrEmail(payload.UsernameEmail, payload.UsernameEmail, &user)
 	if err == gorm.ErrRecordNotFound {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
@@ -63,9 +64,9 @@ func (service *AuthService) Login(payload requests.LoginRequest, ip string) resp
 	// Create Token
 	authRepo := repository.NewAuthRepository(service.container)
 	authHeler := auth.New(service.container, authRepo)
-	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, common.USER_TYPE_USER, ip)
+	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, commonType.User, ip)
 	if err != nil {
-		service.container.Logger.Error("auth.service.Login-GenerateToken", err.Error(), user.ID, common.USER_TYPE_USER, ip)
+		service.container.Logger.Error("auth.service.Login-GenerateToken", err.Error(), user.ID, commonType.User, ip)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
@@ -129,7 +130,7 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 
 	// Verify OTP
 	otpService := NewOTPService(service.container.Redis, 300)
-	err = otpService.VerifyOTP(payload.Email, common.Register, payload.OTP)
+	err = otpService.VerifyOTP(payload.Email, commonType.Register, payload.OTP)
 	if err != nil {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
@@ -169,9 +170,9 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 	// Create Token
 	authRepo := repository.NewAuthRepository(service.container)
 	authHeler := auth.New(service.container, authRepo)
-	accessToken, refreshToken, err := authHeler.GenerateToken(userId, common.USER_TYPE_USER, ip)
+	accessToken, refreshToken, err := authHeler.GenerateToken(userId, commonType.User, ip)
 	if err != nil {
-		service.container.Logger.Error("auth.service.Register-GenerateToken", err.Error(), userId, common.USER_TYPE_USER, ip)
+		service.container.Logger.Error("auth.service.Register-GenerateToken", err.Error(), userId, commonType.User, ip)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
@@ -180,7 +181,7 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 	}
 
 	// Response
-	service.container.Logger.Info("auth.service.Register", "User login successfully!", userId, common.USER_TYPE_USER, ip)
+	service.container.Logger.Info("auth.service.Register", "User login successfully!", userId, commonType.User, ip)
 	return responses.ServiceResponse{
 		StatusCode: common.StatusSuccess,
 		Message:    "User login successfully!",
@@ -194,7 +195,7 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.ServiceResponse {
 
 	// Check email
-	if payload.Type != common.Register {
+	if payload.Type != commonType.Register {
 		isExists, err := service.userRepo.EmailExists(payload.Email)
 		if err != nil {
 			service.container.Logger.Error("auth.service.SentOTP-EmailExists", err.Error(), payload.Email)
@@ -249,7 +250,7 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest,
 	var user models.User
 
 	// Check user
-	err := service.userRepo.GetUser("", payload.Email, &user)
+	err := service.userRepo.GetUserByUsernameOrEmail("", payload.Email, &user)
 	if err == gorm.ErrRecordNotFound {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
@@ -276,7 +277,7 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest,
 	}
 
 	// Verify OTP
-	err = service.otpService.VerifyOTP(payload.Email, common.ResetPassword, payload.OTP)
+	err = service.otpService.VerifyOTP(payload.Email, commonType.ResetPassword, payload.OTP)
 	if err != nil {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
@@ -310,9 +311,9 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest,
 	// Create Token
 	authRepo := repository.NewAuthRepository(service.container)
 	authHeler := auth.New(service.container, authRepo)
-	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, common.USER_TYPE_USER, ip)
+	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, commonType.User, ip)
 	if err != nil {
-		service.container.Logger.Error("auth.service.ResetPassword-GenerateToken", err.Error(), user.ID, common.USER_TYPE_USER, ip)
+		service.container.Logger.Error("auth.service.ResetPassword-GenerateToken", err.Error(), user.ID, commonType.User, ip)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
@@ -321,10 +322,65 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest,
 	}
 
 	// Response
-	service.container.Logger.Info("auth.service.ResetPassword", "Password updated successfully!", user.ID, common.USER_TYPE_USER, ip)
+	service.container.Logger.Info("auth.service.ResetPassword", "Password updated successfully!", user.ID, commonType.User, ip)
 	return responses.ServiceResponse{
 		StatusCode: common.StatusSuccess,
 		Message:    "Password reset successfully!",
+		Data: responses.AuthResponse{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		},
+	}
+}
+
+func (service *AuthService) GetToken(payload requests.TokenRequest, ip string) responses.ServiceResponse {
+	var user models.User
+
+	authRepo := repository.NewAuthRepository(service.container)
+	authHeler := auth.New(service.container, authRepo)
+	tokenClaims, err := authHeler.VerifyRefreshToken(payload.RefreshToken)
+	if err != nil {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    err.Error(),
+			Error:      err,
+		}
+	}
+
+	// Check user
+	claims, _ := tokenClaims.(*auth.AuthClaim)
+	err = service.userRepo.GetUser(claims.ReferenceId, &user)
+	if err == gorm.ErrRecordNotFound {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusNotFound,
+			Message:    "Username/Email not found!",
+			Error:      err,
+		}
+	}
+	if err != nil {
+		service.container.Logger.Error("auth.service.GetToken-GetUser", err.Error(), payload, claims)
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      err,
+		}
+	}
+
+	// Create Token
+	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, commonType.User, ip)
+	if err != nil {
+		service.container.Logger.Error("auth.service.GetToken-GenerateToken", err.Error(), user.ID, commonType.User, ip)
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      err,
+		}
+	}
+
+	// Response
+	return responses.ServiceResponse{
+		StatusCode: common.StatusSuccess,
+		Message:    "Token re-generated successfully!",
 		Data: responses.AuthResponse{
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,

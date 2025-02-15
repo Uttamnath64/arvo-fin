@@ -34,3 +34,7 @@ func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.S
 func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest, ip string) responses.ServiceResponse {
 	return service.authService.ResetPassword(payload, ip)
 }
+
+func (service *AuthService) GetToken(payload requests.TokenRequest, ip string) responses.ServiceResponse {
+	return service.authService.GetToken(payload, ip)
+}

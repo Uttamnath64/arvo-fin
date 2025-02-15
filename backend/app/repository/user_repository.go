@@ -18,7 +18,7 @@ func NewUserRepository(container *storage.Container) *UserRepository {
 	}
 }
 
-func (repo *UserRepository) GetUser(username string, email string, user *models.User) error {
+func (repo *UserRepository) GetUserByUsernameOrEmail(username string, email string, user *models.User) error {
 	return repo.container.Config.ReadOnlyDB.Model(&models.User{}).
 		Where("username = ? or email = ?", username, strings.ToLower(email)).First(user).Error
 }
@@ -67,8 +67,14 @@ func (repo *UserRepository) UpdatePasswordByEmail(email, newPassword string) err
 	}
 
 	if result.RowsAffected == 0 {
-		return errors.New("No user found!")
+		return errors.New("User not found!")
 	}
+	return nil
+}
 
+func (repo *UserRepository) GetUser(userId uint, user *models.User) error {
+	if err := repo.container.Config.ReadOnlyDB.Where("id = ?", userId).First(user).Error; err != nil {
+		return err
+	}
 	return nil
 }
