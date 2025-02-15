@@ -101,6 +101,6 @@ func (v *Validater) HashPassword(password string) (string, error) {
 	return string(hashPassword), nil
 }
 
-func (v *Validater) VerifyPassword(hashedPassword string, candidatePassword string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(candidatePassword))
+func (v *Validater) VerifyPassword(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

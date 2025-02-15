@@ -35,13 +35,13 @@ func (service *EmailService) SendEmail(to, subject, templateFile string, data ma
 	// Load email template
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		return fmt.Errorf("Error loading email template: %v", err)
+		return fmt.Errorf("error loading email template: %v", err)
 	}
 
 	var body bytes.Buffer
 	err = tmpl.Execute(&body, data)
 	if err != nil {
-		return fmt.Errorf("Error executing email template: %v", err)
+		return fmt.Errorf("error executing email template: %v", err)
 	}
 
 	// Set up the email
@@ -66,7 +66,7 @@ func (service *EmailService) SendEmail(to, subject, templateFile string, data ma
 
 	// Send the email
 	if err := dialer.DialAndSend(mailer); err != nil {
-		return fmt.Errorf("Failed to send email: %v", err)
+		return fmt.Errorf("failed to send email: %v", err)
 	}
 	return nil
 }

@@ -121,11 +121,11 @@ func (auth *Auth) VerifyRefreshToken(signedToken string) (interface{}, error) {
 
 	claims, ok := token.Claims.(*AuthClaim)
 	if !ok {
-		return nil, errors.New("Couldn't parse claims")
+		return nil, errors.New("couldn't parse claims")
 	}
 
 	if err := auth.isValidRefreshToken(claims.ReferenceId, claims.UserType, signedToken); err != nil {
-		return nil, errors.New("Refresh token is invalid")
+		return nil, errors.New("refresh token is invalid")
 	}
 
 	return claims, nil
@@ -139,11 +139,11 @@ func (auth *Auth) isValidRefreshToken(referenceID uint, userType byte, signedTok
 
 	// Check if token exists
 	if token == nil {
-		return errors.New("Refresh token not found!")
+		return errors.New("refresh token not found")
 	}
 
 	if token.ExpiresAt < time.Now().Unix() {
-		return errors.New("Refresh token is expired!")
+		return errors.New("refresh token is expired")
 	}
 
 	return nil

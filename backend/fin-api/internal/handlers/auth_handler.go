@@ -213,7 +213,7 @@ func (handler *AuthHandler) ResetPasswordHandler(ctx *gin.Context) {
 	}
 
 	// Reset password
-	serviceResponse := handler.authService.ResetPassword(payload)
+	serviceResponse := handler.authService.ResetPassword(payload, ctx.ClientIP())
 
 	if serviceResponse.HasError() {
 		switch serviceResponse.StatusCode {
@@ -239,8 +239,11 @@ func (handler *AuthHandler) ResetPasswordHandler(ctx *gin.Context) {
 		return
 	}
 
+	authR, _ := serviceResponse.Data.(responses.AuthResponse)
+
 	ctx.JSON(http.StatusOK, responses.ApiResponse{
-		Status:  true,
-		Message: "Password reset successfully!",
+		Status:   true,
+		Message:  serviceResponse.Message,
+		Metadata: authR,
 	})
 }

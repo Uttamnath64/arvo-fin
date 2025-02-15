@@ -31,7 +31,7 @@ func (service *OTPService) SaveOTP(email string, otpType common.OtpType, otp str
 	key := fmt.Sprintf("OTP:email=%s&type=%d", email, otpType)
 	err := service.RedisClient.SetValue(key, otp, service.TTL)
 	if err != nil {
-		return fmt.Errorf("Failed to save OTP: %v", err)
+		return fmt.Errorf("failed to save OTP: %v", err)
 	}
 	return nil
 }
@@ -41,11 +41,11 @@ func (service *OTPService) VerifyOTP(email string, otpType common.OtpType, provi
 	key := fmt.Sprintf("OTP:email=%s&type=%d", email, otpType)
 	storedOTP, err := service.RedisClient.GetValue(key)
 	if err != nil {
-		return errors.New("OTP expired!")
+		return errors.New("OTP expired")
 	}
 
 	if storedOTP != providedOTP {
-		return errors.New("Invalid OTP!")
+		return errors.New("invalid OTP")
 	}
 
 	// Delete the OTP after successful verification
