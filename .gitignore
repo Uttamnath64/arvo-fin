@@ -2,3 +2,5 @@ backend/go.mod
 backend/go.sum
 
 backend/app/config/env/.env 
+.vscode
+backend/logs
