@@ -25,7 +25,7 @@ func NewAuthService(container *storage.Container) *AuthService {
 	return &AuthService{
 		container:    container,
 		userRepo:     repository.NewUserRepository(container),
-		otpService:   NewOTPService(container.Redis, 1000),
+		otpService:   NewOTPService(container.Redis, 300),
 		emailService: NewEmailService(container),
 	}
 }
@@ -128,8 +128,8 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 	}
 
 	// Verify OTP
-	otpService := NewOTPService(service.container.Redis, 250)
-	err = otpService.VerifyOTP(payload.Email, payload.OTP)
+	otpService := NewOTPService(service.container.Redis, 300)
+	err = otpService.VerifyOTP(payload.Email, common.Register, payload.OTP)
 	if err != nil {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
@@ -194,25 +194,27 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.ServiceResponse {
 
 	// Check email
-	isExists, err := service.userRepo.EmailExists(payload.Email)
-	if err != nil {
-		service.container.Logger.Error("auth.service.SentOTP-EmailExists", err.Error(), payload.Email)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
+	if payload.Type != common.Register {
+		isExists, err := service.userRepo.EmailExists(payload.Email)
+		if err != nil {
+			service.container.Logger.Error("auth.service.SentOTP-EmailExists", err.Error(), payload.Email)
+			return responses.ServiceResponse{
+				StatusCode: common.StatusServerError,
+				Message:    "Oops! Something went wrong. Please try again later.",
+				Error:      err,
+			}
 		}
-	}
-	if !isExists {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusValidationError,
-			Message:    "User not found!",
-			Error:      errors.New("User not found!"),
+		if !isExists {
+			return responses.ServiceResponse{
+				StatusCode: common.StatusValidationError,
+				Message:    "User not found!",
+				Error:      errors.New("User not found!"),
+			}
 		}
 	}
 
 	otp := service.otpService.GenerateOTP()
-	if err := service.otpService.SaveOTP(payload.Email, otp); err != nil {
+	if err := service.otpService.SaveOTP(payload.Email, payload.Type, otp); err != nil {
 		service.container.Logger.Error("auth-service-SentOTP-RedisSaveOTP", err.Error(), payload.Email, otp)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
@@ -226,7 +228,7 @@ func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.S
 		"OTP":   otp,
 		"Email": payload.Email,
 	}
-	err = service.emailService.SendEmail(payload.Email, "OTP Verification", templates.OTPVerificationEmailTemplate, data, []string{})
+	err := service.emailService.SendEmail(payload.Email, "OTP Verification", templates.OTPVerificationEmailTemplate, data, []string{})
 	if err != nil {
 		service.container.Logger.Error("auth.service.SentOTP-EmailSend", err.Error(), "OTP Verification", templates.OTPVerificationEmailTemplate, data)
 		return responses.ServiceResponse{
@@ -274,7 +276,7 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest)
 	}
 
 	// Verify OTP
-	err = service.otpService.VerifyOTP(payload.Email, payload.OTP)
+	err = service.otpService.VerifyOTP(payload.Email, common.ResetPassword, payload.OTP)
 	if err != nil {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,

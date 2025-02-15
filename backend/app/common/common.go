@@ -1,5 +1,21 @@
 package common
 
+// OTP type enum
+type OtpType int
+
+const (
+	Register OtpType = iota + 1
+	ResetPassword
+)
+
+func (o OtpType) String() string {
+	return [...]string{"Register", "ResetPassword"}[o]
+}
+
+func (o OtpType) IsValid() bool {
+	return o >= Register && o <= ResetPassword
+}
+
 const (
 
 	// account types

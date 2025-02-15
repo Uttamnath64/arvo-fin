@@ -79,7 +79,7 @@ func New(logLevel string) *Logger {
 	core := zapcore.NewTee(
 		zapcore.NewCore(consoleEncoder, zapcore.AddSync(zapcore.Lock(os.Stdout)), level),
 		zapcore.NewCore(fileEncoder, zapcore.AddSync(&lumberjack.Logger{
-			Filename:   "../logs/app.log",
+			Filename:   "logs/app.log",
 			MaxSize:    500, // megabytes
 			MaxBackups: 3,
 			MaxAge:     28, // days
