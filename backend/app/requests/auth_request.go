@@ -1,21 +1,28 @@
 package requests
 
+import (
+	"errors"
+
+	"github.com/Uttamnath64/arvo-fin/app/common"
+)
+
 type LoginRequest struct {
-	UsernameEmail string `json:"usernameEmail" binding:"required"`
+	UsernameEmail string `json:"username_email" binding:"required"`
 	Password      string `json:"password" binding:"required"`
 }
 
 type RegisterRequest struct {
 	Name         string `json:"name" binding:"required"`
 	Email        string `json:"email" binding:"required"`
-	Username     string `json:"Username" binding:"required"`
-	MobileNumber string `json:"mobileNumber" binding:"required"`
+	Username     string `json:"username" binding:"required"`
+	MobileNumber string `json:"mobile_number" binding:"required"`
 	Password     string `json:"password" binding:"required"`
 	OTP          string `json:"otp" binding:"required"`
 }
 
 type SentOTPRequest struct {
-	Email string `json:"email" binding:"required"`
+	Email string         `json:"email" binding:"required"`
+	Type  common.OtpType `json:"type" binding:"required"`
 }
 
 type ResetPasswordRequest struct {
@@ -24,7 +31,7 @@ type ResetPasswordRequest struct {
 	OTP      string `json:"otp" binding:"required"`
 }
 
-func (r *LoginRequest) IsValid() error {
+func (r LoginRequest) IsValid() error {
 	emailErr := Validate.IsValidEmail(r.UsernameEmail)
 	usernameErr := Validate.IsValidUsername(r.UsernameEmail)
 	if emailErr != nil && usernameErr != nil {
@@ -41,7 +48,7 @@ func (r *LoginRequest) IsValid() error {
 	return nil
 }
 
-func (r *RegisterRequest) IsValid() error {
+func (r RegisterRequest) IsValid() error {
 	if err := Validate.IsValidName(r.Name); err != nil {
 		return err
 	}
@@ -63,14 +70,17 @@ func (r *RegisterRequest) IsValid() error {
 	return nil
 }
 
-func (r *SentOTPRequest) IsValid() error {
+func (r SentOTPRequest) IsValid() error {
 	if err := Validate.IsValidEmail(r.Email); err != nil {
 		return err
+	}
+	if !r.Type.IsValid() {
+		return errors.New("Invalid otp type!")
 	}
 	return nil
 }
 
-func (r *ResetPasswordRequest) IsValid() error {
+func (r ResetPasswordRequest) IsValid() error {
 	if err := Validate.IsValidEmail(r.Email); err != nil {
 		return err
 	}

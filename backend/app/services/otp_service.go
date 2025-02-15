@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Uttamnath64/arvo-fin/app/common"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 )
 
@@ -26,25 +27,25 @@ func (service *OTPService) GenerateOTP() string {
 }
 
 // SaveOTP stores the OTP in Redis
-func (service *OTPService) SaveOTP(email, otp string) error {
-	key := "otp:" + email
+func (service *OTPService) SaveOTP(email string, otpType common.OtpType, otp string) error {
+	key := fmt.Sprintf("OTP:email=%s&type=%d", email, otpType)
 	err := service.RedisClient.SetValue(key, otp, service.TTL)
 	if err != nil {
-		return fmt.Errorf("failed to save OTP: %v", err)
+		return fmt.Errorf("Failed to save OTP: %v", err)
 	}
 	return nil
 }
 
 // VerifyOTP verifies a user-provided OTP against the stored OTP
-func (service *OTPService) VerifyOTP(email, providedOTP string) error {
-	key := "otp:" + email
+func (service *OTPService) VerifyOTP(email string, otpType common.OtpType, providedOTP string) error {
+	key := fmt.Sprintf("OTP:email=%s&type=%d", email, otpType)
 	storedOTP, err := service.RedisClient.GetValue(key)
 	if err != nil {
 		return errors.New("OTP expired!")
 	}
 
 	if storedOTP != providedOTP {
-		return errors.New("invalid OTP!")
+		return errors.New("Invalid OTP!")
 	}
 
 	// Delete the OTP after successful verification

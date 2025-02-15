@@ -47,7 +47,7 @@ func LoadEnv() (env AppEnv, err error) {
 		return
 	}
 
-	configs := []interface{}{&env.Database, &env.Server, &env.Auth}
+	configs := []interface{}{&env.Database, &env.Server, &env.Auth, &env.Server.Smtp}
 	for _, config := range configs {
 		err = viper.Unmarshal(config)
 		if err != nil {

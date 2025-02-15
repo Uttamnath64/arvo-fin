@@ -27,7 +27,7 @@ func (repo *UserRepository) UsernameExists(username string) (bool, error) {
 	var count int64
 
 	err := repo.container.Config.ReadOnlyDB.Model(&models.User{}).
-		Where("username = ? or email = ?", username).Count(&count).Error
+		Where("username = ?", username).Count(&count).Error
 
 	if err != nil {
 		return false, err

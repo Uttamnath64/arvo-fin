@@ -22,7 +22,7 @@ func New() *Validater {
 	Email = regexp.MustCompile(`^[a-zA-Z0-9.!#$%&’*+/=?^_` + "`" + `{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$`)
 	Username = regexp.MustCompile("^[A-Za-z0-9_.]{3,15}$")
 	Name = regexp.MustCompile("^[A-Za-z ]{3,30}$")
-	OTP = regexp.MustCompile("^[0-9]{4}$")
+	OTP = regexp.MustCompile("^[0-9]{6}$")
 	MobileNumber = regexp.MustCompile("^[0-9]{10}$")
 	return &Validater{}
 }

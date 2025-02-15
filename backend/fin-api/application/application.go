@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Uttamnath64/arvo-fin/app/config"
+	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"github.com/Uttamnath64/arvo-fin/fin-api/internal/routes"
 	"github.com/Uttamnath64/arvo-fin/pkg/logger"
@@ -41,6 +42,7 @@ func (a *Application) Initialize() bool {
 	var con config.Config
 
 	ctx := context.Background()
+	requests.NewResponse()
 
 	// load env
 	env, err := config.LoadEnv()
@@ -84,7 +86,6 @@ func (a *Application) Run() {
 
 	// routers
 	routes.New(a.container, server).Handlers()
-
 	if err := server.Run(fmt.Sprint(":", a.container.Env.Server.Port)); err != nil {
 		a.container.Logger.Error("api-application-server", err.Error())
 		return
