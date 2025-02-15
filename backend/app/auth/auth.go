@@ -37,17 +37,17 @@ func (auth *Auth) GenerateToken(referenceId uint, userType byte, ip string) (str
 	// AccessPrivateKey
 	decodedAccessPrivateKey, err := base64.StdEncoding.DecodeString(auth.container.Env.Auth.AccessTokenPrivateKey)
 	if err != nil {
-		return "", "", errors.New("Could not decode key1: " + err.Error())
+		return "", "", errors.New("Could not decode key: " + err.Error())
 	}
 	AccessPrivateKey, err := jwt.ParseRSAPrivateKeyFromPEM(decodedAccessPrivateKey)
 	if err != nil {
-		return "", "", errors.New("Could not parse key2: " + err.Error())
+		return "", "", errors.New("Could not parse key: " + err.Error())
 	}
 
 	// RefreshPrivateKey
 	decodedRefreshPrivateKey, err := base64.StdEncoding.DecodeString(auth.container.Env.Auth.RefreshTokenPrivateKey)
 	if err != nil {
-		return "", "", errors.New("Could not decode key3: " + err.Error())
+		return "", "", errors.New("Could not decode key: " + err.Error())
 	}
 	RefreshPrivateKey, err := jwt.ParseRSAPrivateKeyFromPEM(decodedRefreshPrivateKey)
 
