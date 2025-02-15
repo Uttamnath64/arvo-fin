@@ -31,6 +31,6 @@ func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.S
 	return service.authService.SentOTP(payload)
 }
 
-func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest) responses.ServiceResponse {
-	return service.authService.ResetPassword(payload)
+func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest, ip string) responses.ServiceResponse {
+	return service.authService.ResetPassword(payload, ip)
 }

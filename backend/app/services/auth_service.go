@@ -105,7 +105,7 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
 			Message:    "Username already exists!",
-			Error:      errors.New("Username already exists!"),
+			Error:      errors.New("username already exists"),
 		}
 	}
 
@@ -123,7 +123,7 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
 			Message:    "Email already exists!",
-			Error:      errors.New("Email already exists!"),
+			Error:      errors.New("email already exists"),
 		}
 	}
 
@@ -134,7 +134,7 @@ func (service *AuthService) Register(payload requests.RegisterRequest, ip string
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
 			Message:    "Invalid OTP!",
-			Error:      errors.New("Invalid OTP!"),
+			Error:      errors.New("invalid OTP"),
 		}
 	}
 
@@ -208,7 +208,7 @@ func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.S
 			return responses.ServiceResponse{
 				StatusCode: common.StatusValidationError,
 				Message:    "User not found!",
-				Error:      errors.New("User not found!"),
+				Error:      errors.New("user not found"),
 			}
 		}
 	}
@@ -245,7 +245,7 @@ func (service *AuthService) SentOTP(payload requests.SentOTPRequest) responses.S
 	}
 }
 
-func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest) responses.ServiceResponse {
+func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest, ip string) responses.ServiceResponse {
 	var user models.User
 
 	// Check user
@@ -266,12 +266,12 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest)
 		}
 	}
 
-	// Validate password new password
+	// Validate old and password new password
 	if err := Validate.VerifyPassword(user.Password, payload.Password); err == nil {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
 			Message:    "Password is the same as the previous one!",
-			Error:      err,
+			Error:      errors.New("auth issue"),
 		}
 	}
 
@@ -290,7 +290,7 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest)
 	if err != nil {
 		service.container.Logger.Error("auth.service.ResetPassword-HashPassword", err.Error(), payload)
 		return responses.ServiceResponse{
-			StatusCode: common.StatusValidationError,
+			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
 			Error:      err,
 		}
@@ -307,8 +307,27 @@ func (service *AuthService) ResetPassword(payload requests.ResetPasswordRequest)
 		}
 	}
 
+	// Create Token
+	authRepo := repository.NewAuthRepository(service.container)
+	authHeler := auth.New(service.container, authRepo)
+	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, common.USER_TYPE_USER, ip)
+	if err != nil {
+		service.container.Logger.Error("auth.service.ResetPassword-GenerateToken", err.Error(), user.ID, common.USER_TYPE_USER, ip)
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later.",
+			Error:      err,
+		}
+	}
+
+	// Response
+	service.container.Logger.Info("auth.service.ResetPassword", "Password updated successfully!", user.ID, common.USER_TYPE_USER, ip)
 	return responses.ServiceResponse{
 		StatusCode: common.StatusSuccess,
-		Message:    "Password updated successfully!",
+		Message:    "Password reset successfully!",
+		Data: responses.AuthResponse{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		},
 	}
 }
