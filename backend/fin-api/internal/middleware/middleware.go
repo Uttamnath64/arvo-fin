@@ -2,33 +2,35 @@ package middleware
 
 import (
 	"encoding/base64"
-	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/Uttamnath64/arvo-fin/app/config"
+	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
+	"github.com/Uttamnath64/arvo-fin/app/responses"
+	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
 
 type Middleware struct {
-	config *config.Config
-	env    *config.AppEnv
+	container *storage.Container
 }
 
-func New(con *config.Config, env *config.AppEnv) *Middleware {
+func New(container *storage.Container) *Middleware {
 	return &Middleware{
-		config: con,
-		env:    env,
+		container: container,
 	}
 }
 
-func (auth *Middleware) Middleware() gin.HandlerFunc {
+func (m *Middleware) Middleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		tokenString := ctx.GetHeader("Authorization")
 		if tokenString == "" {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Missing access token!"})
+			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Missing access token!",
+			})
 			ctx.Abort()
 			return
 		}
@@ -37,14 +39,26 @@ func (auth *Middleware) Middleware() gin.HandlerFunc {
 		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
 
 		// conver key
-		decodedAccessPublicKey, err := base64.StdEncoding.DecodeString(auth.env.Auth.AccessTokenPublicKey)
+		decodedAccessPublicKey, err := base64.StdEncoding.DecodeString(m.container.Env.Auth.AccessTokenPublicKey)
 		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Could not decode key: " + err.Error()})
+			m.container.Logger.Error("api-middleware-DecodeString", err.Error())
+			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Could not decode key: " + err.Error(),
+			})
+			ctx.Abort()
+			return
 		}
 
 		AccessPublicKey, err := jwt.ParseRSAPublicKeyFromPEM(decodedAccessPublicKey)
 		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Could not parse key: " + err.Error()})
+			m.container.Logger.Error("api-middleware-ParseRSAPublicKeyFromPEM", err.Error())
+			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Could not decode key: " + err.Error(),
+			})
+			ctx.Abort()
+			return
 		}
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -52,7 +66,10 @@ func (auth *Middleware) Middleware() gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid access token! Error: " + err.Error(), "accessToken": tokenString})
+			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Invalid access token: " + err.Error(),
+			})
 			ctx.Abort()
 			return
 		}
@@ -60,23 +77,31 @@ func (auth *Middleware) Middleware() gin.HandlerFunc {
 		// Check if token claims exist and have the expected format
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			// Log the token payload for debugging purposes
-			fmt.Println("Invalid token claims format! Token payload:", token.Claims)
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims format!"})
+			m.container.Logger.Error("api-middleware-MapClaims", "Invalid token claims format! Token payload:", token.Claims)
+			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Invalid token claims format!",
+			})
 			ctx.Abort()
 			return
 		}
 
-		referenceID, ok := claims["referenceId"].(float64)
+		referenceID, ok := claims["referenceId"].(uint)
 		if !ok {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid referenceId format!"})
+			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Invalid referenceId format!",
+			})
 			ctx.Abort()
 			return
 		}
 
-		userType, ok := claims["userType"].(float64)
+		userType, ok := claims["userType"].(commonType.UserType)
 		if !ok {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid userType format!"})
+			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Invalid userType format!",
+			})
 			ctx.Abort()
 			return
 		}
