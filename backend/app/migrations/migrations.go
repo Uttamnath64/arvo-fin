@@ -52,7 +52,7 @@ func main() {
 
 	// migration log database
 	err = con.LogDB.AutoMigrate(
-		&models.Log{},
+		&models.TransactionAudit{},
 	)
 	if err != nil {
 		log.Error("app-migrate-config-error", "Failed to migrate the log database")

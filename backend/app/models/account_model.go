@@ -9,6 +9,6 @@ type Account struct {
 	Name                 string                 `gorm:"column:name;type:varchar(30);not null"`
 	Type                 string                 `gorm:"column:type;type:enum('bank', 'credit', 'wallet', 'investment');not null"`
 	Balance              float64                `gorm:"column:balance;type:decimal(15,2);default:0.00"`
-	Transaction          []Transaction          `gorm:"foreignKey:account_id"`
-	RecurringTransaction []RecurringTransaction `gorm:"foreignKey:account_id"`
+	Transaction          []Transaction          `gorm:"foreignKey:AccountId;constraint:OnDelete:CASCADE;"`
+	RecurringTransaction []RecurringTransaction `gorm:"foreignKey:AccountId;constraint:OnDelete:CASCADE;"`
 }

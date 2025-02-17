@@ -93,6 +93,10 @@ func (v *Validater) IsValidMobileNumber(data string) error {
 	return nil
 }
 
+func (v *Validater) IsValidID(id uint) bool {
+	return id > 0
+}
+
 func (v *Validater) HashPassword(password string) (string, error) {
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
