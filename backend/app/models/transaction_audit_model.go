@@ -2,7 +2,7 @@ package models
 
 import "gorm.io/gorm"
 
-type Log struct {
+type TransactionAudit struct {
 	gorm.Model
 	UserId        *uint  `gorm:"column:user_id;"`        // Nullable for system actions
 	TransactionId *uint  `gorm:"column:transaction_id;"` // Nullable for system actions

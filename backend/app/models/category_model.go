@@ -8,4 +8,5 @@ type Category struct {
 	PortfolioId uint   `gorm:"column:portfolio_id;not null"`
 	Name        string `gorm:"column:name;type:varchar(100);not null"`
 	Type        string `gorm:"column:type;type:enum('income', 'expense');not null"`
+	AdminId     *uint  `gorm:"column:admin_id"`
 }
