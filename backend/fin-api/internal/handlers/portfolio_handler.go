@@ -36,7 +36,7 @@ func (handler *Portfolio) GetList(ctx *gin.Context) {
 		return
 	}
 
-	portfolioResponse, _ := serviceResponse.Data.([]responses.PortfolioResponse)
+	portfolioResponse, _ := serviceResponse.Data.(*[]responses.PortfolioResponse)
 	ctx.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
@@ -65,7 +65,7 @@ func (handler *Portfolio) Get(ctx *gin.Context) {
 		return
 	}
 
-	portfolioResponse, _ := serviceResponse.Data.(responses.PortfolioResponse)
+	portfolioResponse, _ := serviceResponse.Data.(*responses.PortfolioResponse)
 	ctx.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,

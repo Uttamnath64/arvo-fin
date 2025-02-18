@@ -10,9 +10,9 @@ func (routes *Routes) PortfolioRoutes() {
 	middle := middleware.New(routes.container)
 	userGroup := routes.server.Group("/portfolio").Use(middle.Middleware())
 	{
-		userGroup.GET("/", portfolioHandler.GetList)
+		userGroup.GET("", portfolioHandler.GetList)
 		userGroup.GET("/:id", portfolioHandler.Get)
-		userGroup.POST("/", portfolioHandler.Add)
+		userGroup.POST("", portfolioHandler.Add)
 		userGroup.PUT("/:id", portfolioHandler.Update)
 		userGroup.DELETE("/:id", portfolioHandler.Delete)
 	}

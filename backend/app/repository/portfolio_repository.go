@@ -5,8 +5,10 @@ import (
 
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/models"
+	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/responses"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
+	"gorm.io/gorm"
 )
 
 type Portfolio struct {
@@ -26,15 +28,18 @@ func (repo *Portfolio) GetList(userId uint, userType commonType.UserType) (*[]re
 	var portfolios []responses.PortfolioResponse
 
 	query := repo.container.Config.ReadOnlyDB.Table(portfolio.GetName() + " p").
-		Joins("JOIN " + avatar.GetName() + " a ON a.id = p.avatar_id")
+		Joins("JOIN " + avatar.GetName() + " a ON a.id = p.avatar_id").Where("p.deleted_at IS NULL")
 	if userType == commonType.User {
-		query.Where("p.user_id = ?", userId)
+		query = query.Where("p.user_id = ? ", userId)
 	}
 	err := query.Select("p.id, p.name, a.id as avatar_id, a.url").
 		Scan(&portfolios).Error
 
 	if err != nil {
 		return nil, err // Other errors
+	}
+	if len(portfolios) == 0 {
+		return nil, gorm.ErrRecordNotFound
 	}
 	return &portfolios, nil
 }
@@ -45,10 +50,10 @@ func (repo *Portfolio) Get(id, userId uint, userType commonType.UserType) (*resp
 
 	var portfolios responses.PortfolioResponse
 
-	query := repo.container.Config.ReadOnlyDB.Table(portfolio.GetName() + " p").
-		Joins("JOIN " + avatar.GetName() + " a ON a.id = p.avatar_id")
+	query := repo.container.Config.ReadOnlyDB.Table(portfolio.GetName()+" p").
+		Joins("JOIN "+avatar.GetName()+" a ON a.id = p.avatar_id").Where("p.id = ? AND p.deleted_at IS NULL", id)
 	if userType == commonType.User {
-		query.Where("p.user_id = ?", userId)
+		query = query.Where("p.user_id = ?", userId)
 	}
 	err := query.Select("p.id, p.name, a.id as avatar_id, a.url").
 		Scan(&portfolios).Error
@@ -56,17 +61,23 @@ func (repo *Portfolio) Get(id, userId uint, userType commonType.UserType) (*resp
 	if err != nil {
 		return nil, err // Other errors
 	}
+	if portfolio.ID == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
 	return &portfolios, nil
 }
 
 func (repo *Portfolio) Add(portfolio models.Portfolio) error {
-	return repo.container.Config.ReadOnlyDB.Create(portfolio).Error
+	return repo.container.Config.ReadWriteDB.Create(&portfolio).Error
 }
 
-func (repo *Portfolio) Update(id, userId uint, portfolio models.Portfolio) error {
+func (repo *Portfolio) Update(id, userId uint, payload requests.PortfolioRequest) error {
 	result := repo.container.Config.ReadWriteDB.Model(&models.Portfolio{}).
 		Where("id = ? AND user_id = ?", id, userId).
-		Updates(portfolio)
+		Updates(map[string]interface{}{
+			"name":      payload.Name,
+			"avatar_id": payload.AvatarId,
+		})
 
 	if result.Error != nil {
 		return result.Error
@@ -79,7 +90,7 @@ func (repo *Portfolio) Update(id, userId uint, portfolio models.Portfolio) error
 }
 
 func (repo *Portfolio) Delete(id, userId uint) error {
-	result := repo.container.Config.ReadOnlyDB.Where("id = ? AND user_id = ?", id, userId).Delete(models.Portfolio{})
+	result := repo.container.Config.ReadWriteDB.Where("id = ? AND user_id = ?", id, userId).Delete(&models.Portfolio{})
 
 	if result.Error != nil {
 		return result.Error

@@ -63,19 +63,53 @@ func bindAndValidateJson[T any](ctx *gin.Context, payload *T) bool {
 }
 
 func getUserInfo(ctx *gin.Context) (*userInfo, bool) {
-	userId, exists := ctx.Get("userId")
-	userType, existsType := ctx.Get("userType")
+	userIdValue, exists := ctx.Get("userId")
+	userTypeValue, existsType := ctx.Get("userType")
 
-	// Check if values exist
 	if !exists || !existsType {
 		ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
 			Status:  false,
 			Message: "Unauthorized",
 		})
+		ctx.Abort()
 		return nil, false
 	}
+
+	userId, ok := userIdValue.(uint)
+	if !ok {
+		// Try to convert from float64 (common in JWT claims)
+		if floatId, isFloat := userIdValue.(float64); isFloat {
+			userId = uint(floatId)
+		} else {
+			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Invalid userId format",
+			})
+			ctx.Abort()
+			return nil, false
+		}
+	}
+
+	// Handle userType safely
+	userTypeInt, ok := userTypeValue.(int)
+	if !ok {
+		// Handle case where it's a float64 (common in JWT claims)
+		if userTypeFloat, isFloat := userTypeValue.(float64); isFloat {
+			userTypeInt = int(userTypeFloat) // Convert float64 → int
+		} else {
+			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Invalid userType format",
+			})
+			ctx.Abort()
+			return nil, false
+		}
+	}
+	userType := commonType.UserType(userTypeInt)
+
+	// Return parsed values
 	return &userInfo{
-		userId:   userId.(uint),
-		userType: userType.(commonType.UserType),
+		userId:   userId,
+		userType: userType,
 	}, true
 }

@@ -30,7 +30,7 @@ func NewPortfolio(container *storage.Container) *Portfolio {
 func (service *Portfolio) GetList(userId uint, userType commonType.UserType) responses.ServiceResponse {
 
 	portfolioRes, err := service.portfolioRepo.GetList(userId, userType)
-	if err != gorm.ErrRecordNotFound {
+	if err == gorm.ErrRecordNotFound {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
 			Message:    "Record not found!",
@@ -57,7 +57,7 @@ func (service *Portfolio) GetList(userId uint, userType commonType.UserType) res
 func (service *Portfolio) Get(id, userId uint, userType commonType.UserType) responses.ServiceResponse {
 
 	portfolioRes, err := service.portfolioRepo.Get(id, userId, userType)
-	if err != gorm.ErrRecordNotFound {
+	if err == gorm.ErrRecordNotFound {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
 			Message:    "Record not found!",
@@ -89,7 +89,7 @@ func (service *Portfolio) Add(payload requests.PortfolioRequest, userId uint) re
 		UserId:   userId,
 	}
 
-	if err := service.avatarRepo.GetAvatar(payload.AvatarId, &models.Avatar{}); err != nil {
+	if err := service.avatarRepo.GetAvatarByType(payload.AvatarId, commonType.PortfolioAvatar, &models.Avatar{}); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return responses.ServiceResponse{
 				StatusCode: common.StatusValidationError,
@@ -102,7 +102,7 @@ func (service *Portfolio) Add(payload requests.PortfolioRequest, userId uint) re
 		service.container.Logger.Error("api.common.service.Add", err.Error(), portfolio, userId)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
-			Message:    "Database error while fetching avatar!",
+			Message:    "Oops! Something went wrong. Please try again later!",
 			Error:      err,
 		}
 	}
@@ -125,13 +125,7 @@ func (service *Portfolio) Add(payload requests.PortfolioRequest, userId uint) re
 
 func (service *Portfolio) Update(id, userId uint, payload requests.PortfolioRequest) responses.ServiceResponse {
 
-	portfolio := models.Portfolio{
-		Name:     payload.Name,
-		AvatarId: payload.AvatarId,
-		UserId:   userId,
-	}
-
-	if err := service.avatarRepo.GetAvatar(payload.AvatarId, &models.Avatar{}); err != nil {
+	if err := service.avatarRepo.GetAvatarByType(payload.AvatarId, commonType.PortfolioAvatar, &models.Avatar{}); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return responses.ServiceResponse{
 				StatusCode: common.StatusValidationError,
@@ -141,20 +135,20 @@ func (service *Portfolio) Update(id, userId uint, payload requests.PortfolioRequ
 		}
 
 		// Other database errors
-		service.container.Logger.Error("api.common.service.Update", err.Error(), id, userId, portfolio)
+		service.container.Logger.Error("api.common.service.Update", err.Error(), id, userId, payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
-			Message:    "Database error while fetching avatar!",
+			Message:    "Oops! Something went wrong. Please try again later!",
 			Error:      err,
 		}
 	}
 
-	err := service.portfolioRepo.Update(id, userId, portfolio)
+	err := service.portfolioRepo.Update(id, userId, payload)
 	if err != nil {
-		service.container.Logger.Error("api.common.service.Update", err.Error(), id, userId, portfolio)
+		service.container.Logger.Error("api.common.service.Update", err.Error(), id, userId, payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
+			Message:    err.Error(),
 			Error:      err,
 		}
 	}
@@ -172,7 +166,7 @@ func (service *Portfolio) Delete(id, userId uint) responses.ServiceResponse {
 		service.container.Logger.Error("api.common.service.Delete", err.Error(), id, userId)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
+			Message:    err.Error(),
 			Error:      err,
 		}
 	}
