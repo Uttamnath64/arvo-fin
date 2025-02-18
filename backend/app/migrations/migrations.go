@@ -42,6 +42,7 @@ func main() {
 		&models.Account{},
 		&models.Category{},
 		&models.Budget{},
+		&models.Avatar{},
 		&models.Transaction{},
 		&models.RecurringTransaction{},
 	)

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/responses"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"github.com/gin-gonic/gin"
@@ -86,28 +85,8 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 			return
 		}
 
-		referenceID, ok := claims["referenceId"].(uint)
-		if !ok {
-			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
-				Status:  false,
-				Message: "Invalid referenceId format!",
-			})
-			ctx.Abort()
-			return
-		}
-
-		userType, ok := claims["userType"].(commonType.UserType)
-		if !ok {
-			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
-				Status:  false,
-				Message: "Invalid userType format!",
-			})
-			ctx.Abort()
-			return
-		}
-
-		ctx.Set("ReferenceID", int(referenceID))
-		ctx.Set("UserType", int(userType))
+		ctx.Set("userId", claims["referenceId"])
+		ctx.Set("userType", claims["userType"])
 		ctx.Next()
 	}
 }
