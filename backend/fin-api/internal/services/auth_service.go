@@ -169,11 +169,10 @@ func (service *Auth) Register(payload requests.RegisterRequest, ip string) respo
 
 	// Create user
 	userId, err := service.userRepo.CreateUser(&models.User{
-		Name:         payload.Name,
-		Username:     payload.Username,
-		Email:        payload.Email,
-		MobileNumber: payload.MobileNumber,
-		Password:     password,
+		Name:     payload.Name,
+		Username: payload.Username,
+		Email:    payload.Email,
+		Password: password,
 	})
 	if err != nil {
 		service.container.Logger.Error("auth.service.register-createUser", err.Error(), payload, password)
