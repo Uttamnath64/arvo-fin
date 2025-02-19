@@ -8,22 +8,22 @@ import (
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 )
 
-type UserRepository struct {
+type User struct {
 	container *storage.Container
 }
 
-func NewUserRepository(container *storage.Container) *UserRepository {
-	return &UserRepository{
+func NewUser(container *storage.Container) *User {
+	return &User{
 		container: container,
 	}
 }
 
-func (repo *UserRepository) GetUserByUsernameOrEmail(username string, email string, user *models.User) error {
+func (repo *User) GetUserByUsernameOrEmail(username string, email string, user *models.User) error {
 	return repo.container.Config.ReadOnlyDB.Model(&models.User{}).
 		Where("username = ? or email = ?", username, strings.ToLower(email)).First(user).Error
 }
 
-func (repo *UserRepository) UsernameExists(username string) (bool, error) {
+func (repo *User) UsernameExists(username string) (bool, error) {
 	var count int64
 
 	err := repo.container.Config.ReadOnlyDB.Model(&models.User{}).
@@ -36,7 +36,7 @@ func (repo *UserRepository) UsernameExists(username string) (bool, error) {
 	return count > 0, nil
 }
 
-func (repo *UserRepository) EmailExists(email string) (bool, error) {
+func (repo *User) EmailExists(email string) (bool, error) {
 	var count int64
 
 	err := repo.container.Config.ReadOnlyDB.Model(&models.User{}).
@@ -49,7 +49,7 @@ func (repo *UserRepository) EmailExists(email string) (bool, error) {
 	return count > 0, nil
 }
 
-func (repo *UserRepository) CreateUser(user *models.User) (uint, error) {
+func (repo *User) CreateUser(user *models.User) (uint, error) {
 	err := repo.container.Config.ReadWriteDB.Create(user).Error
 	if err != nil {
 		return 0, err
@@ -57,7 +57,7 @@ func (repo *UserRepository) CreateUser(user *models.User) (uint, error) {
 	return user.ID, nil
 }
 
-func (repo *UserRepository) UpdatePasswordByEmail(email, newPassword string) error {
+func (repo *User) UpdatePasswordByEmail(email, newPassword string) error {
 	result := repo.container.Config.ReadWriteDB.Model(&models.User{}).
 		Where("email = ?", email).
 		Update("password", newPassword)
@@ -72,7 +72,7 @@ func (repo *UserRepository) UpdatePasswordByEmail(email, newPassword string) err
 	return nil
 }
 
-func (repo *UserRepository) GetUser(userId uint, user *models.User) error {
+func (repo *User) GetUser(userId uint, user *models.User) error {
 	if err := repo.container.Config.ReadOnlyDB.Where("id = ?", userId).First(user).Error; err != nil {
 		return err
 	}
