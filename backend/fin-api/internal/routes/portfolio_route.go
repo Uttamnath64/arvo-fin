@@ -6,14 +6,14 @@ import (
 )
 
 func (routes *Routes) PortfolioRoutes() {
-	portfolioHandler := handlers.NewPortfolio(routes.container)
+	handler := handlers.NewPortfolio(routes.container)
 	middle := middleware.New(routes.container)
 	userGroup := routes.server.Group("/portfolio").Use(middle.Middleware())
 	{
-		userGroup.GET("", portfolioHandler.GetList)
-		userGroup.GET("/:id", portfolioHandler.Get)
-		userGroup.POST("", portfolioHandler.Add)
-		userGroup.PUT("/:id", portfolioHandler.Update)
-		userGroup.DELETE("/:id", portfolioHandler.Delete)
+		userGroup.GET("", handler.GetList)
+		userGroup.GET("/:id", handler.Get)
+		userGroup.POST("", handler.Add)
+		userGroup.PUT("/:id", handler.Update)
+		userGroup.DELETE("/:id", handler.Delete)
 	}
 }

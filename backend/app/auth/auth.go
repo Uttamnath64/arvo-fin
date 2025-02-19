@@ -14,7 +14,7 @@ import (
 
 type Auth struct {
 	container *storage.Container
-	authRepo  *repository.AuthRepository
+	authRepo  *repository.Auth
 }
 
 type AuthClaim struct {
@@ -23,10 +23,10 @@ type AuthClaim struct {
 	jwt.StandardClaims
 }
 
-func New(container *storage.Container, authRepo *repository.AuthRepository) *Auth {
+func New(container *storage.Container, authRepo *repository.Auth) *Auth {
 	return &Auth{
 		container: container,
-		authRepo:  repository.NewAuthRepository(container),
+		authRepo:  repository.NewAuth(container),
 	}
 }
 
