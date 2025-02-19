@@ -34,7 +34,7 @@ func (service *Portfolio) GetList(userId uint, userType commonType.UserType) res
 		}
 	}
 	if err != nil {
-		service.container.Logger.Error("api.common.service.GetList", err.Error(), userId, userType)
+		service.container.Logger.Error("portfolio.service.getList", err.Error(), userId, userType)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
@@ -61,7 +61,7 @@ func (service *Portfolio) Get(id, userId uint, userType commonType.UserType) res
 		}
 	}
 	if err != nil {
-		service.container.Logger.Error("api.common.service.Get", err.Error(), id, userId, userType)
+		service.container.Logger.Error("portfolio.service.get", err.Error(), id, userId, userType)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
