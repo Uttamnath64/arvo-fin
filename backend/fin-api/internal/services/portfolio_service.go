@@ -56,7 +56,7 @@ func (service *Portfolio) Add(payload requests.PortfolioRequest, userId uint) re
 		}
 
 		// Other database errors
-		service.container.Logger.Error("api.common.service.Add", err.Error(), portfolio, userId)
+		service.container.Logger.Error("portfolio.service.add", err.Error(), portfolio, userId)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later!",
@@ -66,7 +66,7 @@ func (service *Portfolio) Add(payload requests.PortfolioRequest, userId uint) re
 
 	err := service.portfolioRepo.Add(portfolio)
 	if err != nil {
-		service.container.Logger.Error("api.common.service.Add", err.Error(), portfolio, userId)
+		service.container.Logger.Error("portfolio.service.add", err.Error(), portfolio, userId)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
@@ -92,7 +92,7 @@ func (service *Portfolio) Update(id, userId uint, payload requests.PortfolioRequ
 		}
 
 		// Other database errors
-		service.container.Logger.Error("api.common.service.Update", err.Error(), id, userId, payload)
+		service.container.Logger.Error("portfolio.service.update", err.Error(), id, userId, payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later!",
@@ -102,7 +102,7 @@ func (service *Portfolio) Update(id, userId uint, payload requests.PortfolioRequ
 
 	err := service.portfolioRepo.Update(id, userId, payload)
 	if err != nil {
-		service.container.Logger.Error("api.common.service.Update", err.Error(), id, userId, payload)
+		service.container.Logger.Error("portfolio.service.update", err.Error(), id, userId, payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    err.Error(),
@@ -120,7 +120,7 @@ func (service *Portfolio) Delete(id, userId uint) responses.ServiceResponse {
 
 	err := service.portfolioRepo.Delete(id, userId)
 	if err != nil {
-		service.container.Logger.Error("api.common.service.Delete", err.Error(), id, userId)
+		service.container.Logger.Error("portfolio.service.delete", err.Error(), id, userId)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    err.Error(),
