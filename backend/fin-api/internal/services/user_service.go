@@ -7,12 +7,12 @@ import (
 
 type UserService struct {
 	container *storage.Container
-	userRepo  *repository.UserRepository
+	userRepo  *repository.User
 }
 
 func NewUserService(container *storage.Container) *UserService {
 	return &UserService{
 		container: container,
-		userRepo:  repository.NewUserRepository(container),
+		userRepo:  repository.NewUser(container),
 	}
 }
