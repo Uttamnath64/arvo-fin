@@ -26,13 +26,10 @@ func isErrorResponse(ctx *gin.Context, serviceResponse responses.ServiceResponse
 		switch serviceResponse.StatusCode {
 		case common.StatusNotFound:
 			ctx.JSON(http.StatusBadRequest, apiResponse)
-			break
 		case common.StatusValidationError:
 			ctx.JSON(http.StatusUnauthorized, apiResponse)
-			break
 		case common.StatusServerError:
 			ctx.JSON(http.StatusInternalServerError, apiResponse)
-			break
 		}
 		return true
 	}
