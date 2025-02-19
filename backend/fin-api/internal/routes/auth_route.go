@@ -3,13 +3,13 @@ package routes
 import "github.com/Uttamnath64/arvo-fin/fin-api/internal/handlers"
 
 func (routes *Routes) AuthRoutes() {
-	authHandler := handlers.NewAuthHandler(routes.container)
+	handler := handlers.NewAuth(routes.container)
 	userGroup := routes.server.Group("/auth")
 	{
-		userGroup.POST("/login", authHandler.LoginHandler)
-		userGroup.POST("/register", authHandler.RegisterHandler)
-		userGroup.POST("/send-otp", authHandler.SentOTPHandler)
-		userGroup.POST("/reset-password", authHandler.ResetPasswordHandler)
-		userGroup.POST("/token", authHandler.TokenHandler)
+		userGroup.POST("/login", handler.Login)
+		userGroup.POST("/register", handler.Register)
+		userGroup.POST("/send-otp", handler.SentOTP)
+		userGroup.POST("/reset-password", handler.ResetPassword)
+		userGroup.POST("/token", handler.Token)
 	}
 }
