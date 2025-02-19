@@ -36,6 +36,7 @@ type RegisterRequest struct {
 	Email        string `json:"email" binding:"required"`
 	Username     string `json:"username" binding:"required"`
 	MobileNumber string `json:"mobile_number" binding:"required"`
+	AvatarId     uint   `json:"avatar_id" binding:"required"`
 	Password     string `json:"password" binding:"required"`
 	OTP          string `json:"otp" binding:"required"`
 }
@@ -52,6 +53,9 @@ func (r RegisterRequest) IsValid() error {
 	}
 	if err := Validate.IsValidMobileNumber(r.MobileNumber); err != nil {
 		return err
+	}
+	if !Validate.IsValidID(r.AvatarId) {
+		return errors.New("Invalid avatar id!")
 	}
 	if err := Validate.IsValidPassword(r.Password); err != nil {
 		return err

@@ -126,6 +126,25 @@ func (service *Auth) Register(payload requests.RegisterRequest, ip string) respo
 		}
 	}
 
+	avatarRepo := repository.NewAvatar(service.container)
+	if err := avatarRepo.GetAvatarByType(payload.AvatarId, commonType.UserAvatar, &models.Avatar{}); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return responses.ServiceResponse{
+				StatusCode: common.StatusValidationError,
+				Message:    "Avatar not found!",
+				Error:      err,
+			}
+		}
+
+		// Other database errors
+		service.container.Logger.Error("auth.service.add-getAvatarByType", err.Error(), payload)
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later!",
+			Error:      err,
+		}
+	}
+
 	// Verify OTP
 	otpService := appService.NewOTPService(service.container.Redis, 300)
 	err = otpService.VerifyOTP(payload.Email, commonType.Register, payload.OTP)
