@@ -20,5 +20,6 @@ func New(container *storage.Container, server *gin.Engine) *Routes {
 func (routes *Routes) Handlers() {
 	routes.AuthRoutes()
 	routes.UserRoutes()
+	routes.MeRoutes()
 	routes.PortfolioRoutes()
 }
