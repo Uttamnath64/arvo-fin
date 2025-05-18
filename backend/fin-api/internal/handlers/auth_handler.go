@@ -29,7 +29,7 @@ func (handler *Auth) Login(ctx *gin.Context) {
 		return
 	}
 
-	serviceResponse := handler.authService.Login(payload, ctx.ClientIP())
+	serviceResponse := handler.authService.Login(payload, ctx.Request.UserAgent(), ctx.ClientIP())
 	if isErrorResponse(ctx, serviceResponse) {
 		return
 	}
@@ -49,7 +49,7 @@ func (handler *Auth) Register(ctx *gin.Context) {
 		return
 	}
 
-	serviceResponse := handler.authService.Register(payload, ctx.ClientIP())
+	serviceResponse := handler.authService.Register(payload, ctx.Request.UserAgent(), ctx.ClientIP())
 	if isErrorResponse(ctx, serviceResponse) {
 		return
 	}
@@ -88,7 +88,7 @@ func (handler *Auth) ResetPassword(ctx *gin.Context) {
 	}
 
 	// Reset password
-	serviceResponse := handler.authService.ResetPassword(payload, ctx.ClientIP())
+	serviceResponse := handler.authService.ResetPassword(payload, ctx.Request.UserAgent(), ctx.ClientIP())
 	if isErrorResponse(ctx, serviceResponse) {
 		return
 	}
@@ -109,7 +109,7 @@ func (handler *Auth) Token(ctx *gin.Context) {
 	}
 
 	// Get token
-	serviceResponse := handler.authService.GetToken(payload, ctx.ClientIP())
+	serviceResponse := handler.authService.GetToken(payload, ctx.Request.UserAgent(), ctx.ClientIP())
 	if isErrorResponse(ctx, serviceResponse) {
 		return
 	}

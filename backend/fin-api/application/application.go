@@ -50,6 +50,8 @@ func (a *Application) Initialize() bool {
 		logger.New("none").Error("api-application-env", err.Error())
 		return false
 	}
+
+	// set logger
 	log := logger.New(env.Server.Environment)
 
 	// load config DB

@@ -18,8 +18,9 @@ type Auth struct {
 }
 
 type AuthClaim struct {
-	ReferenceId uint                `json:"referenceId"`
-	UserType    commonType.UserType `json:"userType"`
+	UserId    uint                `json:"user_id"`
+	UserType  commonType.UserType `json:"user_type"`
+	SessionID uint                `json:"session_id"`
 	jwt.StandardClaims
 }
 
@@ -30,7 +31,7 @@ func New(container *storage.Container, authRepo *repository.Auth) *Auth {
 	}
 }
 
-func (auth *Auth) GenerateToken(referenceId uint, userType commonType.UserType, ip string) (string, string, error) {
+func (auth *Auth) GenerateToken(userId uint, userType commonType.UserType, deviceInfo, ipAddress string) (string, string, error) {
 
 	var accessExpiresAt = time.Now().Add(auth.container.Env.Auth.AccessTokenExpired * time.Hour).Unix()
 	var refreshExpiresAt = time.Now().Add(auth.container.Env.Auth.RefreshTokenExpired * time.Hour).Unix()
@@ -56,9 +57,21 @@ func (auth *Auth) GenerateToken(referenceId uint, userType commonType.UserType, 
 		return "", "", errors.New("Could not parse key: " + err.Error())
 	}
 
+	// create settion
+	session := models.Session{
+		UserID:     userId,
+		UserType:   userType,
+		DeviceInfo: deviceInfo,
+		IPAddress:  ipAddress,
+	}
+	if err := auth.authRepo.CreateSession(&session); err != nil {
+		return "", "", err
+	}
+
 	accessTokenJWT := jwt.NewWithClaims(jwt.SigningMethodRS256, &AuthClaim{
-		ReferenceId: referenceId,
-		UserType:    userType,
+		UserId:    userId,
+		UserType:  userType,
+		SessionID: session.ID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: accessExpiresAt,
 		},
@@ -70,8 +83,9 @@ func (auth *Auth) GenerateToken(referenceId uint, userType commonType.UserType, 
 	}
 
 	refreshTokenJWT := jwt.NewWithClaims(jwt.SigningMethodRS256, &AuthClaim{
-		ReferenceId: referenceId,
-		UserType:    userType,
+		UserId:    userId,
+		UserType:  userType,
+		SessionID: session.ID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: refreshExpiresAt,
 		},
@@ -82,13 +96,7 @@ func (auth *Auth) GenerateToken(referenceId uint, userType commonType.UserType, 
 		return "", "", err
 	}
 
-	if err := auth.CreateToken(&models.Token{
-		ReferenceId: referenceId,
-		UserType:    userType,
-		IP:          ip,
-		Token:       refreshToken,
-		ExpiresAt:   refreshExpiresAt,
-	}); err != nil {
+	if err := auth.authRepo.UpdateSession(session.ID, refreshToken, refreshExpiresAt); err != nil {
 		return "", "", err
 	}
 
@@ -127,31 +135,27 @@ func (auth *Auth) VerifyRefreshToken(refreshToken string) (interface{}, error) {
 		return nil, errors.New("Refresh token is invalid!")
 	}
 
-	if err := auth.isValidRefreshToken(claims.ReferenceId, claims.UserType, refreshToken); err != nil {
+	if err := auth.isValidRefreshToken(claims.SessionID, claims.UserType, refreshToken); err != nil {
 		return nil, err
 	}
 
 	return claims, nil
 }
 
-func (auth *Auth) isValidRefreshToken(referenceID uint, userType commonType.UserType, refreshToken string) error {
-	token, err := auth.authRepo.GetTokenByReference(referenceID, userType, refreshToken)
+func (auth *Auth) isValidRefreshToken(sessionID uint, userType commonType.UserType, refreshToken string) error {
+	session, err := auth.authRepo.GetSessionByRefreshToken(refreshToken, userType)
 	if err != nil {
 		return err
 	}
 
 	// Check if token exists
-	if token == nil {
+	if session == nil {
 		return errors.New("Refresh token not found!")
 	}
 
-	if token.ExpiresAt < time.Now().Unix() {
+	if session.ExpiresAt < time.Now().Unix() {
 		return errors.New("Refresh token is expired!")
 	}
 
 	return nil
-}
-
-func (auth *Auth) CreateToken(token *models.Token) error {
-	return auth.authRepo.CreateToken(token)
 }

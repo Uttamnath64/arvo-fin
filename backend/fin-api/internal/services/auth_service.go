@@ -32,7 +32,7 @@ func NewAuth(container *storage.Container) *Auth {
 	}
 }
 
-func (service *Auth) Login(payload requests.LoginRequest, ip string) responses.ServiceResponse {
+func (service *Auth) Login(payload requests.LoginRequest, deviceInfo string, ip string) responses.ServiceResponse {
 	var user models.User
 
 	// Check user
@@ -65,7 +65,7 @@ func (service *Auth) Login(payload requests.LoginRequest, ip string) responses.S
 	// Create Token
 	authRepo := repository.NewAuth(service.container)
 	authHeler := auth.New(service.container, authRepo)
-	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, commonType.User, ip)
+	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, commonType.User, deviceInfo, ip)
 	if err != nil {
 		service.container.Logger.Error("auth.service.login-generateToken", err.Error(), user.ID, commonType.User, ip)
 		return responses.ServiceResponse{
@@ -85,7 +85,7 @@ func (service *Auth) Login(payload requests.LoginRequest, ip string) responses.S
 	}
 }
 
-func (service *Auth) Register(payload requests.RegisterRequest, ip string) responses.ServiceResponse {
+func (service *Auth) Register(payload requests.RegisterRequest, deviceInfo string, ip string) responses.ServiceResponse {
 	var (
 		err      error
 		isExists bool
@@ -186,7 +186,7 @@ func (service *Auth) Register(payload requests.RegisterRequest, ip string) respo
 	// Create Token
 	authRepo := repository.NewAuth(service.container)
 	authHeler := auth.New(service.container, authRepo)
-	accessToken, refreshToken, err := authHeler.GenerateToken(userId, commonType.User, ip)
+	accessToken, refreshToken, err := authHeler.GenerateToken(userId, commonType.User, deviceInfo, ip)
 	if err != nil {
 		service.container.Logger.Error("auth.service.register-generateToken", err.Error(), userId, commonType.User, ip)
 		return responses.ServiceResponse{
@@ -261,7 +261,7 @@ func (service *Auth) SentOTP(payload requests.SentOTPRequest) responses.ServiceR
 	}
 }
 
-func (service *Auth) ResetPassword(payload requests.ResetPasswordRequest, ip string) responses.ServiceResponse {
+func (service *Auth) ResetPassword(payload requests.ResetPasswordRequest, deviceInfo string, ip string) responses.ServiceResponse {
 	var user models.User
 
 	// Check user
@@ -325,7 +325,7 @@ func (service *Auth) ResetPassword(payload requests.ResetPasswordRequest, ip str
 	// Create Token
 	authRepo := repository.NewAuth(service.container)
 	authHeler := auth.New(service.container, authRepo)
-	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, commonType.User, ip)
+	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, commonType.User, deviceInfo, ip)
 	if err != nil {
 		service.container.Logger.Error("auth.service.resetPassword-generateToken", err.Error(), user.ID, commonType.User, ip)
 		return responses.ServiceResponse{
@@ -345,7 +345,7 @@ func (service *Auth) ResetPassword(payload requests.ResetPasswordRequest, ip str
 	}
 }
 
-func (service *Auth) GetToken(payload requests.TokenRequest, ip string) responses.ServiceResponse {
+func (service *Auth) GetToken(payload requests.TokenRequest, deviceInfo string, ip string) responses.ServiceResponse {
 	var user models.User
 
 	authRepo := repository.NewAuth(service.container)
@@ -361,7 +361,7 @@ func (service *Auth) GetToken(payload requests.TokenRequest, ip string) response
 
 	// Check user
 	claims, _ := tokenClaims.(*auth.AuthClaim)
-	err = service.userRepo.GetUser(claims.ReferenceId, &user)
+	err = service.userRepo.GetUser(claims.SessionID, &user)
 	if err == gorm.ErrRecordNotFound {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
@@ -379,7 +379,7 @@ func (service *Auth) GetToken(payload requests.TokenRequest, ip string) response
 	}
 
 	// Create Token
-	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, commonType.User, ip)
+	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, commonType.User, deviceInfo, ip)
 	if err != nil {
 		service.container.Logger.Error("auth.service.getToken-generateToken", err.Error(), user.ID, commonType.User, ip)
 		return responses.ServiceResponse{

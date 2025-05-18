@@ -37,7 +37,6 @@ func main() {
 	// migration database
 	err = con.ReadWriteDB.AutoMigrate(
 		&models.User{},
-		&models.Token{},
 		&models.Portfolio{},
 		&models.Account{},
 		&models.Category{},
