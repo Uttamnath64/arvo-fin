@@ -41,7 +41,7 @@ func (repo *Auth) CreateSession(session *models.Session) error {
 }
 
 func (repo *Auth) UpdateSession(id uint, refreshToken string, expiresAt int64) error {
-	result := repo.container.Config.ReadWriteDB.Model(&models.Portfolio{}).
+	result := repo.container.Config.ReadWriteDB.Model(&models.Session{}).
 		Where("id = ?", id).
 		Updates(map[string]interface{}{
 			"refresh_token": refreshToken,

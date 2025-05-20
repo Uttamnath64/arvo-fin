@@ -7,6 +7,7 @@ func (routes *Routes) AuthRoutes() {
 	userGroup := routes.server.Group("/auth")
 	{
 		userGroup.POST("/register", handler.Register)
+		userGroup.POST("/login", handler.Login)
 		userGroup.POST("/send-otp", handler.SentOTP)
 		userGroup.POST("/reset-password", handler.ResetPassword)
 		userGroup.POST("/token", handler.Token)

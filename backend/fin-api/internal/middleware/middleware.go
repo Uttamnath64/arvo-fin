@@ -85,8 +85,9 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 			return
 		}
 
-		ctx.Set("userId", claims["referenceId"])
-		ctx.Set("userType", claims["userType"])
+		ctx.Set("user_id", claims["user_id"])
+		ctx.Set("user_type", claims["user_type"])
+		ctx.Set("session_id", claims["session_id"])
 		ctx.Next()
 	}
 }
