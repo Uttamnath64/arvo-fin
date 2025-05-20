@@ -43,6 +43,7 @@ func main() {
 		&models.Budget{},
 		&models.Avatar{},
 		&models.Transaction{},
+		&models.Session{},
 		&models.RecurringTransaction{},
 	)
 	if err != nil {

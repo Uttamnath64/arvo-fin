@@ -60,8 +60,8 @@ func bindAndValidateJson[T any](ctx *gin.Context, payload *T) bool {
 }
 
 func getUserInfo(ctx *gin.Context) (*userInfo, bool) {
-	userIdValue, exists := ctx.Get("userId")
-	userTypeValue, existsType := ctx.Get("userType")
+	userIdValue, exists := ctx.Get("user_id")
+	userTypeValue, existsType := ctx.Get("user_type")
 
 	if !exists || !existsType {
 		ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
