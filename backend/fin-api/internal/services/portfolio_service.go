@@ -16,9 +16,9 @@ import (
 
 type Portfolio struct {
 	container        *storage.Container
-	portfolioService *commonServices.Portfolio
-	portfolioRepo    *repository.Portfolio
-	avatarRepo       *repository.Avatar
+	portfolioService commonServices.PortfolioService
+	portfolioRepo    repository.PortfolioRepository
+	avatarRepo       repository.AvatarRepository
 }
 
 func NewPortfolio(container *storage.Container) *Portfolio {

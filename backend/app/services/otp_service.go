@@ -9,25 +9,25 @@ import (
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 )
 
-type OTPService struct {
+type OTP struct {
 	RedisClient *storage.RedisClient
 	TTL         int
 }
 
-func NewOTPService(redisClient *storage.RedisClient, ttl int) *OTPService {
-	return &OTPService{
+func NewOTP(redisClient *storage.RedisClient, ttl int) *OTP {
+	return &OTP{
 		RedisClient: redisClient,
 		TTL:         ttl,
 	}
 }
 
 // GenerateOTP generates a random OTP (for simplicity, hardcoded here).
-func (service *OTPService) GenerateOTP() string {
+func (service *OTP) GenerateOTP() string {
 	return fmt.Sprintf("%06d", time.Now().UnixNano()%1000000) // 6-digit OTP
 }
 
 // SaveOTP stores the OTP in Redis
-func (service *OTPService) SaveOTP(email string, otpType commonType.OtpType, otp string) error {
+func (service *OTP) SaveOTP(email string, otpType commonType.OtpType, otp string) error {
 	key := fmt.Sprintf("OTP:email=%s&type=%d", email, otpType)
 	err := service.RedisClient.SetValue(key, otp, service.TTL)
 	if err != nil {
@@ -37,7 +37,7 @@ func (service *OTPService) SaveOTP(email string, otpType commonType.OtpType, otp
 }
 
 // VerifyOTP verifies a user-provided OTP against the stored OTP
-func (service *OTPService) VerifyOTP(email string, otpType commonType.OtpType, providedOTP string) error {
+func (service *OTP) VerifyOTP(email string, otpType commonType.OtpType, providedOTP string) error {
 	key := fmt.Sprintf("OTP:email=%s&type=%d", email, otpType)
 	storedOTP, err := service.RedisClient.GetValue(key)
 	if err != nil {

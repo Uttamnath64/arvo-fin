@@ -14,7 +14,7 @@ import (
 
 type Auth struct {
 	container *storage.Container
-	authRepo  *repository.Auth
+	authRepo  repository.AuthRepository
 }
 
 type AuthClaim struct {
@@ -24,10 +24,10 @@ type AuthClaim struct {
 	jwt.StandardClaims
 }
 
-func New(container *storage.Container, authRepo *repository.Auth) *Auth {
+func New(container *storage.Container, authRepo repository.AuthRepository) *Auth {
 	return &Auth{
 		container: container,
-		authRepo:  repository.NewAuth(container),
+		authRepo:  authRepo,
 	}
 }
 
@@ -112,7 +112,6 @@ func (auth *Auth) VerifyRefreshToken(refreshToken string) (interface{}, error) {
 	}
 
 	RefreshPublicKey, err := jwt.ParseRSAPublicKeyFromPEM(decodedRefreshPublicKey)
-
 	if err != nil {
 		auth.container.Logger.Error("auth.service.GetToken-VerifyRefreshToken", err.Error())
 		return "", errors.New("Refresh token is invalid!")
@@ -125,7 +124,6 @@ func (auth *Auth) VerifyRefreshToken(refreshToken string) (interface{}, error) {
 			return RefreshPublicKey, nil
 		},
 	)
-
 	if err != nil {
 		return nil, errors.New("Refresh token is invalid!")
 	}

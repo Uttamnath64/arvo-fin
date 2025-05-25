@@ -18,17 +18,23 @@ import (
 
 type Auth struct {
 	container    *storage.Container
-	userRepo     *repository.User
-	otpService   *appService.OTPService
-	emailService *appService.EmailService
+	userRepo     repository.UserRepository
+	authRepo     repository.AuthRepository
+	authHelper   *auth.Auth
+	otpService   appService.OTPService
+	emailService appService.EmailService
 }
 
 func NewAuth(container *storage.Container) *Auth {
+
+	authRepo := repository.NewAuth(container)
 	return &Auth{
 		container:    container,
 		userRepo:     repository.NewUser(container),
-		otpService:   appService.NewOTPService(container.Redis, 300),
-		emailService: appService.NewEmailService(container),
+		authRepo:     authRepo,
+		authHelper:   auth.New(container, authRepo),
+		otpService:   appService.NewOTP(container.Redis, 300),
+		emailService: appService.NewEmail(container),
 	}
 }
 
@@ -63,9 +69,7 @@ func (service *Auth) Login(payload requests.LoginRequest, deviceInfo string, ip 
 	}
 
 	// Create Token
-	authRepo := repository.NewAuth(service.container)
-	authHeler := auth.New(service.container, authRepo)
-	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, commonType.User, deviceInfo, ip)
+	accessToken, refreshToken, err := service.authHelper.GenerateToken(user.ID, commonType.User, deviceInfo, ip)
 	if err != nil {
 		service.container.Logger.Error("auth.service.login-generateToken", err.Error(), user.ID, commonType.User, ip)
 		return responses.ServiceResponse{
@@ -146,8 +150,7 @@ func (service *Auth) Register(payload requests.RegisterRequest, deviceInfo strin
 	}
 
 	// Verify OTP
-	otpService := appService.NewOTPService(service.container.Redis, 300)
-	err = otpService.VerifyOTP(payload.Email, commonType.Register, payload.OTP)
+	err = service.otpService.VerifyOTP(payload.Email, commonType.Register, payload.OTP)
 	if err != nil {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
@@ -184,9 +187,7 @@ func (service *Auth) Register(payload requests.RegisterRequest, deviceInfo strin
 	}
 
 	// Create Token
-	authRepo := repository.NewAuth(service.container)
-	authHeler := auth.New(service.container, authRepo)
-	accessToken, refreshToken, err := authHeler.GenerateToken(userId, commonType.User, deviceInfo, ip)
+	accessToken, refreshToken, err := service.authHelper.GenerateToken(userId, commonType.User, deviceInfo, ip)
 	if err != nil {
 		service.container.Logger.Error("auth.service.register-generateToken", err.Error(), userId, commonType.User, ip)
 		return responses.ServiceResponse{
@@ -323,9 +324,7 @@ func (service *Auth) ResetPassword(payload requests.ResetPasswordRequest, device
 	}
 
 	// Create Token
-	authRepo := repository.NewAuth(service.container)
-	authHeler := auth.New(service.container, authRepo)
-	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, commonType.User, deviceInfo, ip)
+	accessToken, refreshToken, err := service.authHelper.GenerateToken(user.ID, commonType.User, deviceInfo, ip)
 	if err != nil {
 		service.container.Logger.Error("auth.service.resetPassword-generateToken", err.Error(), user.ID, commonType.User, ip)
 		return responses.ServiceResponse{
@@ -348,9 +347,7 @@ func (service *Auth) ResetPassword(payload requests.ResetPasswordRequest, device
 func (service *Auth) GetToken(payload requests.TokenRequest, deviceInfo string, ip string) responses.ServiceResponse {
 	var user models.User
 
-	authRepo := repository.NewAuth(service.container)
-	authHeler := auth.New(service.container, authRepo)
-	tokenClaims, err := authHeler.VerifyRefreshToken(payload.RefreshToken)
+	tokenClaims, err := service.authHelper.VerifyRefreshToken(payload.RefreshToken)
 	if err != nil {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
@@ -379,7 +376,7 @@ func (service *Auth) GetToken(payload requests.TokenRequest, deviceInfo string, 
 	}
 
 	// Create Token
-	accessToken, refreshToken, err := authHeler.GenerateToken(user.ID, commonType.User, deviceInfo, ip)
+	accessToken, refreshToken, err := service.authHelper.GenerateToken(user.ID, commonType.User, deviceInfo, ip)
 	if err != nil {
 		service.container.Logger.Error("auth.service.getToken-generateToken", err.Error(), user.ID, commonType.User, ip)
 		return responses.ServiceResponse{
