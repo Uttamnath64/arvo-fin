@@ -40,7 +40,10 @@ type AppEnv struct {
 
 func LoadEnv() (env AppEnv, err error) {
 
-	viper.SetConfigFile("app/config/env/.env")
+	viper.SetConfigName(".env")
+	viper.SetConfigType("env")
+	viper.AddConfigPath("app/config/env")
+	viper.AddConfigPath(".")
 
 	err = viper.ReadInConfig()
 	if err != nil {

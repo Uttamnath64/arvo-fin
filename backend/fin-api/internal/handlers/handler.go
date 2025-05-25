@@ -80,7 +80,7 @@ func getUserInfo(ctx *gin.Context) (*userInfo, bool) {
 		} else {
 			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
-				Message: "Invalid userId format",
+				Message: "Invalid user_id format",
 			})
 			ctx.Abort()
 			return nil, false

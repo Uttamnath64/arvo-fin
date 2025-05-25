@@ -10,7 +10,7 @@ import (
 	"github.com/go-gomail/gomail"
 )
 
-type EmailService struct {
+type Email struct {
 	SMTPHost    string
 	SMTPPort    int
 	SenderEmail string
@@ -19,8 +19,8 @@ type EmailService struct {
 }
 
 // NewEmailService initializes the email service
-func NewEmailService(container *storage.Container) *EmailService {
-	return &EmailService{
+func NewEmail(container *storage.Container) *Email {
+	return &Email{
 		SMTPHost:    container.Env.Server.Smtp.Host,
 		SMTPPort:    container.Env.Server.Smtp.Port,
 		SenderEmail: container.Env.Server.Smtp.Email,
@@ -30,7 +30,7 @@ func NewEmailService(container *storage.Container) *EmailService {
 }
 
 // SendEmail sends an email with optional attachments
-func (service *EmailService) SendEmail(to, subject, templateFile string, data map[string]string, attachments []string) error {
+func (service *Email) SendEmail(to, subject, templateFile string, data map[string]string, attachments []string) error {
 
 	// Load email template
 	tmpl, err := template.ParseFiles(templateFile)

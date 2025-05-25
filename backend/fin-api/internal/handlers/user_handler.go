@@ -8,13 +8,13 @@ import (
 
 type UserHandler struct {
 	container   *storage.Container
-	userService *services.UserService
+	userService *services.User
 }
 
 func NewUserHandler(container *storage.Container) *UserHandler {
 	return &UserHandler{
 		container:   container,
-		userService: services.NewUserService(container),
+		userService: services.NewUser(container),
 	}
 }
 

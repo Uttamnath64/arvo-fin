@@ -5,13 +5,13 @@ import (
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 )
 
-type UserService struct {
+type User struct {
 	container *storage.Container
-	repo      *repository.User
+	repo      repository.UserRepository
 }
 
-func NewUserService(container *storage.Container) *UserService {
-	return &UserService{
+func NewUserService(container *storage.Container) *User {
+	return &User{
 		container: container,
 		repo:      repository.NewUser(container),
 	}
