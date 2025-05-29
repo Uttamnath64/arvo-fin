@@ -1,0 +1,68 @@
+version: '3.4'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: arvo-fin-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB_MAIN}
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+      - ./backend/docker/init/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "${MYSQL_PORT}:${MYSQL_CONTAINER_PORT}"
+
+  redis:
+    image: redis:alpine
+    container_name: arvo-fin-redis
+    restart: always
+    ports:
+      - "${REDIS_PORT}:${REDIS_CONTAINER_PORT}"
+
+  fin-api:
+    container_name: arvo-fin-api
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.api
+    restart: always
+    env_file:
+      - ./backend/app/config/env/.env
+    volumes:
+      - ./backend:/backend
+    depends_on:
+      - mysql
+      - redis
+    ports:
+      - "${PORT}:${PORT}"
+
+  # fin-consumer:
+  #   container_name: arvo-fin-consumer
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.consumer
+  #   env_file:
+  #     - ./backend/app/config/env/.env
+  #   depends_on:
+  #     - mysql
+  #     - redis
+  #   volumes:
+  #     - backend-data:/backend
+  #   working_dir: /app/cmd/fin-consumer
+  #   command: go run main.go
+
+  # web:
+  #   container_name: arvo-fin-web
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: frontend
+  #   ports:
+  #     - "${CLIENT_ORIGIN_PORT}:${CLIENT_ORIGIN_PORT}"
+  #   depends_on:
+  #     - fin-api
+
+
+
+# docker-compose --env-file ./backend/app/config/env/.env up --build
