@@ -35,7 +35,7 @@ func getTestContainer() (*storage.Container, bool) {
 	}
 
 	// load redis
-	redis, err := storage.NewRedisClient(ctx, env.Server.RedisHost, "", 0)
+	redis, err := storage.NewRedisClient(ctx, env.Server.RedisAddr, "", 0)
 	if err != nil {
 		log.Error("api-test-application-redis", err.Error())
 		return nil, false

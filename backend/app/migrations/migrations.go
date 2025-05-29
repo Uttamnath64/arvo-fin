@@ -18,7 +18,7 @@ func init() {
 	// load env
 	env, err = config.LoadEnv()
 	if err != nil {
-		logger.New("none").Error("api-application-env", err.Error())
+		logger.New("none").Error("app-migrate-config-env", err.Error())
 		return
 	}
 
@@ -27,7 +27,7 @@ func init() {
 	// load config DB
 	err = config.LoadConfig(env, &con)
 	if err != nil {
-		log.Error("api-application-config", err.Error())
+		log.Error("app-migrate-config", err.Error())
 		return
 	}
 }

@@ -62,7 +62,7 @@ func (a *Application) Initialize() bool {
 	}
 
 	// load redis
-	redis, err := storage.NewRedisClient(ctx, env.Server.RedisHost, "", 0)
+	redis, err := storage.NewRedisClient(ctx, env.Server.RedisAddr, "", 0)
 	if err != nil {
 		log.Error("api-application-redis", err.Error())
 		return false
