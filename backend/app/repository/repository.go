@@ -12,6 +12,7 @@ type AuthRepository interface {
 	GetSessionByRefreshToken(refreshToken string, userType commonType.UserType) (*models.Session, error)
 	CreateSession(session *models.Session) error
 	UpdateSession(id uint, refreshToken string, expiresAt int64) error
+	DeleteSession(sessionID uint) error
 }
 
 type AvatarRepository interface {

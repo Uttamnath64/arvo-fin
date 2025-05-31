@@ -358,7 +358,7 @@ func (service *Auth) GetToken(payload requests.TokenRequest, deviceInfo string, 
 
 	// Check user
 	claims, _ := tokenClaims.(*auth.AuthClaim)
-	err = service.userRepo.GetUser(claims.SessionID, &user)
+	err = service.userRepo.GetUser(claims.UserId, &user)
 	if err == gorm.ErrRecordNotFound {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
@@ -374,6 +374,9 @@ func (service *Auth) GetToken(payload requests.TokenRequest, deviceInfo string, 
 			Error:      err,
 		}
 	}
+
+	// Remove session
+	service.authRepo.DeleteSession(claims.SessionID)
 
 	// Create Token
 	accessToken, refreshToken, err := service.authHelper.GenerateToken(user.ID, commonType.User, deviceInfo, ip)

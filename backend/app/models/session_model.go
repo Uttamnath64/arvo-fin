@@ -11,6 +11,6 @@ type Session struct {
 	UserType     commonType.UserType `gorm:"type:VARCHAR(50);not null"`
 	DeviceInfo   string              `gorm:"type:TEXT"`
 	IPAddress    string              `gorm:"type:VARCHAR(45)"`
-	RefreshToken string              `gorm:"type:VARCHAR(512);"`
+	RefreshToken string              `gorm:"type:TEXT"`
 	ExpiresAt    int64
 }

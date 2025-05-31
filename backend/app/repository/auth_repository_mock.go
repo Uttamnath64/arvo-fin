@@ -63,6 +63,10 @@ func (repo *TestAuth) CreateSession(session *models.Session) error {
 	return nil
 }
 
+func (repo *TestAuth) DeleteSession(sessionID uint) error {
+	return nil
+}
+
 func (repo *TestAuth) UpdateSession(id uint, refreshToken string, expiresAt int64) error {
 	return nil
 }
