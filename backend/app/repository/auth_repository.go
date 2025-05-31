@@ -37,7 +37,11 @@ func (repo *Auth) GetSessionByRefreshToken(refreshToken string, userType commonT
 }
 
 func (repo *Auth) CreateSession(session *models.Session) error {
-	return repo.container.Config.ReadOnlyDB.Create(session).Error
+	return repo.container.Config.ReadWriteDB.Create(session).Error
+}
+
+func (repo *Auth) DeleteSession(sessionID uint) error {
+	return repo.container.Config.ReadWriteDB.Unscoped().Where("id = ?", sessionID).Delete(&models.Session{}).Error
 }
 
 func (repo *Auth) UpdateSession(id uint, refreshToken string, expiresAt int64) error {
