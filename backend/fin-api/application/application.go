@@ -45,7 +45,7 @@ func (a *Application) Initialize() bool {
 	requests.NewResponse()
 
 	// load env
-	env, err := config.LoadEnv()
+	env, err := config.LoadEnv(".env")
 	if err != nil {
 		logger.New("none").Error("api-application-env", err.Error())
 		return false

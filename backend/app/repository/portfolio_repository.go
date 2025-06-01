@@ -61,7 +61,7 @@ func (repo *Portfolio) Get(id, userId uint, userType commonType.UserType) (*resp
 	if err != nil {
 		return nil, err // Other errors
 	}
-	if portfolio.ID == 0 {
+	if portfolios.Id == 0 {
 		return nil, gorm.ErrRecordNotFound
 	}
 	return &portfolios, nil
