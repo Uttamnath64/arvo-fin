@@ -16,7 +16,7 @@ func init() {
 	var err error
 
 	// load env
-	env, err = config.LoadEnv()
+	env, err = config.LoadEnv(".env")
 	if err != nil {
 		logger.New("none").Error("app-migrate-config-env", err.Error())
 		return

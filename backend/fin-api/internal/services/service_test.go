@@ -12,34 +12,20 @@ import (
 
 func getTestContainer() (*storage.Container, bool) {
 	var con config.Config
-
+	var redis *storage.RedisClient
 	ctx := context.Background()
 	requests.NewResponse()
 
 	// load env
 	_ = os.Chdir("../../../")
-	env, err := config.LoadEnv()
+	env, err := config.LoadEnv(".env.test")
 	if err != nil {
 		logger.New("none").Error("api-test-application-env", err.Error())
 		return nil, false
 	}
 
 	// set logger
-	log := logger.New(env.Server.Environment)
-
-	// load config DB
-	err = config.LoadConfig(env, &con)
-	if err != nil {
-		log.Error("api-test-application-config", err.Error())
-		return nil, false
-	}
-
-	// load redis
-	redis, err := storage.NewRedisClient(ctx, env.Server.RedisAddr, "", 0)
-	if err != nil {
-		log.Error("api-test-application-redis", err.Error())
-		return nil, false
-	}
+	log := logger.NewTest(env.Server.Environment)
 
 	return storage.NewContainer(ctx, &con, log, redis, &env), true
 }

@@ -22,6 +22,7 @@ func NewTestAuth() (*Auth, bool) {
 		container:    container,
 		userRepo:     repository.NewTestUser(container),
 		authRepo:     authRepo,
+		avatarRepo:   repository.NewTestAvatar(container),
 		authHelper:   auth.New(container, authRepo),
 		otpService:   appService.NewTestOTP(container.Redis, 300),
 		emailService: appService.NewTestEmail(container),

@@ -38,9 +38,9 @@ type AppEnv struct {
 	}
 }
 
-func LoadEnv() (env AppEnv, err error) {
+func LoadEnv(fileName string) (env AppEnv, err error) {
 
-	viper.SetConfigName(".env")
+	viper.SetConfigName(fileName)
 	viper.SetConfigType("env")
 	viper.AddConfigPath("app/config/env")
 	viper.AddConfigPath(".")

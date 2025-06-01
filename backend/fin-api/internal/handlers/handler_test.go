@@ -33,7 +33,7 @@ func TestIsErrorResponse(t *testing.T) {
 				Message:    "Resource not found",
 				StatusCode: common.StatusNotFound,
 			},
-			expectedStatus: http.StatusBadRequest,
+			expectedStatus: http.StatusNotFound,
 			expectedBody:   `{"status":false,"message":"Resource not found","metadata":null,"details":"not found"}`,
 			expectError:    true,
 		},

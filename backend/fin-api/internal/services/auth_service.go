@@ -20,6 +20,7 @@ type Auth struct {
 	container    *storage.Container
 	userRepo     repository.UserRepository
 	authRepo     repository.AuthRepository
+	avatarRepo   repository.AvatarRepository
 	authHelper   *auth.Auth
 	otpService   appService.OTPService
 	emailService appService.EmailService
@@ -32,6 +33,7 @@ func NewAuth(container *storage.Container) *Auth {
 		container:    container,
 		userRepo:     repository.NewUser(container),
 		authRepo:     authRepo,
+		avatarRepo:   repository.NewAvatar(container),
 		authHelper:   auth.New(container, authRepo),
 		otpService:   appService.NewOTP(container.Redis, 300),
 		emailService: appService.NewEmail(container),
@@ -130,8 +132,7 @@ func (service *Auth) Register(payload requests.RegisterRequest, deviceInfo strin
 		}
 	}
 
-	avatarRepo := repository.NewAvatar(service.container)
-	if err := avatarRepo.GetAvatarByType(payload.AvatarId, commonType.UserAvatar, &models.Avatar{}); err != nil {
+	if err := service.avatarRepo.GetAvatarByType(payload.AvatarId, commonType.UserAvatar, &models.Avatar{}); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return responses.ServiceResponse{
 				StatusCode: common.StatusValidationError,
