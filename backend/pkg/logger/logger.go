@@ -42,19 +42,6 @@ func New(logLevel string) *Logger {
 		level = zap.DebugLevel
 	}
 
-	// // setup zap config
-	// config := zap.Config{
-	// 	Level:            zap.NewAtomicLevelAt(level),
-	// 	Encoding:         "json",
-	// 	OutputPaths:      []string{"../logs/app.log"},
-	// 	ErrorOutputPaths: []string{"../logs/error.log"},
-	// }
-	// logger, _ := config.Build()
-
-	// return &Logger{
-	// 	log: logger,
-	// }
-
 	// configure encoder
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "time",
@@ -90,7 +77,37 @@ func New(logLevel string) *Logger {
 	// create the logger
 	logger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
 	return &Logger{log: logger}
+}
 
+// NewTest creates a logger that logs only to the console (for testing)
+func NewTest(logLevel string) *Logger {
+	// log level
+	level, ok := LogLevel[logLevel]
+	if !ok {
+		level = zap.DebugLevel
+	}
+
+	// configure encoder
+	encoderConfig := zapcore.EncoderConfig{
+		TimeKey:        "time",
+		LevelKey:       "level",
+		NameKey:        "logger",
+		MessageKey:     "topic",
+		StacktraceKey:  "stacktrace",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.CapitalColorLevelEncoder,
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
+		EncodeDuration: zapcore.SecondsDurationEncoder,
+		EncodeCaller:   zapcore.ShortCallerEncoder,
+	}
+
+	// console encoder and core only
+	consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
+	consoleCore := zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), level)
+
+	// build logger
+	logger := zap.New(consoleCore, zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
+	return &Logger{log: logger}
 }
 
 // logger Debug log
