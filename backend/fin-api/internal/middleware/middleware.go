@@ -1,9 +1,10 @@
 package middleware
 
 import (
-	"encoding/base64"
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/Uttamnath64/arvo-fin/app/responses"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
@@ -37,31 +38,11 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 		// remove bearer
 		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
 
-		// conver key
-		decodedAccessPublicKey, err := base64.StdEncoding.DecodeString(m.container.Env.Auth.AccessTokenPublicKey)
-		if err != nil {
-			m.container.Logger.Error("api-middleware-DecodeString", err.Error())
-			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
-				Status:  false,
-				Message: "Could not decode key: " + err.Error(),
-			})
-			ctx.Abort()
-			return
-		}
-
-		AccessPublicKey, err := jwt.ParseRSAPublicKeyFromPEM(decodedAccessPublicKey)
-		if err != nil {
-			m.container.Logger.Error("api-middleware-ParseRSAPublicKeyFromPEM", err.Error())
-			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
-				Status:  false,
-				Message: "Could not decode key: " + err.Error(),
-			})
-			ctx.Abort()
-			return
-		}
-
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return AccessPublicKey, nil
+			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return m.container.Env.Auth.AccessPublicKey, nil
 		})
 
 		if err != nil || !token.Valid {
@@ -80,6 +61,17 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
 				Message: "Invalid token claims format!",
+			})
+			ctx.Abort()
+			return
+		}
+
+		// ✅ Check token expiration manually
+		exp, ok := claims["exp"].(float64)
+		if !ok || int64(exp) < time.Now().Unix() {
+			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Access token expired!",
 			})
 			ctx.Abort()
 			return

@@ -54,6 +54,13 @@ func (a *Application) Initialize() bool {
 	// set logger
 	log := logger.New(env.Server.Environment)
 
+	// Load access and refresh keys
+	err = config.LoadAccessAndRefreshKeys(&env)
+	if err != nil {
+		log.Error("api-application-accessAndRefreshKeys", err.Error())
+		return false
+	}
+
 	// load config DB
 	err = config.LoadConfig(env, &con)
 	if err != nil {

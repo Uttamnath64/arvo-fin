@@ -1,6 +1,7 @@
 package config
 
 import (
+	"crypto/rsa"
 	"time"
 
 	"github.com/spf13/viper"
@@ -29,10 +30,14 @@ type AppEnv struct {
 	}
 
 	Auth struct {
-		AccessTokenPrivateKey  string        `mapstructure:"ACCESS_TOKEN_PRIVATE_KEY"`
-		AccessTokenPublicKey   string        `mapstructure:"ACCESS_TOKEN_PUBLIC_KEY"`
-		RefreshTokenPrivateKey string        `mapstructure:"REFRESH_TOKEN_PRIVATE_KEY"`
-		RefreshTokenPublicKey  string        `mapstructure:"REFRESH_TOKEN_PUBLIC_KEY"`
+		AccessTokenPublicKey   string `mapstructure:"ACCESS_TOKEN_PUBLIC_KEY"`
+		AccessTokenPrivateKey  string `mapstructure:"ACCESS_TOKEN_PRIVATE_KEY"`
+		RefreshTokenPublicKey  string `mapstructure:"REFRESH_TOKEN_PUBLIC_KEY"`
+		RefreshTokenPrivateKey string `mapstructure:"REFRESH_TOKEN_PRIVATE_KEY"`
+		AccessPublicKey        *rsa.PublicKey
+		AccessPrivateKey       *rsa.PrivateKey
+		RefreshPublicKey       *rsa.PublicKey
+		RefreshPrivateKey      *rsa.PrivateKey
 		AccessTokenExpired     time.Duration `mapstructure:"ACCESS_TOKEN_EXPIRED"`
 		RefreshTokenExpired    time.Duration `mapstructure:"REFRESH_TOKEN_EXPIRED"`
 	}
