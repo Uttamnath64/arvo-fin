@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"encoding/base64"
 	"errors"
+	"fmt"
 	"time"
 
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
@@ -33,29 +33,8 @@ func New(container *storage.Container, authRepo repository.AuthRepository) *Auth
 
 func (auth *Auth) GenerateToken(userId uint, userType commonType.UserType, deviceInfo, ipAddress string) (string, string, error) {
 
-	var accessExpiresAt = time.Now().Add(auth.container.Env.Auth.AccessTokenExpired * time.Hour).Unix()
-	var refreshExpiresAt = time.Now().Add(auth.container.Env.Auth.RefreshTokenExpired * time.Hour).Unix()
-
-	// AccessPrivateKey
-	decodedAccessPrivateKey, err := base64.StdEncoding.DecodeString(auth.container.Env.Auth.AccessTokenPrivateKey)
-	if err != nil {
-		return "", "", errors.New("Could not decode key: " + err.Error())
-	}
-	AccessPrivateKey, err := jwt.ParseRSAPrivateKeyFromPEM(decodedAccessPrivateKey)
-	if err != nil {
-		return "", "", errors.New("Could not parse key: " + err.Error())
-	}
-
-	// RefreshPrivateKey
-	decodedRefreshPrivateKey, err := base64.StdEncoding.DecodeString(auth.container.Env.Auth.RefreshTokenPrivateKey)
-	if err != nil {
-		return "", "", errors.New("Could not decode key: " + err.Error())
-	}
-	RefreshPrivateKey, err := jwt.ParseRSAPrivateKeyFromPEM(decodedRefreshPrivateKey)
-
-	if err != nil {
-		return "", "", errors.New("Could not parse key: " + err.Error())
-	}
+	var accessExpiresAt = time.Now().Add(auth.container.Env.Auth.AccessTokenExpired).Unix()
+	var refreshExpiresAt = time.Now().Add(auth.container.Env.Auth.RefreshTokenExpired).Unix()
 
 	// create settion
 	session := models.Session{
@@ -77,7 +56,7 @@ func (auth *Auth) GenerateToken(userId uint, userType commonType.UserType, devic
 		},
 	})
 
-	accessToken, err := accessTokenJWT.SignedString(AccessPrivateKey)
+	accessToken, err := accessTokenJWT.SignedString(auth.container.Env.Auth.AccessPrivateKey)
 	if err != nil {
 		return "", "", err
 	}
@@ -91,7 +70,7 @@ func (auth *Auth) GenerateToken(userId uint, userType commonType.UserType, devic
 		},
 	})
 
-	refreshToken, err := refreshTokenJWT.SignedString(RefreshPrivateKey)
+	refreshToken, err := refreshTokenJWT.SignedString(auth.container.Env.Auth.RefreshPrivateKey)
 	if err != nil {
 		return "", "", err
 	}
@@ -105,32 +84,23 @@ func (auth *Auth) GenerateToken(userId uint, userType commonType.UserType, devic
 
 func (auth *Auth) VerifyRefreshToken(refreshToken string) (interface{}, error) {
 
-	decodedRefreshPublicKey, err := base64.StdEncoding.DecodeString(auth.container.Env.Auth.RefreshTokenPublicKey)
-	if err != nil {
-		auth.container.Logger.Error("auth.service.GetToken-VerifyRefreshToken", err.Error())
-		return nil, errors.New("Refresh token is invalid!")
-	}
-
-	RefreshPublicKey, err := jwt.ParseRSAPublicKeyFromPEM(decodedRefreshPublicKey)
-	if err != nil {
-		auth.container.Logger.Error("auth.service.GetToken-VerifyRefreshToken", err.Error())
-		return "", errors.New("Refresh token is invalid!")
-	}
-
 	token, err := jwt.ParseWithClaims(
 		refreshToken,
 		&AuthClaim{},
 		func(t *jwt.Token) (interface{}, error) {
-			return RefreshPublicKey, nil
+			if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+				return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
+			}
+			return auth.container.Env.Auth.RefreshPublicKey, nil
 		},
 	)
-	if err != nil {
+	if err != nil || !token.Valid {
 		return nil, errors.New("Refresh token is invalid!")
 	}
 
 	claims, ok := token.Claims.(*AuthClaim)
-	if !ok {
-		return nil, errors.New("Refresh token is invalid!")
+	if !ok || claims.SessionID == 0 {
+		return nil, errors.New("Invalid refresh token claims!")
 	}
 
 	if err := auth.isValidRefreshToken(claims.SessionID, claims.UserType, refreshToken); err != nil {
