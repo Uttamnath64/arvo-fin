@@ -27,5 +27,11 @@ func getTestContainer() (*storage.Container, bool) {
 	// set logger
 	log := logger.NewTest(env.Server.Environment)
 
+	err = config.LoadAccessAndRefreshKeys(&env)
+	if err != nil {
+		log.Error("api-test-application-accessAndRefreshKeys", err.Error())
+		return nil, false
+	}
+
 	return storage.NewContainer(ctx, &con, log, redis, &env), true
 }
