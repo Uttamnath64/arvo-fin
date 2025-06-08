@@ -28,8 +28,8 @@ func RunMigrations(container *storage.Container) error {
 		Func SeedFunc
 	}{
 		{"Currencies", currencies},
-		{"Admins", admins},
 		{"Avatars", avatars},
+		{"Admins", admins},
 		{"Categories", categories},
 	}
 	for _, seed := range seeds {

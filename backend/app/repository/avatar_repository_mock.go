@@ -27,10 +27,9 @@ func (repo *TestAvatar) GetAvatar(id uint, avatar *models.Avatar) error {
 				CreatedAt: time.Now().Add(-2 * time.Hour),
 				UpdatedAt: time.Now(),
 			},
-			Name:    "Default Avatar",
-			Icon:    "🧠",
-			Type:    commonType.AvatarTypeUser,
-			AdminId: 1,
+			Name: "Default Avatar",
+			Icon: "🧠",
+			Type: commonType.AvatarTypeUser,
 		}
 		return nil
 	}
@@ -45,10 +44,9 @@ func (repo *TestAvatar) GetAvatarByType(id uint, avatarType commonType.AvatarTyp
 				CreatedAt: time.Now().Add(-2 * time.Hour),
 				UpdatedAt: time.Now(),
 			},
-			Name:    "Default Avatar",
-			Icon:    "🧠",
-			Type:    avatarType,
-			AdminId: 1,
+			Name: "Default Avatar",
+			Icon: "🧠",
+			Type: avatarType,
 		}
 		return nil
 	}

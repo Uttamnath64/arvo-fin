@@ -32,7 +32,7 @@ func (repo *Portfolio) GetList(userId uint, userType commonType.UserType) (*[]re
 	if userType == commonType.UserTypeUser {
 		query = query.Where("p.user_id = ? ", userId)
 	}
-	err := query.Select("p.id, p.name, a.id as avatar_id, a.url").
+	err := query.Select("p.id, p.name, a.id as avatar_id, a.icon as avatar_icon").
 		Scan(&portfolios).Error
 
 	if err != nil {
@@ -55,7 +55,7 @@ func (repo *Portfolio) Get(id, userId uint, userType commonType.UserType) (*resp
 	if userType == commonType.UserTypeUser {
 		query = query.Where("p.user_id = ?", userId)
 	}
-	err := query.Select("p.id, p.name, a.id as avatar_id, a.url").
+	err := query.Select("p.id, p.name, a.id as avatar_id, a.icon as avatar_icon").
 		Scan(&portfolios).Error
 
 	if err != nil {
