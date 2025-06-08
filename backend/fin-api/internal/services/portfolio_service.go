@@ -46,7 +46,7 @@ func (service *Portfolio) Add(payload requests.PortfolioRequest, userId uint) re
 		UserId:   userId,
 	}
 
-	if err := service.avatarRepo.GetAvatarByType(payload.AvatarId, commonType.PortfolioAvatar, &models.Avatar{}); err != nil {
+	if err := service.avatarRepo.GetAvatarByType(payload.AvatarId, commonType.AvatarTypePortfolio, &models.Avatar{}); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return responses.ServiceResponse{
 				StatusCode: common.StatusValidationError,
@@ -82,7 +82,7 @@ func (service *Portfolio) Add(payload requests.PortfolioRequest, userId uint) re
 
 func (service *Portfolio) Update(id, userId uint, payload requests.PortfolioRequest) responses.ServiceResponse {
 
-	if err := service.avatarRepo.GetAvatarByType(payload.AvatarId, commonType.PortfolioAvatar, &models.Avatar{}); err != nil {
+	if err := service.avatarRepo.GetAvatarByType(payload.AvatarId, commonType.AvatarTypePortfolio, &models.Avatar{}); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return responses.ServiceResponse{
 				StatusCode: common.StatusValidationError,

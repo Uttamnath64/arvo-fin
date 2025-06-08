@@ -1,10 +1,11 @@
 package commonType
 
+// Register, ResetPassword
 type OtpType int
 
 const (
-	Register OtpType = iota + 1
-	ResetPassword
+	OtpTypeRegister OtpType = iota + 1
+	OtpTypeResetPassword
 )
 
 func (t OtpType) String() string {
@@ -12,5 +13,5 @@ func (t OtpType) String() string {
 }
 
 func (t OtpType) IsValid() bool {
-	return t >= Register && t <= ResetPassword
+	return t >= OtpTypeRegister && t <= OtpTypeResetPassword
 }

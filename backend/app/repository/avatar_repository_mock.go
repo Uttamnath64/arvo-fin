@@ -28,8 +28,8 @@ func (repo *TestAvatar) GetAvatar(id uint, avatar *models.Avatar) error {
 				UpdatedAt: time.Now(),
 			},
 			Name:    "Default Avatar",
-			Url:     "https://example.com/avatars/default.png",
-			Type:    commonType.UserAvatar,
+			Icon:    "🧠",
+			Type:    commonType.AvatarTypeUser,
 			AdminId: 1,
 		}
 		return nil
@@ -46,7 +46,7 @@ func (repo *TestAvatar) GetAvatarByType(id uint, avatarType commonType.AvatarTyp
 				UpdatedAt: time.Now(),
 			},
 			Name:    "Default Avatar",
-			Url:     "https://example.com/avatars/default.png",
+			Icon:    "🧠",
 			Type:    avatarType,
 			AdminId: 1,
 		}

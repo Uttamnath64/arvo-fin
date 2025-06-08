@@ -84,7 +84,7 @@ func (handler *Portfolio) Add(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	if userInfo.userType != commonType.User {
+	if userInfo.userType != commonType.UserTypeUser {
 		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "Only users can add portfolios!",
@@ -122,7 +122,7 @@ func (handler *Portfolio) Update(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	if userInfo.userType != commonType.User {
+	if userInfo.userType != commonType.UserTypeUser {
 		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "You are not allowed to update this portfolio!",
@@ -154,7 +154,7 @@ func (handler *Portfolio) Delete(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	if userInfo.userType != commonType.User {
+	if userInfo.userType != commonType.UserTypeUser {
 		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "You are not authorized to delete a portfolio!",

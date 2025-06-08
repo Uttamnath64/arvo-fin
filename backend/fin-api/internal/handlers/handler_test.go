@@ -188,7 +188,7 @@ func TestGetUserInfo(t *testing.T) {
 			userId:     -1,
 			userType:   1,
 			exUserId:   uint(0),
-			exUserType: commonType.User,
+			exUserType: commonType.UserTypeUser,
 			isValid:    false,
 		},
 		{
@@ -196,7 +196,7 @@ func TestGetUserInfo(t *testing.T) {
 			userId:     uint(10),
 			userType:   10,
 			exUserId:   uint(10),
-			exUserType: commonType.Admin,
+			exUserType: commonType.UserTypeAdmin,
 			isValid:    false,
 		},
 		{
@@ -204,7 +204,7 @@ func TestGetUserInfo(t *testing.T) {
 			userId:     uint(10),
 			userType:   1,
 			exUserId:   uint(10),
-			exUserType: commonType.User,
+			exUserType: commonType.UserTypeUser,
 			isValid:    true,
 		},
 	}

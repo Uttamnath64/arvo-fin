@@ -71,9 +71,9 @@ func (service *Auth) Login(payload requests.LoginRequest, deviceInfo string, ip 
 	}
 
 	// Create Token
-	accessToken, refreshToken, err := service.authHelper.GenerateToken(user.ID, commonType.User, deviceInfo, ip)
+	accessToken, refreshToken, err := service.authHelper.GenerateToken(user.ID, commonType.UserTypeUser, deviceInfo, ip)
 	if err != nil {
-		service.container.Logger.Error("auth.service.login-generateToken", err.Error(), user.ID, commonType.User, ip)
+		service.container.Logger.Error("auth.service.login-generateToken", err.Error(), user.ID, commonType.UserTypeUser, ip)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
@@ -132,7 +132,7 @@ func (service *Auth) Register(payload requests.RegisterRequest, deviceInfo strin
 		}
 	}
 
-	if err := service.avatarRepo.GetAvatarByType(payload.AvatarId, commonType.UserAvatar, &models.Avatar{}); err != nil {
+	if err := service.avatarRepo.GetAvatarByType(payload.AvatarId, commonType.AvatarTypeUser, &models.Avatar{}); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return responses.ServiceResponse{
 				StatusCode: common.StatusValidationError,
@@ -151,7 +151,7 @@ func (service *Auth) Register(payload requests.RegisterRequest, deviceInfo strin
 	}
 
 	// Verify OTP
-	err = service.otpService.VerifyOTP(payload.Email, commonType.Register, payload.OTP)
+	err = service.otpService.VerifyOTP(payload.Email, commonType.OtpTypeRegister, payload.OTP)
 	if err != nil {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
@@ -188,9 +188,9 @@ func (service *Auth) Register(payload requests.RegisterRequest, deviceInfo strin
 	}
 
 	// Create Token
-	accessToken, refreshToken, err := service.authHelper.GenerateToken(userId, commonType.User, deviceInfo, ip)
+	accessToken, refreshToken, err := service.authHelper.GenerateToken(userId, commonType.UserTypeUser, deviceInfo, ip)
 	if err != nil {
-		service.container.Logger.Error("auth.service.register-generateToken", err.Error(), userId, commonType.User, ip)
+		service.container.Logger.Error("auth.service.register-generateToken", err.Error(), userId, commonType.UserTypeUser, ip)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
@@ -199,7 +199,7 @@ func (service *Auth) Register(payload requests.RegisterRequest, deviceInfo strin
 	}
 
 	// Response
-	service.container.Logger.Info("auth.service.register", "User registered successfully!", userId, commonType.User, ip)
+	service.container.Logger.Info("auth.service.register", "User registered successfully!", userId, commonType.UserTypeUser, ip)
 	return responses.ServiceResponse{
 		StatusCode: common.StatusSuccess,
 		Message:    "User registered successfully!",
@@ -213,7 +213,7 @@ func (service *Auth) Register(payload requests.RegisterRequest, deviceInfo strin
 func (service *Auth) SentOTP(payload requests.SentOTPRequest) responses.ServiceResponse {
 
 	// Check email
-	if payload.Type != commonType.Register {
+	if payload.Type != commonType.OtpTypeRegister {
 		isExists, err := service.userRepo.EmailExists(payload.Email)
 		if err != nil {
 			return responses.ServiceResponse{
@@ -293,7 +293,7 @@ func (service *Auth) ResetPassword(payload requests.ResetPasswordRequest, device
 	}
 
 	// Verify OTP
-	err = service.otpService.VerifyOTP(payload.Email, commonType.ResetPassword, payload.OTP)
+	err = service.otpService.VerifyOTP(payload.Email, commonType.OtpTypeResetPassword, payload.OTP)
 	if err != nil {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
@@ -325,9 +325,9 @@ func (service *Auth) ResetPassword(payload requests.ResetPasswordRequest, device
 	}
 
 	// Create Token
-	accessToken, refreshToken, err := service.authHelper.GenerateToken(user.ID, commonType.User, deviceInfo, ip)
+	accessToken, refreshToken, err := service.authHelper.GenerateToken(user.ID, commonType.UserTypeUser, deviceInfo, ip)
 	if err != nil {
-		service.container.Logger.Error("auth.service.resetPassword-generateToken", err.Error(), user.ID, commonType.User, ip)
+		service.container.Logger.Error("auth.service.resetPassword-generateToken", err.Error(), user.ID, commonType.UserTypeUser, ip)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",
@@ -380,9 +380,9 @@ func (service *Auth) GetToken(payload requests.TokenRequest, deviceInfo string, 
 	service.authRepo.DeleteSession(claims.SessionID)
 
 	// Create Token
-	accessToken, refreshToken, err := service.authHelper.GenerateToken(user.ID, commonType.User, deviceInfo, ip)
+	accessToken, refreshToken, err := service.authHelper.GenerateToken(user.ID, commonType.UserTypeUser, deviceInfo, ip)
 	if err != nil {
-		service.container.Logger.Error("auth.service.getToken-generateToken", err.Error(), user.ID, commonType.User, ip)
+		service.container.Logger.Error("auth.service.getToken-generateToken", err.Error(), user.ID, commonType.UserTypeUser, ip)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later.",

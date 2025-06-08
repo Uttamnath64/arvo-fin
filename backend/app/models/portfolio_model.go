@@ -4,9 +4,9 @@ import "gorm.io/gorm"
 
 type Portfolio struct {
 	gorm.Model
-	Name                 string                 `gorm:"column:name;not null"`
-	UserId               uint                   `gorm:"column:user_id"`
-	AvatarId             uint                   `gorm:"column:avatar_id"`
+	UserId               uint
+	AvatarId             uint
+	Name                 string                 `gorm:"not null"`
 	Account              []Account              `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`
 	Budget               []Budget               `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`
 	Transaction          []Transaction          `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`

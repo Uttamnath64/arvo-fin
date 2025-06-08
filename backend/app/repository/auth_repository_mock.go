@@ -20,7 +20,7 @@ func NewTestAuth(container *storage.Container) *TestAuth {
 }
 
 func (repo *TestAuth) GetSessionByUser(userId uint, userType commonType.UserType, signedToken string) (*models.Session, error) {
-	if userId == 1 && userType == commonType.User {
+	if userId == 1 && userType == commonType.UserTypeUser {
 		session := models.Session{
 			Model: gorm.Model{
 				ID:        1,
@@ -28,7 +28,7 @@ func (repo *TestAuth) GetSessionByUser(userId uint, userType commonType.UserType
 				UpdatedAt: time.Now(),
 			},
 			UserID:       101,
-			UserType:     commonType.User,
+			UserType:     commonType.UserTypeUser,
 			DeviceInfo:   "Chrome on Windows 10",
 			IPAddress:    "192.168.1.100",
 			RefreshToken: "mock-refresh-token-abc123",
@@ -40,7 +40,7 @@ func (repo *TestAuth) GetSessionByUser(userId uint, userType commonType.UserType
 }
 
 func (repo *TestAuth) GetSessionByRefreshToken(refreshToken string, userType commonType.UserType) (*models.Session, error) {
-	if refreshToken != "" && userType == commonType.User {
+	if refreshToken != "" && userType == commonType.UserTypeUser {
 		session := models.Session{
 			Model: gorm.Model{
 				ID:        1,
@@ -48,7 +48,7 @@ func (repo *TestAuth) GetSessionByRefreshToken(refreshToken string, userType com
 				UpdatedAt: time.Now(),
 			},
 			UserID:       101,
-			UserType:     commonType.User,
+			UserType:     commonType.UserTypeUser,
 			DeviceInfo:   "Chrome on Windows 10",
 			IPAddress:    "192.168.1.100",
 			RefreshToken: "mock-refresh-token-abc123",
