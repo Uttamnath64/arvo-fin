@@ -16,7 +16,7 @@ type User struct {
 	Portfolio          []Portfolio        `gorm:"foreignKey:UserId;constraint:OnDelete:CASCADE;"`
 	TransactionAudit   []TransactionAudit `gorm:"foreignKey:UserId;constraint:OnDelete:CASCADE;"`
 	Account            []Account          `gorm:"foreignKey:UserId;constraint:OnDelete:CASCADE;"`
-	Category           []Category         `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE;"`
+	Category           []Category         `gorm:"-"`
 }
 
 func (m *User) GetName() string {

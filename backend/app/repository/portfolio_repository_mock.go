@@ -23,16 +23,16 @@ func (repo *TestPortfolio) GetList(userId uint, userType commonType.UserType) (*
 	if userId == 1 && userType == commonType.UserTypeUser {
 		portfolios := []responses.PortfolioResponse{
 			{
-				Id:        1,
-				Name:      "Retirement Fund",
-				AvatarID:  101,
-				AvatarURL: "https://example.com/avatars/retirement.png",
+				Id:         1,
+				Name:       "Retirement Fund",
+				AvatarID:   101,
+				AvatarIcon: "🔐",
 			},
 			{
-				Id:        2,
-				Name:      "Crypto Portfolio",
-				AvatarID:  102,
-				AvatarURL: "https://example.com/avatars/crypto.png",
+				Id:         2,
+				Name:       "Crypto Portfolio",
+				AvatarID:   102,
+				AvatarIcon: "🟡",
 			},
 		}
 		return &portfolios, nil
@@ -43,10 +43,10 @@ func (repo *TestPortfolio) GetList(userId uint, userType commonType.UserType) (*
 func (repo *TestPortfolio) Get(id, userId uint, userType commonType.UserType) (*responses.PortfolioResponse, error) {
 	if id == 1 && userId == 1 && userType == commonType.UserTypeUser {
 		portfolios := responses.PortfolioResponse{
-			Id:        1,
-			Name:      "Retirement Fund",
-			AvatarID:  101,
-			AvatarURL: "https://example.com/avatars/retirement.png",
+			Id:         1,
+			Name:       "Retirement Fund",
+			AvatarID:   101,
+			AvatarIcon: "🔐",
 		}
 		return &portfolios, nil
 	}
