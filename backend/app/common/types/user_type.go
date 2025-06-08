@@ -1,10 +1,11 @@
 package commonType
 
+// User, Admin
 type UserType int
 
 const (
-	User UserType = iota + 1
-	Admin
+	UserTypeUser UserType = iota + 1
+	UserTypeAdmin
 )
 
 func (t UserType) String() string {
@@ -12,5 +13,5 @@ func (t UserType) String() string {
 }
 
 func (t UserType) IsValid() bool {
-	return t >= User && t <= Admin
+	return t >= UserTypeUser && t <= UserTypeAdmin
 }

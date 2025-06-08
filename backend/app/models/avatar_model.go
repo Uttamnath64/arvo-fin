@@ -7,10 +7,10 @@ import (
 
 type Avatar struct {
 	gorm.Model
-	Name    string                `gorm:"column:name;not null"`
-	Url     string                `gorm:"column:url;type:varchar(500)"`
-	Type    commonType.AvatarType `gorm:"column:type;not null"`
-	AdminId uint                  `gorm:"column:admin_id"`
+	AdminId uint
+	Name    string                `gorm:"not null"`
+	Icon    string                `gorm:"type:varchar(500)"`
+	Type    commonType.AvatarType `gorm:"not null"`
 }
 
 func (m *Avatar) GetName() string {

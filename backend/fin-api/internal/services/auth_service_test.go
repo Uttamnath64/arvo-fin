@@ -128,7 +128,7 @@ func TestSentOTP(t *testing.T) {
 			name: "Send OTP",
 			payload: requests.SentOTPRequest{
 				Email: "uttam@example.com",
-				Type:  commonType.Register,
+				Type:  commonType.OtpTypeRegister,
 			},
 			expectError: false,
 		},

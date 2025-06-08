@@ -1,18 +1,19 @@
 package commonType
 
+// Default, User, Category, Portfolio
 type AvatarType int
 
 const (
-	DefaultAvatar AvatarType = iota + 1
-	UserAvatar
-	CategoryAvatar
-	PortfolioAvatar
+	AvatarTypeDefault AvatarType = iota + 1
+	AvatarTypeUser
+	AvatarTypeCategory
+	AvatarTypePortfolio
 )
 
 func (t AvatarType) String() string {
-	return [...]string{"DefaultAvatar", "UserAvatar", "CategoryAvatar", "PortfolioAvatar"}[t]
+	return [...]string{"Default", "User", "Category", "Portfolio"}[t]
 }
 
 func (t AvatarType) IsValid() bool {
-	return t >= DefaultAvatar && t <= PortfolioAvatar
+	return t >= AvatarTypeDefault && t <= AvatarTypePortfolio
 }

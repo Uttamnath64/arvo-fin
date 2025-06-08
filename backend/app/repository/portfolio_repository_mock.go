@@ -20,7 +20,7 @@ func NewTestPortfolio(container *storage.Container) *TestPortfolio {
 }
 
 func (repo *TestPortfolio) GetList(userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error) {
-	if userId == 1 && userType == commonType.User {
+	if userId == 1 && userType == commonType.UserTypeUser {
 		portfolios := []responses.PortfolioResponse{
 			{
 				Id:        1,
@@ -41,7 +41,7 @@ func (repo *TestPortfolio) GetList(userId uint, userType commonType.UserType) (*
 }
 
 func (repo *TestPortfolio) Get(id, userId uint, userType commonType.UserType) (*responses.PortfolioResponse, error) {
-	if id == 1 && userId == 1 && userType == commonType.User {
+	if id == 1 && userId == 1 && userType == commonType.UserTypeUser {
 		portfolios := responses.PortfolioResponse{
 			Id:        1,
 			Name:      "Retirement Fund",

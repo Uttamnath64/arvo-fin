@@ -39,13 +39,13 @@ func TestGetList(t *testing.T) {
 		{
 			name:        "Valid",
 			userId:      1,
-			userType:    commonType.User,
+			userType:    commonType.UserTypeUser,
 			expectError: false,
 		},
 		{
 			name:        "Not Found",
 			userId:      1,
-			userType:    commonType.Admin,
+			userType:    commonType.UserTypeAdmin,
 			expectError: true,
 		},
 	}
@@ -76,14 +76,14 @@ func TestGet(t *testing.T) {
 			name:        "Valid",
 			Id:          1,
 			userId:      1,
-			userType:    commonType.User,
+			userType:    commonType.UserTypeUser,
 			expectError: false,
 		},
 		{
 			name:        "Not Found",
 			Id:          2,
 			userId:      1,
-			userType:    commonType.User,
+			userType:    commonType.UserTypeUser,
 			expectError: true,
 		},
 	}

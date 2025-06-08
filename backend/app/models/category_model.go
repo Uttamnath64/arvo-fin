@@ -1,12 +1,20 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
+	"gorm.io/gorm"
+)
 
 type Category struct {
 	gorm.Model
-	UserID      *uint  `gorm:"column:user_id;"`
-	PortfolioId uint   `gorm:"column:portfolio_id;not null"`
-	Name        string `gorm:"column:name;type:varchar(100);not null"`
-	Type        string `gorm:"column:type;type:enum('income', 'expense');not null"`
-	AdminId     *uint  `gorm:"column:admin_id"`
+	SourceID     uint
+	SourceType   commonType.UserType
+	PortfolioId  *uint
+	CopiedFromID *uint
+	Name         string                     `gorm:"type:varchar(100);not null"`
+	Type         commonType.TransactionType `gorm:"not null"`
+}
+
+func (m *Category) GetName() string {
+	return "categories"
 }

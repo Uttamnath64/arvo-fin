@@ -1,5 +1,6 @@
 package commonType
 
+// "None 10", "One 10.9", "Two 10.98"
 type DecimalPlaces int
 
 const (
@@ -24,6 +25,7 @@ func (t DecimalPlaces) IsValid() bool {
 	return t >= DecimalPlacesNone && t <= DecimalPlacesTwo
 }
 
+// "2,10,343.20", "2.10.343,20", "2 10 343,20", "2 10 343.20"
 type NumberFormat int
 
 const (
