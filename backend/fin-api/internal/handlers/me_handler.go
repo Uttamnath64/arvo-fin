@@ -50,11 +50,11 @@ func (handler *Me) Get(ctx *gin.Context) {
 		return
 	}
 
-	portfolioResponse, _ := serviceResponse.Data.(*responses.MeResponse)
+	response, _ := serviceResponse.Data.(*responses.MeResponse)
 	ctx.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
-		Metadata: portfolioResponse,
+		Metadata: response,
 	})
 }
 
@@ -84,17 +84,17 @@ func (handler *Me) GetSettings(ctx *gin.Context) {
 		return
 	}
 
-	portfolioResponse, _ := serviceResponse.Data.(*responses.MeResponse)
+	response, _ := serviceResponse.Data.(*responses.SettingsResponse)
 	ctx.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
-		Metadata: portfolioResponse,
+		Metadata: response,
 	})
 }
 
 func (handler *Me) Update(ctx *gin.Context) {
 
-	var payload requests.SettingsRequest
+	var payload requests.MeRequest
 	if !bindAndValidateJson(ctx, &payload) {
 		return
 	}

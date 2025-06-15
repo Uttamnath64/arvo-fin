@@ -2,6 +2,7 @@ package services
 
 import (
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
+	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/responses"
 	"github.com/Uttamnath64/arvo-fin/pkg/validater"
 )
@@ -26,4 +27,8 @@ type PortfolioService interface {
 }
 
 type UserService interface {
+	Get(userId uint) responses.ServiceResponse
+	GetSettings(userId uint) responses.ServiceResponse
+	Update(payload requests.MeRequest, userId uint) responses.ServiceResponse
+	UpdateSettings(payload requests.SettingsRequest, userId uint) responses.ServiceResponse
 }
