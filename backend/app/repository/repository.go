@@ -35,4 +35,12 @@ type UserRepository interface {
 	CreateUser(user *models.User) (uint, error)
 	UpdatePasswordByEmail(email, newPassword string) error
 	GetUser(userId uint, user *models.User) error
+	Get(userId uint) (*responses.MeResponse, error)
+	GetSettings(userId uint) (*responses.SettingsResponse, error)
+	Update(userId uint, payload requests.MeRequest) error
+	UpdateSettings(userId uint, payload requests.SettingsRequest) error
+}
+
+type CurrencyRepository interface {
+	CodeExists(code string) (bool, error)
 }

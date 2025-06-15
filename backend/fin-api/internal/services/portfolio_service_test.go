@@ -24,7 +24,7 @@ func NewTestPortfolio() (*Portfolio, bool) {
 	}, true
 }
 
-func TestGetList(t *testing.T) {
+func TestGetList_Portfolio(t *testing.T) {
 	portfolioService, ok := NewTestPortfolio()
 	if !ok {
 		return
@@ -59,7 +59,7 @@ func TestGetList(t *testing.T) {
 	}
 }
 
-func TestGet(t *testing.T) {
+func TestGet_Portfolio(t *testing.T) {
 	portfolioService, ok := NewTestPortfolio()
 	if !ok {
 		return
@@ -97,7 +97,7 @@ func TestGet(t *testing.T) {
 	}
 }
 
-func TestAdd(t *testing.T) {
+func TestAdd_Portfolio(t *testing.T) {
 	portfolioService, ok := NewTestPortfolio()
 	if !ok {
 		return
@@ -139,7 +139,7 @@ func TestAdd(t *testing.T) {
 	}
 }
 
-func TestUpdate(t *testing.T) {
+func TestUpdate_Portfolio(t *testing.T) {
 	portfolioService, ok := NewTestPortfolio()
 	if !ok {
 		return
@@ -183,7 +183,7 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
+func TestDelete_Portfolio(t *testing.T) {
 	portfolioService, ok := NewTestPortfolio()
 	if !ok {
 		return

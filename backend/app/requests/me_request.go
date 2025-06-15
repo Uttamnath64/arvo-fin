@@ -30,8 +30,7 @@ type SettingsRequest struct {
 	CurrencyCode       string                   `json:"currency_code" binding:"required"`
 	DecimalPlaces      commonType.DecimalPlaces `json:"decimal_places" binding:"required"`
 	NumberFormat       commonType.NumberFormat  `json:"number_format" binding:"required"`
-	RemindEveryday     bool                     `json:"remind_everyday" binding:"required"`
-	MonthlyReportEmail bool                     `json:"monthly_report_email" binding:"required"`
+	EmailNotifications bool                     `json:"email_notifications" binding:"required"`
 }
 
 func (r SettingsRequest) IsValid() error {

@@ -29,7 +29,7 @@ func NewTestAuth() (*Auth, bool) {
 	}, true
 }
 
-func TestLogin(t *testing.T) {
+func TestLogin_Auth(t *testing.T) {
 	authService, ok := NewTestAuth()
 	if !ok {
 		return
@@ -67,7 +67,7 @@ func TestLogin(t *testing.T) {
 	}
 }
 
-func TestRegister(t *testing.T) {
+func TestRegister_Auth(t *testing.T) {
 	authService, ok := NewTestAuth()
 	if !ok {
 		return
@@ -113,7 +113,7 @@ func TestRegister(t *testing.T) {
 	}
 }
 
-func TestSentOTP(t *testing.T) {
+func TestSentOTP_Auth(t *testing.T) {
 	authService, ok := NewTestAuth()
 	if !ok {
 		return
@@ -143,7 +143,7 @@ func TestSentOTP(t *testing.T) {
 	}
 }
 
-func TestResetPassword(t *testing.T) {
+func TestResetPassword_Auth(t *testing.T) {
 	authService, ok := NewTestAuth()
 	if !ok {
 		return
@@ -201,7 +201,7 @@ func TestResetPassword(t *testing.T) {
 	}
 }
 
-func TestGetToken(t *testing.T) {
+func TestGetToken_Auth(t *testing.T) {
 	authService, ok := NewTestAuth()
 	if !ok {
 		return

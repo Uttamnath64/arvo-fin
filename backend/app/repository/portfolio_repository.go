@@ -28,7 +28,7 @@ func (repo *Portfolio) GetList(userId uint, userType commonType.UserType) (*[]re
 	var portfolios []responses.PortfolioResponse
 
 	query := repo.container.Config.ReadOnlyDB.Table(portfolio.GetName() + " p").
-		Joins("JOIN " + avatar.GetName() + " a ON a.id = p.avatar_id").Where("p.deleted_at IS NULL")
+		Joins("JOIN " + avatar.GetName() + " a ON a.id = p.avatar_id")
 	if userType == commonType.UserTypeUser {
 		query = query.Where("p.user_id = ? ", userId)
 	}
@@ -51,7 +51,7 @@ func (repo *Portfolio) Get(id, userId uint, userType commonType.UserType) (*resp
 	var portfolios responses.PortfolioResponse
 
 	query := repo.container.Config.ReadOnlyDB.Table(portfolio.GetName()+" p").
-		Joins("JOIN "+avatar.GetName()+" a ON a.id = p.avatar_id").Where("p.id = ? AND p.deleted_at IS NULL", id)
+		Joins("JOIN "+avatar.GetName()+" a ON a.id = p.avatar_id").Where("p.id = ?", id)
 	if userType == commonType.UserTypeUser {
 		query = query.Where("p.user_id = ?", userId)
 	}
