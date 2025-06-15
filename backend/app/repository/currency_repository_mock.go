@@ -9,8 +9,8 @@ type TestCurrency struct {
 	container *storage.Container
 }
 
-func NewTestCurrency(container *storage.Container) *Currency {
-	return &Currency{
+func NewTestCurrency(container *storage.Container) *TestCurrency {
+	return &TestCurrency{
 		container: container,
 	}
 }
