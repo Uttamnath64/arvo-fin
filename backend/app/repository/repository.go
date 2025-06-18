@@ -16,14 +16,17 @@ type AuthRepository interface {
 }
 
 type AvatarRepository interface {
-	GetAvatar(id uint, avatar *models.Avatar) error
-	GetAvatarByType(id uint, avatarType commonType.AvatarType, avatar *models.Avatar) error
+	Get(id uint, avatar *models.Avatar) error
+	AvatarByTypeExists(id uint, avatarType commonType.AvatarType) (bool, error)
+	GetAvatarsByType(avatarType commonType.AvatarType) (*[]models.Avatar, error)
+	Create(payload models.Avatar) error
+	Update(id uint, payload requests.AvatarRequest) error
 }
 
 type PortfolioRepository interface {
 	GetList(userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error)
 	Get(id, userId uint, userType commonType.UserType) (*responses.PortfolioResponse, error)
-	Add(portfolio models.Portfolio) error
+	Create(portfolio models.Portfolio) error
 	Update(id, userId uint, payload requests.PortfolioRequest) error
 	Delete(id, userId uint) error
 }

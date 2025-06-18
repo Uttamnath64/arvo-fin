@@ -132,17 +132,17 @@ func (service *Auth) Register(payload requests.RegisterRequest, deviceInfo strin
 		}
 	}
 
-	if err := service.avatarRepo.GetAvatarByType(payload.AvatarId, commonType.AvatarTypeUser, &models.Avatar{}); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return responses.ServiceResponse{
-				StatusCode: common.StatusValidationError,
-				Message:    "Avatar not found!",
-				Error:      err,
-			}
+	// Verify avatar
+	ok, err := service.avatarRepo.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypeUser)
+	if !ok {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Avatar not found!",
+			Error:      errors.New("Avatar not found!"),
 		}
-
-		// Other database errors
-		service.container.Logger.Error("auth.service.add-getAvatarByType", err.Error(), payload)
+	}
+	if err != nil {
+		service.container.Logger.Error("auth.service.register-AvatarByTypeExists", err.Error(), payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later!",

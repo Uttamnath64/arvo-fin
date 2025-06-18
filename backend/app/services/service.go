@@ -32,3 +32,10 @@ type UserService interface {
 	Update(payload requests.MeRequest, userId uint) responses.ServiceResponse
 	UpdateSettings(payload requests.SettingsRequest, userId uint) responses.ServiceResponse
 }
+
+type AvatarService interface {
+	Get(id uint) responses.ServiceResponse
+	GetAvatarsByType(avatarType commonType.AvatarType) responses.ServiceResponse
+	Creatre(payload requests.AvatarRequest) responses.ServiceResponse
+	Update(id uint, payload requests.AvatarRequest) responses.ServiceResponse
+}

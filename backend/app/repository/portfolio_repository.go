@@ -67,7 +67,7 @@ func (repo *Portfolio) Get(id, userId uint, userType commonType.UserType) (*resp
 	return &portfolios, nil
 }
 
-func (repo *Portfolio) Add(portfolio models.Portfolio) error {
+func (repo *Portfolio) Create(portfolio models.Portfolio) error {
 	return repo.container.Config.ReadWriteDB.Create(&portfolio).Error
 }
 
