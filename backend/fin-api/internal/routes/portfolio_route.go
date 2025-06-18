@@ -12,7 +12,7 @@ func (routes *Routes) PortfolioRoutes() {
 	{
 		userGroup.GET("", handler.GetList)
 		userGroup.GET("/:id", handler.Get)
-		userGroup.POST("", handler.Add)
+		userGroup.POST("", handler.Create)
 		userGroup.PUT("/:id", handler.Update)
 		userGroup.DELETE("/:id", handler.Delete)
 	}

@@ -53,7 +53,7 @@ func (repo *TestPortfolio) Get(id, userId uint, userType commonType.UserType) (*
 	return nil, gorm.ErrRecordNotFound
 }
 
-func (repo *TestPortfolio) Add(portfolio models.Portfolio) error {
+func (repo *TestPortfolio) Create(portfolio models.Portfolio) error {
 	return nil
 }
 

@@ -1,9 +1,10 @@
 package services
 
 import (
+	"errors"
+
 	"github.com/Uttamnath64/arvo-fin/app/common"
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
-	"github.com/Uttamnath64/arvo-fin/app/models"
 	"github.com/Uttamnath64/arvo-fin/app/repository"
 	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/responses"
@@ -82,13 +83,20 @@ func (service *User) GetSettings(userId uint) responses.ServiceResponse {
 }
 
 func (service *User) Update(payload requests.MeRequest, userId uint) responses.ServiceResponse {
-	var avatar models.Avatar
 
-	err := service.repoAvatar.GetAvatarByType(payload.AvatarId, commonType.AvatarTypeUser, &avatar)
-	if err != nil {
+	ok, err := service.repoAvatar.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypeUser)
+	if !ok {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
 			Message:    "Avatar not found!",
+			Error:      errors.New("Avatar not found!"),
+		}
+	}
+	if err != nil {
+		service.container.Logger.Error("auth.service.user-Update", err.Error(), payload)
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later!",
 			Error:      err,
 		}
 	}

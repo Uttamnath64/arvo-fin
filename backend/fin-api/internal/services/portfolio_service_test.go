@@ -97,7 +97,7 @@ func TestGet_Portfolio(t *testing.T) {
 	}
 }
 
-func TestAdd_Portfolio(t *testing.T) {
+func TestCreate_Portfolio(t *testing.T) {
 	portfolioService, ok := NewTestPortfolio()
 	if !ok {
 		return
@@ -133,7 +133,7 @@ func TestAdd_Portfolio(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := portfolioService.Add(tt.payload, tt.userId)
+			serviceResponse := portfolioService.Create(tt.payload, tt.userId)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}

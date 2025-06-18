@@ -73,7 +73,7 @@ func (handler *Portfolio) Get(ctx *gin.Context) {
 	})
 }
 
-func (handler *Portfolio) Add(ctx *gin.Context) {
+func (handler *Portfolio) Create(ctx *gin.Context) {
 
 	var payload requests.PortfolioRequest
 	if !bindAndValidateJson(ctx, &payload) {
@@ -91,7 +91,7 @@ func (handler *Portfolio) Add(ctx *gin.Context) {
 		})
 	}
 
-	serviceResponse := handler.portfolioService.Add(payload, userInfo.userId)
+	serviceResponse := handler.portfolioService.Create(payload, userInfo.userId)
 	if isErrorResponse(ctx, serviceResponse) {
 		return
 	}
