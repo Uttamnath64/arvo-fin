@@ -21,6 +21,19 @@ func NewPortfolio(container *storage.Container) *Portfolio {
 	}
 }
 
+func (repo *Portfolio) UserPortfolioExists(id, userId uint) (bool, error) {
+	var count int64
+
+	err := repo.container.Config.ReadOnlyDB.Model(&models.Portfolio{}).
+		Where("id = ? and user_id = ?", id, userId).Count(&count).Error
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
 func (repo *Portfolio) GetList(userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error) {
 	var portfolio models.Portfolio
 	var avatar models.Avatar

@@ -1,17 +1,19 @@
 package commonType
 
 // Bank, Credit, Wallet, Investment
-type AccountType int
+type AccountType int8
 
 const (
 	AccountTypeBank AccountType = iota + 1
-	AccountTypeCredit
+	AccountTypeCash
 	AccountTypeWallet
+	AccountTypeCredit
+	AccountTypeLoan
 	AccountTypeInvestment
 )
 
 func (t AccountType) String() string {
-	return [...]string{"Bank", "Credit", "Wallet", "Investment"}[t]
+	return [...]string{"Bank", "Cash", "Wallet", "Credit", "Loan", "Investment"}[t]
 }
 
 func (t AccountType) IsValid() bool {

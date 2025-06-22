@@ -1,7 +1,7 @@
 package commonType
 
 // "None 10", "One 10.9", "Two 10.98"
-type DecimalPlaces int
+type DecimalPlaces int8
 
 const (
 	DecimalPlacesNone DecimalPlaces = iota + 1
@@ -26,7 +26,7 @@ func (t DecimalPlaces) IsValid() bool {
 }
 
 // "2,10,343.20", "2.10.343,20", "2 10 343,20", "2 10 343.20"
-type NumberFormat int
+type NumberFormat int8
 
 const (
 	NumberFormatFirst NumberFormat = iota + 1

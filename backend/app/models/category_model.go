@@ -2,11 +2,10 @@ package models
 
 import (
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
-	"gorm.io/gorm"
 )
 
 type Category struct {
-	gorm.Model
+	BaseModel
 	SourceID     uint
 	SourceType   commonType.UserType
 	PortfolioId  *uint

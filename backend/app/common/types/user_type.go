@@ -1,7 +1,7 @@
 package commonType
 
 // User, Admin
-type UserType int
+type UserType int8
 
 const (
 	UserTypeUser UserType = iota + 1

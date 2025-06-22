@@ -23,7 +23,7 @@ func NewTestAvatar(container *storage.Container) *TestAvatar {
 func (repo *TestAvatar) Get(id uint, avatar *models.Avatar) error {
 	if id == 1 {
 		*avatar = models.Avatar{
-			Model: gorm.Model{
+			BaseModel: models.BaseModel{
 				ID:        1,
 				CreatedAt: time.Now().Add(-2 * time.Hour),
 				UpdatedAt: time.Now(),
@@ -37,6 +37,14 @@ func (repo *TestAvatar) Get(id uint, avatar *models.Avatar) error {
 	return gorm.ErrRecordNotFound
 }
 
+func (repo *TestAvatar) GetByNameAndType(name string, avatarType commonType.AvatarType) *models.Avatar {
+	return &models.Avatar{
+		Name: name,
+		Type: avatarType,
+		Icon: "T",
+	}
+}
+
 func (repo *TestAvatar) AvatarByTypeExists(id uint, avatarType commonType.AvatarType) (bool, error) {
 	if id == 1 {
 		return true, nil
@@ -47,7 +55,7 @@ func (repo *TestAvatar) AvatarByTypeExists(id uint, avatarType commonType.Avatar
 func (repo *TestAvatar) GetAvatarsByType(avatarType commonType.AvatarType) (*[]models.Avatar, error) {
 	responses := []models.Avatar{
 		{
-			Model: gorm.Model{
+			BaseModel: models.BaseModel{
 				ID:        1,
 				CreatedAt: time.Now().Add(-2 * time.Hour),
 				UpdatedAt: time.Now(),
@@ -57,7 +65,7 @@ func (repo *TestAvatar) GetAvatarsByType(avatarType commonType.AvatarType) (*[]m
 			Type: commonType.AvatarTypeUser,
 		},
 		{
-			Model: gorm.Model{
+			BaseModel: models.BaseModel{
 				ID:        1,
 				CreatedAt: time.Now().Add(-2 * time.Hour),
 				UpdatedAt: time.Now(),

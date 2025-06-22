@@ -17,6 +17,7 @@ type AuthRepository interface {
 
 type AvatarRepository interface {
 	Get(id uint, avatar *models.Avatar) error
+	GetByNameAndType(name string, avatarType commonType.AvatarType) *models.Avatar
 	AvatarByTypeExists(id uint, avatarType commonType.AvatarType) (bool, error)
 	GetAvatarsByType(avatarType commonType.AvatarType) (*[]models.Avatar, error)
 	Create(payload models.Avatar) error
@@ -24,6 +25,7 @@ type AvatarRepository interface {
 }
 
 type PortfolioRepository interface {
+	UserPortfolioExists(id, userId uint) (bool, error)
 	GetList(userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error)
 	Get(id, userId uint, userType commonType.UserType) (*responses.PortfolioResponse, error)
 	Create(portfolio models.Portfolio) error
@@ -46,4 +48,12 @@ type UserRepository interface {
 
 type CurrencyRepository interface {
 	CodeExists(code string) (bool, error)
+}
+
+type AccountRepository interface {
+	GetList(portfolioId, userId uint) (*[]models.Account, error)
+	Get(id uint) (*models.Account, error)
+	Create(account models.Account) (uint, error)
+	Update(id, userId uint, payload requests.AccountUpdateRequest) (bool, error)
+	Delete(id, userId uint) (bool, error)
 }

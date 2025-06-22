@@ -19,16 +19,19 @@ func LoadConfig(env AppEnv, con *Config) (err error) {
 	if err != nil {
 		return
 	}
+	con.ReadWriteDB = con.ReadWriteDB.Debug()
 
 	con.ReadOnlyDB, err = connect(env.Database.DSNReadOnly)
 	if err != nil {
 		return
 	}
+	con.ReadOnlyDB = con.ReadOnlyDB.Debug()
 
 	con.LogDB, err = connect(env.Database.DSNLogs)
 	if err != nil {
 		return
 	}
+	con.LogDB = con.LogDB.Debug()
 	return
 }
 

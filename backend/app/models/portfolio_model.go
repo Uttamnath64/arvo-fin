@@ -1,9 +1,7 @@
 package models
 
-import "gorm.io/gorm"
-
 type Portfolio struct {
-	gorm.Model
+	BaseModel
 	UserId               uint
 	AvatarId             uint
 	Name                 string                 `gorm:"not null"`

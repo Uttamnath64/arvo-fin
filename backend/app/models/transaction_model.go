@@ -1,11 +1,7 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
-
 type Transaction struct {
-	gorm.Model
+	BaseModel
 	TransferAccountId *uint
 	AccountId         uint               `gorm:"not null"`
 	CategoryId        uint               `gorm:"not null"`

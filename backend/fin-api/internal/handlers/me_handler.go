@@ -34,7 +34,7 @@ func (handler *Me) Get(ctx *gin.Context) {
 
 	// User is admin then
 	if userInfo.userType == commonType.UserTypeAdmin {
-		id, err := strconv.Atoi(ctx.Param("user_id"))
+		id, err := strconv.Atoi(ctx.Param("userId"))
 		if err != nil || id <= 0 {
 			ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
 				Status:  false,
@@ -68,7 +68,7 @@ func (handler *Me) GetSettings(ctx *gin.Context) {
 
 	// User is admin then
 	if userInfo.userType == commonType.UserTypeAdmin {
-		id, err := strconv.Atoi(ctx.Param("user_id"))
+		id, err := strconv.Atoi(ctx.Param("userId"))
 		if err != nil || id <= 0 {
 			ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
 				Status:  false,

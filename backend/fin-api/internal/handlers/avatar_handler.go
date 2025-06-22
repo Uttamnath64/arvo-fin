@@ -96,6 +96,7 @@ func (handler *Avatar) Create(ctx *gin.Context) {
 			Status:  false,
 			Message: "Only admin can add avatar!",
 		})
+		return
 	}
 
 	serviceResponse := handler.avatarService.Create(payload)
@@ -135,6 +136,7 @@ func (handler *Avatar) Update(ctx *gin.Context) {
 			Status:  false,
 			Message: "Only admin can update avatar!",
 		})
+		return
 	}
 
 	serviceResponse := handler.avatarService.Update(uint(id), payload)

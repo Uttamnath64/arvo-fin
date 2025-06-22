@@ -19,6 +19,13 @@ func NewTestPortfolio(container *storage.Container) *TestPortfolio {
 	}
 }
 
+func (repo *TestPortfolio) UserPortfolioExists(id, userId uint) (bool, error) {
+	if userId == 1 {
+		return true, nil
+	}
+	return false, nil
+}
+
 func (repo *TestPortfolio) GetList(userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error) {
 	if userId == 1 && userType == commonType.UserTypeUser {
 		portfolios := []responses.PortfolioResponse{

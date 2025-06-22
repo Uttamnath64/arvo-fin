@@ -1,9 +1,7 @@
 package models
 
-import "gorm.io/gorm"
-
 type TransactionAudit struct {
-	gorm.Model
+	BaseModel
 	UserId        *uint
 	TransactionId *uint
 	Action        string `gorm:"type:varchar(255);not null"`

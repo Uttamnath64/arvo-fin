@@ -2,11 +2,10 @@ package models
 
 import (
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
-	"gorm.io/gorm"
 )
 
 type Session struct {
-	gorm.Model
+	BaseModel
 	Theme        int
 	UserID       uint                `gorm:"not null"`
 	UserType     commonType.UserType `gorm:"type:VARCHAR(50);not null"`
