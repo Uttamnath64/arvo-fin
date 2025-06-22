@@ -134,19 +134,19 @@ func (service *Auth) Register(payload requests.RegisterRequest, deviceInfo strin
 
 	// Verify avatar
 	ok, err := service.avatarRepo.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypeUser)
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusValidationError,
-			Message:    "Avatar not found!",
-			Error:      errors.New("Avatar not found!"),
-		}
-	}
 	if err != nil {
 		service.container.Logger.Error("auth.service.register-AvatarByTypeExists", err.Error(), payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later!",
 			Error:      err,
+		}
+	}
+	if !ok {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Avatar not found!",
+			Error:      errors.New("Avatar not found!"),
 		}
 	}
 

@@ -85,19 +85,19 @@ func (service *User) GetSettings(userId uint) responses.ServiceResponse {
 func (service *User) Update(payload requests.MeRequest, userId uint) responses.ServiceResponse {
 
 	ok, err := service.repoAvatar.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypeUser)
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Avatar not found!",
-			Error:      errors.New("Avatar not found!"),
-		}
-	}
 	if err != nil {
 		service.container.Logger.Error("auth.service.user-Update", err.Error(), payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later!",
 			Error:      err,
+		}
+	}
+	if !ok {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusNotFound,
+			Message:    "Avatar not found!",
+			Error:      errors.New("Avatar not found!"),
 		}
 	}
 
@@ -129,19 +129,18 @@ func (service *User) Update(payload requests.MeRequest, userId uint) responses.S
 func (service *User) UpdateSettings(payload requests.SettingsRequest, userId uint) responses.ServiceResponse {
 
 	ok, err := service.repoCurrency.CodeExists(payload.CurrencyCode)
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Currency not found!",
-			Error:      err,
-		}
-	}
-
 	if err != nil {
 		service.container.Logger.Error("auth.service.user-UpdateSettings", err.Error(), payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later!",
+			Error:      err,
+		}
+	}
+	if !ok {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusNotFound,
+			Message:    "Currency not found!",
 			Error:      err,
 		}
 	}

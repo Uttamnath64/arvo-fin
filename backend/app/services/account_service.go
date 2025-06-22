@@ -68,7 +68,6 @@ func (service *Account) GetList(portfolioId, userId uint) responses.ServiceRespo
 			Error:      err,
 		}
 	}
-
 	if err != nil {
 		service.container.Logger.Error("account.service.get-list", err.Error(), userId)
 		return responses.ServiceResponse{
@@ -81,7 +80,7 @@ func (service *Account) GetList(portfolioId, userId uint) responses.ServiceRespo
 	// Response
 	return responses.ServiceResponse{
 		StatusCode: common.StatusSuccess,
-		Message:    "Accounts records found!",
+		Message:    "Accounts found!",
 		Data:       response,
 	}
 }
@@ -129,6 +128,14 @@ func (service *Account) AccountTypes() responses.ServiceResponse {
 
 func (service *Account) Create(userId uint, payload requests.AccountRequest) responses.ServiceResponse {
 	ok, err := service.repoPortfolio.UserPortfolioExists(payload.PortfolioId, userId)
+	if err != nil {
+		service.container.Logger.Error("account.service.create", err.Error(), payload)
+		return responses.ServiceResponse{
+			StatusCode: common.StatusServerError,
+			Message:    "Oops! Something went wrong. Please try again later!",
+			Error:      err,
+		}
+	}
 	if !ok {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
@@ -136,6 +143,8 @@ func (service *Account) Create(userId uint, payload requests.AccountRequest) res
 			Error:      errors.New("portfolio not found with this user"),
 		}
 	}
+
+	ok, err = service.repoAvatar.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio)
 	if err != nil {
 		service.container.Logger.Error("account.service.create", err.Error(), payload)
 		return responses.ServiceResponse{
@@ -144,8 +153,6 @@ func (service *Account) Create(userId uint, payload requests.AccountRequest) res
 			Error:      err,
 		}
 	}
-
-	ok, err = service.repoAvatar.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio)
 	if !ok {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
@@ -153,6 +160,8 @@ func (service *Account) Create(userId uint, payload requests.AccountRequest) res
 			Error:      errors.New("avatar not found"),
 		}
 	}
+
+	ok, err = service.repoCurrency.CodeExists(payload.CurrencyCode)
 	if err != nil {
 		service.container.Logger.Error("account.service.create", err.Error(), payload)
 		return responses.ServiceResponse{
@@ -161,21 +170,10 @@ func (service *Account) Create(userId uint, payload requests.AccountRequest) res
 			Error:      err,
 		}
 	}
-
-	ok, err = service.repoCurrency.CodeExists(payload.CurrencyCode)
 	if !ok {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
 			Message:    "Currency not found!",
-			Error:      err,
-		}
-	}
-
-	if err != nil {
-		service.container.Logger.Error("account.service.create", err.Error(), payload)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later!",
 			Error:      err,
 		}
 	}
@@ -211,13 +209,6 @@ func (service *Account) Create(userId uint, payload requests.AccountRequest) res
 func (service *Account) Update(id, userId uint, payload requests.AccountUpdateRequest) responses.ServiceResponse {
 
 	ok, err := service.repoAvatar.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio)
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Avatar not found!",
-			Error:      errors.New("avatar not found"),
-		}
-	}
 	if err != nil {
 		service.container.Logger.Error("account.service.update", err.Error(), payload)
 		return responses.ServiceResponse{
@@ -226,16 +217,15 @@ func (service *Account) Update(id, userId uint, payload requests.AccountUpdateRe
 			Error:      err,
 		}
 	}
-
-	ok, err = service.repoCurrency.CodeExists(payload.CurrencyCode)
 	if !ok {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
-			Message:    "Currency not found!",
-			Error:      err,
+			Message:    "Avatar not found!",
+			Error:      errors.New("avatar not found"),
 		}
 	}
 
+	ok, err = service.repoCurrency.CodeExists(payload.CurrencyCode)
 	if err != nil {
 		service.container.Logger.Error("account.service.update", err.Error(), payload, userId)
 		return responses.ServiceResponse{
@@ -244,20 +234,28 @@ func (service *Account) Update(id, userId uint, payload requests.AccountUpdateRe
 			Error:      err,
 		}
 	}
-	ok, err = service.repoAccount.Update(id, userId, payload)
 	if !ok {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusNotFound,
-			Message:    "Account not updated!",
-			Error:      errors.New("account not updated"),
+			Message:    "Currency not found!",
+			Error:      err,
 		}
 	}
+
+	ok, err = service.repoAccount.Update(id, userId, payload)
 	if err != nil {
 		service.container.Logger.Error("account.service.update", err.Error(), id, userId, payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    err.Error(),
 			Error:      err,
+		}
+	}
+	if !ok {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusNotFound,
+			Message:    "Account not updated!",
+			Error:      errors.New("account not updated"),
 		}
 	}
 
@@ -271,19 +269,19 @@ func (service *Account) Update(id, userId uint, payload requests.AccountUpdateRe
 
 func (service *Account) Delete(id, userId uint) responses.ServiceResponse {
 	ok, err := service.repoAccount.Delete(id, userId)
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Account not deleted!",
-			Error:      errors.New("account not deleted"),
-		}
-	}
 	if err != nil {
 		service.container.Logger.Error("account.service.deleted", err.Error(), id, userId)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    err.Error(),
 			Error:      err,
+		}
+	}
+	if !ok {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusNotFound,
+			Message:    "Account not deleted!",
+			Error:      errors.New("account not deleted"),
 		}
 	}
 

@@ -11,7 +11,11 @@ const (
 )
 
 func (t AvatarType) String() string {
-	return [...]string{"Default", "User", "Category", "Portfolio"}[t]
+	names := [...]string{"Default", "User", "Category", "Portfolio"}
+	if !t.IsValid() {
+		return "Unknown"
+	}
+	return names[t]
 }
 
 func (t AvatarType) IsValid() bool {
