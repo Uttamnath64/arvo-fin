@@ -1,7 +1,7 @@
 package commonType
 
 // Default, User, Category, Portfolio
-type AvatarType int
+type AvatarType int8
 
 const (
 	AvatarTypeDefault AvatarType = iota + 1

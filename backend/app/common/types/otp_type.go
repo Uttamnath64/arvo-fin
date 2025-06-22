@@ -1,7 +1,7 @@
 package commonType
 
 // Register, ResetPassword
-type OtpType int
+type OtpType int8
 
 const (
 	OtpTypeRegister OtpType = iota + 1

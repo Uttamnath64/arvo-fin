@@ -24,7 +24,7 @@ func (repo *TestUser) GetUserByUsernameOrEmail(username string, email string, us
 	if username == "uttam.nath" || email == "uttam@example.com" {
 		now := time.Now()
 		*user = models.User{
-			Model: gorm.Model{
+			BaseModel: models.BaseModel{
 				ID:        1,
 				CreatedAt: now.AddDate(0, -1, 0),
 				UpdatedAt: now,
@@ -64,7 +64,7 @@ func (repo *TestUser) UpdatePasswordByEmail(email, newPassword string) error {
 func (repo *TestUser) GetUser(userId uint, user *models.User) error {
 	now := time.Now()
 	*user = models.User{
-		Model: gorm.Model{
+		BaseModel: models.BaseModel{
 			ID:        1,
 			CreatedAt: now.AddDate(0, -1, 0),
 			UpdatedAt: now,

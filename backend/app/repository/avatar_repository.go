@@ -24,10 +24,16 @@ func (repo *Avatar) Get(id uint, avatar *models.Avatar) error {
 	return repo.container.Config.ReadOnlyDB.Where("id = ?", id).First(avatar).Error
 }
 
+func (repo *Avatar) GetByNameAndType(name string, avatarType commonType.AvatarType) *models.Avatar {
+	var avatar models.Avatar
+	repo.container.Config.ReadOnlyDB.Where("name = ? and type = ?", name, avatarType).First(&avatar)
+	return &avatar
+}
+
 func (repo *Avatar) AvatarByTypeExists(id uint, avatarType commonType.AvatarType) (bool, error) {
 	var count int64
 
-	err := repo.container.Config.ReadOnlyDB.Model(&models.User{}).
+	err := repo.container.Config.ReadOnlyDB.Model(&models.Avatar{}).
 		Where("id = ? AND type = ?", id, avatarType).Count(&count).Error
 
 	if err != nil {
@@ -54,7 +60,7 @@ func (repo *Avatar) Create(avatar models.Avatar) error {
 }
 
 func (repo *Avatar) Update(id uint, payload requests.AvatarRequest) error {
-	result := repo.container.Config.ReadWriteDB.Model(&models.Portfolio{}).
+	result := repo.container.Config.ReadWriteDB.Model(&models.Avatar{}).
 		Where("id = ?", id).
 		Updates(map[string]interface{}{
 			"name": payload.Name,

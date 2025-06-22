@@ -62,6 +62,9 @@ func avatars(container *storage.Container) error {
 			{Name: "Gem", Icon: "💎", Type: commonType.AvatarTypePortfolio},
 			{Name: "Gold Coin", Icon: "🪙", Type: commonType.AvatarTypePortfolio},
 			{Name: "Stock Market", Icon: "🏛️", Type: commonType.AvatarTypePortfolio},
+			{Name: "Cash", Icon: "💵", Type: commonType.AvatarTypePortfolio},
+			{Name: "Credit", Icon: "💳", Type: commonType.AvatarTypePortfolio},
+			{Name: "Loan", Icon: "🤝", Type: commonType.AvatarTypePortfolio},
 		}
 		for _, a := range avatars {
 			if err := db.FirstOrCreate(&a, models.Avatar{Name: a.Name, Type: a.Type}).Error; err != nil {

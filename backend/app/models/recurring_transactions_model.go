@@ -4,11 +4,10 @@ import (
 	"time"
 
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
-	"gorm.io/gorm"
 )
 
 type RecurringTransaction struct {
-	gorm.Model
+	BaseModel
 	AccountId   uint                       `gorm:"not null"`
 	CategoryId  uint                       `gorm:"not null"`
 	PortfolioId uint                       `gorm:"not null"`

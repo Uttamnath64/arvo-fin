@@ -2,12 +2,10 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Budget struct {
-	gorm.Model
+	BaseModel
 	UserId      uint      `gorm:"not null"`
 	CategoryId  uint      `gorm:"not null"`
 	PortfolioId uint      `gorm:"not null"`

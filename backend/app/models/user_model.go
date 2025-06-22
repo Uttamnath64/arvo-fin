@@ -1,9 +1,7 @@
 package models
 
-import "gorm.io/gorm"
-
 type User struct {
-	gorm.Model
+	BaseModel
 	AvatarId           uint
 	Name               string             `gorm:"type:varchar(30);not null"`
 	Email              string             `gorm:"type:varchar(100);unique;not null"`

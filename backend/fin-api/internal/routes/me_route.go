@@ -11,11 +11,11 @@ func (routes *Routes) MeRoutes() {
 	userGroup := routes.server.Group("/me").Use(middle.Middleware())
 	{
 		userGroup.GET("/", handler.Get)
-		userGroup.GET("/settings", handler.GetSettings)
-		userGroup.PUT("", handler.Update)
-		userGroup.PUT("/settings", handler.UpdateSettings)
+		userGroup.GET("/:userId", handler.Get)
+		userGroup.GET("/settings/", handler.GetSettings)
 
-		userGroup.GET("/:user_id", handler.Get)
-		userGroup.GET("/settings/:user_id", handler.GetSettings)
+		userGroup.PUT("/", handler.Update)
+		userGroup.PUT("/settings/", handler.UpdateSettings)
+
 	}
 }

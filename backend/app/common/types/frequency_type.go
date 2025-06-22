@@ -1,7 +1,7 @@
 package commonType
 
 // Daily, Weekly, onthly, Yearly
-type FrequencyType int
+type FrequencyType int8
 
 const (
 	FrequencyTypeDaily FrequencyType = iota + 1

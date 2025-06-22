@@ -46,7 +46,7 @@ func (service *Portfolio) Create(payload requests.PortfolioRequest, userId uint)
 	}
 
 	// Verify avatar
-	ok, err := service.avatarRepo.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypeUser)
+	ok, err := service.avatarRepo.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio)
 	if !ok {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,
@@ -82,7 +82,7 @@ func (service *Portfolio) Create(payload requests.PortfolioRequest, userId uint)
 func (service *Portfolio) Update(id, userId uint, payload requests.PortfolioRequest) responses.ServiceResponse {
 
 	// Verify avatar
-	ok, err := service.avatarRepo.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypeUser)
+	ok, err := service.avatarRepo.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio)
 	if !ok {
 		return responses.ServiceResponse{
 			StatusCode: common.StatusValidationError,

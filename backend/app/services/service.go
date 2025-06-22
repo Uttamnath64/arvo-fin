@@ -39,3 +39,12 @@ type AvatarService interface {
 	Creatre(payload requests.AvatarRequest) responses.ServiceResponse
 	Update(id uint, payload requests.AvatarRequest) responses.ServiceResponse
 }
+
+type AccountService interface {
+	Get(id uint) responses.ServiceResponse
+	GetList(portfolioId, userId uint) responses.ServiceResponse
+	AccountTypes() responses.ServiceResponse
+	Create(userId uint, payload requests.AccountRequest) responses.ServiceResponse
+	Update(id, userId uint, payload requests.AccountUpdateRequest) responses.ServiceResponse
+	Delete(id, userId uint) responses.ServiceResponse
+}
