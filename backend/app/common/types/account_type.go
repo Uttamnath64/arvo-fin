@@ -1,6 +1,6 @@
 package commonType
 
-// Bank, Credit, Wallet, Investment
+// Bank, Cash, Wallet, Credit, Loan, Investment
 type AccountType int8
 
 const (
@@ -13,7 +13,11 @@ const (
 )
 
 func (t AccountType) String() string {
-	return [...]string{"Bank", "Cash", "Wallet", "Credit", "Loan", "Investment"}[t]
+	names := [...]string{"", "Bank", "Cash", "Wallet", "Credit", "Loan", "Investment"}
+	if !t.IsValid() {
+		return "Unknown"
+	}
+	return names[t]
 }
 
 func (t AccountType) IsValid() bool {

@@ -11,7 +11,11 @@ const (
 )
 
 func (t FrequencyType) String() string {
-	return [...]string{"Daily", "Weekly", "Monthly", "Yearly"}[t]
+	names := [...]string{"Daily", "Weekly", "Monthly", "Yearly"}
+	if !t.IsValid() {
+		return "Unknown"
+	}
+	return names[t]
 }
 
 func (t FrequencyType) IsValid() bool {

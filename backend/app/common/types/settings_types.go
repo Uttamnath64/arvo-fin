@@ -18,7 +18,11 @@ func AllDecimalPlaces() []DecimalPlaces {
 }
 
 func (t DecimalPlaces) String() string {
-	return [...]string{"None 10", "One 10.9", "Two 10.98"}[t]
+	names := [...]string{"None 10", "One 10.9", "Two 10.98"}
+	if !t.IsValid() {
+		return "Unknown"
+	}
+	return names[t]
 }
 
 func (t DecimalPlaces) IsValid() bool {
@@ -45,7 +49,11 @@ func AllNumberFormats() []NumberFormat {
 }
 
 func (t NumberFormat) String() string {
-	return [...]string{"First 2,10,343.20", "Second 2.10.343,20", "Third 2 10 343,20", "Fourth 2 10 343.20"}[t]
+	names := [...]string{"First 2,10,343.20", "Second 2.10.343,20", "Third 2 10 343,20", "Fourth 2 10 343.20"}
+	if !t.IsValid() {
+		return "Unknown"
+	}
+	return names[t]
 }
 
 func (t NumberFormat) IsValid() bool {

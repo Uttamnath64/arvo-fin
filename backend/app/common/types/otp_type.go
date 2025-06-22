@@ -9,7 +9,11 @@ const (
 )
 
 func (t OtpType) String() string {
-	return [...]string{"Register", "ResetPassword"}[t]
+	names := [...]string{"Register", "ResetPassword"}
+	if !t.IsValid() {
+		return "Unknown"
+	}
+	return names[t]
 }
 
 func (t OtpType) IsValid() bool {

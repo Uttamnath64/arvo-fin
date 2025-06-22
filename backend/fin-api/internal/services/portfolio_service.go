@@ -47,19 +47,19 @@ func (service *Portfolio) Create(payload requests.PortfolioRequest, userId uint)
 
 	// Verify avatar
 	ok, err := service.avatarRepo.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio)
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusValidationError,
-			Message:    "Avatar not found!",
-			Error:      errors.New("Avatar not found!"),
-		}
-	}
 	if err != nil {
 		service.container.Logger.Error("auth.service.portfolio-Create", err.Error(), payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later!",
 			Error:      err,
+		}
+	}
+	if !ok {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Avatar not found!",
+			Error:      errors.New("Avatar not found!"),
 		}
 	}
 
@@ -83,19 +83,19 @@ func (service *Portfolio) Update(id, userId uint, payload requests.PortfolioRequ
 
 	// Verify avatar
 	ok, err := service.avatarRepo.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio)
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusValidationError,
-			Message:    "Avatar not found!",
-			Error:      errors.New("Avatar not found!"),
-		}
-	}
 	if err != nil {
 		service.container.Logger.Error("auth.service.portfolio-Create", err.Error(), payload)
 		return responses.ServiceResponse{
 			StatusCode: common.StatusServerError,
 			Message:    "Oops! Something went wrong. Please try again later!",
 			Error:      err,
+		}
+	}
+	if !ok {
+		return responses.ServiceResponse{
+			StatusCode: common.StatusValidationError,
+			Message:    "Avatar not found!",
+			Error:      errors.New("Avatar not found!"),
 		}
 	}
 
