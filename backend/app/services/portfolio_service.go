@@ -25,54 +25,32 @@ func NewPortfolio(container *storage.Container) *Portfolio {
 
 func (service *Portfolio) GetList(userId uint, userType commonType.UserType) responses.ServiceResponse {
 
-	portfolioRes, err := service.portfolioRepo.GetList(userId, userType)
-	if err == gorm.ErrRecordNotFound {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Record not found!",
-			Error:      err,
-		}
-	}
+	response, err := service.portfolioRepo.GetList(userId, userType)
 	if err != nil {
-		service.container.Logger.Error("portfolio.service.getList", err.Error(), userId, userType)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Portfolios not found!", err)
 		}
+
+		service.container.Logger.Error("portfolio.appService.getList-GetList", "error", err.Error(), "userId", userId, "userType", userType, "userTypeName", userType.String())
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Portfolio records found!",
-		Data:       portfolioRes,
-	}
+	return responses.SuccessResponse("Portfolios records found!", response)
 }
 
 func (service *Portfolio) Get(id, userId uint, userType commonType.UserType) responses.ServiceResponse {
 
-	portfolioRes, err := service.portfolioRepo.Get(id, userId, userType)
-	if err == gorm.ErrRecordNotFound {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Record not found!",
-			Error:      err,
-		}
-	}
+	response, err := service.portfolioRepo.Get(id, userId, userType)
 	if err != nil {
-		service.container.Logger.Error("portfolio.service.get", err.Error(), id, userId, userType)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Portfolio not found!", err)
 		}
+
+		service.container.Logger.Error("portfolio.appService.get-Get", "error", err.Error(), "id", id, "userId", userId, "userType", userType, "userTypeName", userType.String())
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Portfolio record found!",
-		Data:       portfolioRes,
-	}
+	return responses.SuccessResponse("Portfolio records found!", response)
 }

@@ -39,18 +39,18 @@ func (repo *TestUser) GetUserByUsernameOrEmail(username string, email string, us
 	return gorm.ErrRecordNotFound
 }
 
-func (repo *TestUser) UsernameExists(username string) (bool, error) {
+func (repo *TestUser) UsernameExists(username string) error {
 	if username == "uttam.nath" {
-		return true, nil
+		return nil
 	}
-	return false, nil
+	return gorm.ErrRecordNotFound
 }
 
-func (repo *TestUser) EmailExists(email string) (bool, error) {
+func (repo *TestUser) EmailExists(email string) error {
 	if email == "uttam@example.com" {
-		return true, nil
+		return nil
 	}
-	return false, nil
+	return gorm.ErrRecordNotFound
 }
 
 func (repo *TestUser) CreateUser(user *models.User) (uint, error) {

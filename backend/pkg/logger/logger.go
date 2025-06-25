@@ -110,27 +110,46 @@ func NewTest(logLevel string) *Logger {
 	return &Logger{log: logger}
 }
 
-// logger Debug log
-func (l *Logger) Debug(topic string, arg ...interface{}) {
-	l.log.Debug(topic, zap.Any("data", arg))
+func toZapFields(fields []interface{}) []zap.Field {
+	var zapFields []zap.Field
+	if len(fields)%2 != 0 {
+		// odd number of args, fallback
+		zapFields = append(zapFields, zap.Any("fields", fields))
+		return zapFields
+	}
+
+	for i := 0; i < len(fields); i += 2 {
+		key, ok := fields[i].(string)
+		if !ok {
+			// if key is not string, fallback to printing whole slice as data
+			return []zap.Field{zap.Any("fields", fields)}
+		}
+		zapFields = append(zapFields, zap.Any(key, fields[i+1]))
+	}
+	return zapFields
 }
 
-// logger Info log
-func (l *Logger) Info(topic string, arg ...interface{}) {
-	l.log.Info(topic, zap.Any("data", arg))
+func (l *Logger) Debug(topic string, fields ...interface{}) {
+	zapFields := toZapFields(fields)
+	l.log.Debug(topic, zapFields...)
 }
 
-// logger Warn log
-func (l *Logger) Warn(topic string, arg ...interface{}) {
-	l.log.Warn(topic, zap.Any("data", arg))
+func (l *Logger) Info(topic string, fields ...interface{}) {
+	zapFields := toZapFields(fields)
+	l.log.Info(topic, zapFields...)
 }
 
-// logger Error log
-func (l *Logger) Error(topic string, arg ...interface{}) {
-	l.log.Error(topic, zap.Any("data", arg))
+func (l *Logger) Warn(topic string, fields ...interface{}) {
+	zapFields := toZapFields(fields)
+	l.log.Warn(topic, zapFields...)
 }
 
-// logger Fatal log
-func (l *Logger) Fatal(topic string, arg ...interface{}) {
-	l.log.Fatal(topic, zap.Any("data", arg))
+func (l *Logger) Error(topic string, fields ...interface{}) {
+	zapFields := toZapFields(fields)
+	l.log.Error(topic, zapFields...)
+}
+
+func (l *Logger) Fatal(topic string, fields ...interface{}) {
+	zapFields := toZapFields(fields)
+	l.log.Fatal(topic, zapFields...)
 }

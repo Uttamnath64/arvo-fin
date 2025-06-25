@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/Uttamnath64/arvo-fin/app/models"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
+	"gorm.io/gorm"
 )
 
 type Currency struct {
@@ -15,15 +16,17 @@ func NewCurrency(container *storage.Container) *Currency {
 	}
 }
 
-func (repo *Currency) CodeExists(code string) (bool, error) {
+func (repo *Currency) CodeExists(code string) error {
 	var count int64
 
 	err := repo.container.Config.ReadOnlyDB.Model(&models.Currency{}).
 		Where("code = ?", code).Count(&count).Error
 
 	if err != nil {
-		return false, err
+		return err
 	}
-
-	return count > 0, nil
+	if count == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }

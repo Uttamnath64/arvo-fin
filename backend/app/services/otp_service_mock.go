@@ -31,5 +31,5 @@ func (service *TestOTP) VerifyOTP(email string, otpType commonType.OtpType, prov
 	if (email == "uttam@example.com" || email == "uttam-new@example.com") && providedOTP == "123456" {
 		return nil
 	}
-	return errors.New("Not found!")
+	return errors.New("not found")
 }

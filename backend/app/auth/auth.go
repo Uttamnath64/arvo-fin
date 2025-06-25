@@ -37,20 +37,20 @@ func (auth *Auth) GenerateToken(userId uint, userType commonType.UserType, devic
 	var refreshExpiresAt = time.Now().Add(auth.container.Env.Auth.RefreshTokenExpired).Unix()
 
 	// create settion
-	session := models.Session{
+	sessionId, err := auth.authRepo.CreateSession(&models.Session{
 		UserID:     userId,
 		UserType:   userType,
 		DeviceInfo: deviceInfo,
 		IPAddress:  ipAddress,
-	}
-	if err := auth.authRepo.CreateSession(&session); err != nil {
+	})
+	if err != nil {
 		return "", "", err
 	}
 
 	accessTokenJWT := jwt.NewWithClaims(jwt.SigningMethodRS256, &AuthClaim{
 		UserId:    userId,
 		UserType:  userType,
-		SessionID: session.ID,
+		SessionID: sessionId,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: accessExpiresAt,
 		},
@@ -64,7 +64,7 @@ func (auth *Auth) GenerateToken(userId uint, userType commonType.UserType, devic
 	refreshTokenJWT := jwt.NewWithClaims(jwt.SigningMethodRS256, &AuthClaim{
 		UserId:    userId,
 		UserType:  userType,
-		SessionID: session.ID,
+		SessionID: sessionId,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: refreshExpiresAt,
 		},
@@ -75,7 +75,7 @@ func (auth *Auth) GenerateToken(userId uint, userType commonType.UserType, devic
 		return "", "", err
 	}
 
-	if err := auth.authRepo.UpdateSession(session.ID, refreshToken, refreshExpiresAt); err != nil {
+	if err := auth.authRepo.UpdateSession(sessionId, refreshToken, refreshExpiresAt); err != nil {
 		return "", "", err
 	}
 
@@ -89,18 +89,18 @@ func (auth *Auth) VerifyRefreshToken(refreshToken string) (interface{}, error) {
 		&AuthClaim{},
 		func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
-				return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
+				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 			}
 			return auth.container.Env.Auth.RefreshPublicKey, nil
 		},
 	)
 	if err != nil || !token.Valid {
-		return nil, errors.New("Refresh token is invalid!")
+		return nil, errors.New("refresh token is invalid")
 	}
 
 	claims, ok := token.Claims.(*AuthClaim)
 	if !ok || claims.SessionID == 0 {
-		return nil, errors.New("Invalid refresh token claims!")
+		return nil, errors.New("invalid refresh token claims")
 	}
 
 	if err := auth.isValidRefreshToken(claims.SessionID, claims.UserType, refreshToken); err != nil {
@@ -118,11 +118,11 @@ func (auth *Auth) isValidRefreshToken(sessionID uint, userType commonType.UserTy
 
 	// Check if token exists
 	if session == nil {
-		return errors.New("Refresh token not found!")
+		return errors.New("refresh token not found")
 	}
 
 	if session.ExpiresAt < time.Now().Unix() {
-		return errors.New("Refresh token is expired!")
+		return errors.New("refresh token is expired")
 	}
 
 	return nil

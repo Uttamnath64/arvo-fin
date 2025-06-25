@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/Uttamnath64/arvo-fin/app/models"
@@ -26,30 +25,34 @@ func (repo *User) GetUserByUsernameOrEmail(username string, email string, user *
 		Where("username = ? or email = ?", username, strings.ToLower(email)).First(user).Error
 }
 
-func (repo *User) UsernameExists(username string) (bool, error) {
+func (repo *User) UsernameExists(username string) error {
 	var count int64
 
 	err := repo.container.Config.ReadOnlyDB.Model(&models.User{}).
 		Where("username = ?", username).Count(&count).Error
 
 	if err != nil {
-		return false, err
+		return err
 	}
-
-	return count > 0, nil
+	if count == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
 
-func (repo *User) EmailExists(email string) (bool, error) {
+func (repo *User) EmailExists(email string) error {
 	var count int64
 
 	err := repo.container.Config.ReadOnlyDB.Model(&models.User{}).
 		Where("email = ?", strings.ToLower(email)).Count(&count).Error
 
 	if err != nil {
-		return false, err
+		return err
 	}
-
-	return count > 0, nil
+	if count == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
 
 func (repo *User) CreateUser(user *models.User) (uint, error) {
@@ -70,7 +73,7 @@ func (repo *User) UpdatePasswordByEmail(email, newPassword string) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return errors.New("User not found!")
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }
@@ -136,7 +139,7 @@ func (repo *User) Update(userId uint, payload requests.MeRequest) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return errors.New("User not found!")
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }
@@ -156,7 +159,7 @@ func (repo *User) UpdateSettings(userId uint, payload requests.SettingsRequest) 
 	}
 
 	if result.RowsAffected == 0 {
-		return errors.New("User not found!")
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }

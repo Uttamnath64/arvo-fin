@@ -9,7 +9,7 @@ func (routes *Routes) AuthRoutes() {
 		userGroup.POST("/login", handler.Login)
 		userGroup.POST("/token", handler.Token)
 
-		userGroup.POST("/send-otp", handler.SentOTP)
+		userGroup.POST("/send-otp", handler.SendOTP)
 		userGroup.POST("/register", handler.Register)
 		userGroup.POST("/reset-password", handler.ResetPassword)
 	}

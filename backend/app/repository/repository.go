@@ -10,22 +10,22 @@ import (
 type AuthRepository interface {
 	GetSessionByUser(userId uint, userType commonType.UserType, signedToken string) (*models.Session, error)
 	GetSessionByRefreshToken(refreshToken string, userType commonType.UserType) (*models.Session, error)
-	CreateSession(session *models.Session) error
+	CreateSession(session *models.Session) (uint, error)
 	UpdateSession(id uint, refreshToken string, expiresAt int64) error
 	DeleteSession(sessionID uint) error
 }
 
 type AvatarRepository interface {
-	Get(id uint, avatar *models.Avatar) error
+	Get(id uint) (*models.Avatar, error)
 	GetByNameAndType(name string, avatarType commonType.AvatarType) *models.Avatar
-	AvatarByTypeExists(id uint, avatarType commonType.AvatarType) (bool, error)
+	AvatarByTypeExists(id uint, avatarType commonType.AvatarType) error
 	GetAvatarsByType(avatarType commonType.AvatarType) (*[]models.Avatar, error)
-	Create(payload models.Avatar) error
+	Create(payload models.Avatar) (uint, error)
 	Update(id uint, payload requests.AvatarRequest) error
 }
 
 type PortfolioRepository interface {
-	UserPortfolioExists(id, userId uint) (bool, error)
+	UserPortfolioExists(id, userId uint) error
 	GetList(userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error)
 	Get(id, userId uint, userType commonType.UserType) (*responses.PortfolioResponse, error)
 	Create(portfolio models.Portfolio) error
@@ -35,8 +35,8 @@ type PortfolioRepository interface {
 
 type UserRepository interface {
 	GetUserByUsernameOrEmail(username string, email string, user *models.User) error
-	UsernameExists(username string) (bool, error)
-	EmailExists(email string) (bool, error)
+	UsernameExists(username string) error
+	EmailExists(email string) error
 	CreateUser(user *models.User) (uint, error)
 	UpdatePasswordByEmail(email, newPassword string) error
 	GetUser(userId uint, user *models.User) error
@@ -47,13 +47,13 @@ type UserRepository interface {
 }
 
 type CurrencyRepository interface {
-	CodeExists(code string) (bool, error)
+	CodeExists(code string) error
 }
 
 type AccountRepository interface {
 	GetList(portfolioId, userId uint) (*[]models.Account, error)
 	Get(id uint) (*models.Account, error)
 	Create(account models.Account) (uint, error)
-	Update(id, userId uint, payload requests.AccountUpdateRequest) (bool, error)
-	Delete(id, userId uint) (bool, error)
+	Update(id, userId uint, payload requests.AccountUpdateRequest) error
+	Delete(id, userId uint) error
 }

@@ -59,8 +59,8 @@ func (repo *TestAuth) GetSessionByRefreshToken(refreshToken string, userType com
 	return nil, gorm.ErrRecordNotFound
 }
 
-func (repo *TestAuth) CreateSession(session *models.Session) error {
-	return nil
+func (repo *TestAuth) CreateSession(session *models.Session) (uint, error) {
+	return 1, nil
 }
 
 func (repo *TestAuth) DeleteSession(sessionID uint) error {

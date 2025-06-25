@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"errors"
-
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/models"
 	"github.com/Uttamnath64/arvo-fin/app/requests"
@@ -21,17 +19,19 @@ func NewPortfolio(container *storage.Container) *Portfolio {
 	}
 }
 
-func (repo *Portfolio) UserPortfolioExists(id, userId uint) (bool, error) {
+func (repo *Portfolio) UserPortfolioExists(id, userId uint) error {
 	var count int64
 
 	err := repo.container.Config.ReadOnlyDB.Model(&models.Portfolio{}).
 		Where("id = ? and user_id = ?", id, userId).Count(&count).Error
 
 	if err != nil {
-		return false, err
+		return err
 	}
-
-	return count > 0, nil
+	if count == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
 
 func (repo *Portfolio) GetList(userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error) {
@@ -97,7 +97,7 @@ func (repo *Portfolio) Update(id, userId uint, payload requests.PortfolioRequest
 	}
 
 	if result.RowsAffected == 0 {
-		return errors.New("Portfolio not found!")
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }
@@ -110,7 +110,7 @@ func (repo *Portfolio) Delete(id, userId uint) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return errors.New("Portfolio not found!")
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }
