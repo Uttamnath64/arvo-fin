@@ -61,7 +61,7 @@ func (service *Auth) Login(payload requests.LoginRequest, deviceInfo string, ip 
 	accessToken, refreshToken, err := service.authHelper.GenerateToken(user.ID, commonType.UserTypeUser, deviceInfo, ip)
 	if err != nil {
 		service.container.Logger.Error("auth.service.login-GenerateToken", "error", err.Error(), "userId", user.ID, "userType", commonType.UserTypeUser, "deviceInfo", deviceInfo, "ip", ip)
-		return responses.ErrorResponse(common.StatusValidationError, "Oops! Something went wrong. Please try again later.", err)
+		return responses.ErrorResponse(common.StatusServerError, "Failed to generate tokens. Please try again later.", err)
 	}
 
 	// Response
@@ -131,6 +131,7 @@ func (service *Auth) Register(payload requests.RegisterRequest, deviceInfo strin
 	var accessToken, refreshToken string
 	if accessToken, refreshToken, err = service.authHelper.GenerateToken(userId, commonType.UserTypeUser, deviceInfo, ip); err != nil {
 		service.container.Logger.Error("auth.service.register-GenerateToken", "error", err.Error(), "userId", userId, "type", commonType.UserTypeUser)
+		return responses.ErrorResponse(common.StatusServerError, "Failed to generate tokens. Please try again later.", err)
 	}
 
 	// Response
@@ -215,7 +216,7 @@ func (service *Auth) ResetPassword(payload requests.ResetPasswordRequest, device
 	var accessToken, refreshToken string
 	if accessToken, refreshToken, err = service.authHelper.GenerateToken(user.ID, commonType.UserTypeUser, deviceInfo, ip); err != nil {
 		service.container.Logger.Error("auth.service.resetPassword-UpdatePasswordByEmail", "error", err.Error(), "userId", user.ID, "password", "userType", commonType.UserTypeUser, "userTypeName", commonType.UserTypeUser.String())
-		return responses.ErrorResponse(common.StatusServerError, "Oops! Something went wrong. Please try again later.", err)
+		return responses.ErrorResponse(common.StatusServerError, "Failed to generate tokens. Please try again later.", err)
 	}
 
 	// Response
@@ -252,7 +253,7 @@ func (service *Auth) GetToken(payload requests.TokenRequest, deviceInfo string, 
 	var accessToken, refreshToken string
 	if accessToken, refreshToken, err = service.authHelper.GenerateToken(user.ID, commonType.UserTypeUser, deviceInfo, ip); err != nil {
 		service.container.Logger.Error("auth.service.getToken-GenerateToken", "error", err.Error(), "userId", user.ID, "userType", commonType.UserTypeUser, "userTypeName", commonType.UserTypeUser.String(), "deviceInfo", deviceInfo, "ip", ip)
-		return responses.ErrorResponse(common.StatusServerError, "Oops! Something went wrong. Please try again later.", err)
+		return responses.ErrorResponse(common.StatusServerError, "Failed to generate tokens. Please try again later.", err)
 	}
 
 	// Response
