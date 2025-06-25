@@ -19,11 +19,11 @@ func NewTestPortfolio(container *storage.Container) *TestPortfolio {
 	}
 }
 
-func (repo *TestPortfolio) UserPortfolioExists(id, userId uint) (bool, error) {
+func (repo *TestPortfolio) UserPortfolioExists(id, userId uint) error {
 	if userId == 1 {
-		return true, nil
+		return nil
 	}
-	return false, nil
+	return gorm.ErrRecordNotFound
 }
 
 func (repo *TestPortfolio) GetList(userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error) {

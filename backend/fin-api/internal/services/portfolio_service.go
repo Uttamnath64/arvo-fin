@@ -11,6 +11,7 @@ import (
 	"github.com/Uttamnath64/arvo-fin/app/responses"
 	commonServices "github.com/Uttamnath64/arvo-fin/app/services"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
+	"gorm.io/gorm"
 )
 
 type Portfolio struct {
@@ -46,89 +47,54 @@ func (service *Portfolio) Create(payload requests.PortfolioRequest, userId uint)
 	}
 
 	// Verify avatar
-	ok, err := service.avatarRepo.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio)
-	if err != nil {
-		service.container.Logger.Error("auth.service.portfolio-Create", err.Error(), payload)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later!",
-			Error:      err,
+	if err := service.avatarRepo.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", errors.New("avatar not found"))
 		}
-	}
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusValidationError,
-			Message:    "Avatar not found!",
-			Error:      errors.New("Avatar not found!"),
-		}
+
+		service.container.Logger.Error("portfolio.service.create-AvatarByTypeExists", "error", err.Error(), "avatarId", payload.AvatarId, "avatarType", commonType.AvatarTypePortfolio, "avatarTypeName", commonType.AvatarTypePortfolio.String())
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later", err)
 	}
 
-	err = service.portfolioRepo.Create(portfolio)
-	if err != nil {
-		service.container.Logger.Error("portfolio.service.add", err.Error(), portfolio, userId)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
-		}
+	// Create
+	if err := service.portfolioRepo.Create(portfolio); err != nil {
+		service.container.Logger.Error("portfolio.service.create-Create", "error", err.Error(), "portfolio", portfolio)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later", err)
 	}
 
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Portfolio record added!",
-	}
+	// Response
+	response, _ := service.portfolioRepo.Get(portfolio.ID, portfolio.UserId, commonType.UserTypeUser)
+	return responses.SuccessResponse("Portfolio record added!", response)
 }
 
 func (service *Portfolio) Update(id, userId uint, payload requests.PortfolioRequest) responses.ServiceResponse {
 
 	// Verify avatar
-	ok, err := service.avatarRepo.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio)
-	if err != nil {
-		service.container.Logger.Error("auth.service.portfolio-Create", err.Error(), payload)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later!",
-			Error:      err,
+	if err := service.avatarRepo.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", errors.New("avatar not found"))
 		}
-	}
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusValidationError,
-			Message:    "Avatar not found!",
-			Error:      errors.New("Avatar not found!"),
-		}
+
+		service.container.Logger.Error("portfolio.service.update-AvatarByTypeExists", "error", err.Error(), "avatarId", payload.AvatarId, "avatarType", commonType.AvatarTypePortfolio, "avatarTypeName", commonType.AvatarTypePortfolio.String())
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later", err)
 	}
 
-	err = service.portfolioRepo.Update(id, userId, payload)
-	if err != nil {
-		service.container.Logger.Error("portfolio.service.update", err.Error(), id, userId, payload)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    err.Error(),
-			Error:      err,
-		}
+	if err := service.portfolioRepo.Update(id, userId, payload); err != nil {
+		service.container.Logger.Error("portfolio.service.update-Update", "error", err.Error(), "id", id, "userId", userId, "payload", payload)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later", err)
 	}
 
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Portfolio record updated!",
-	}
+	// Response
+	response, _ := service.portfolioRepo.Get(id, userId, commonType.UserTypeUser)
+	return responses.SuccessResponse("Portfolio record updated!", response)
 }
 
 func (service *Portfolio) Delete(id, userId uint) responses.ServiceResponse {
 
-	err := service.portfolioRepo.Delete(id, userId)
-	if err != nil {
-		service.container.Logger.Error("portfolio.service.delete", err.Error(), id, userId)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    err.Error(),
-			Error:      err,
-		}
+	if err := service.portfolioRepo.Delete(id, userId); err != nil {
+		service.container.Logger.Error("portfolio.service.delete-Delete", "error", err.Error(), "id", id, "userId", userId)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later", err)
 	}
 
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Portfolio record deleted!",
-	}
+	return responses.SuccessResponse("Portfolio record deleted!", nil)
 }

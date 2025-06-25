@@ -62,14 +62,14 @@ func (handler *Auth) Register(ctx *gin.Context) {
 	})
 }
 
-func (handler *Auth) SentOTP(ctx *gin.Context) {
+func (handler *Auth) SendOTP(ctx *gin.Context) {
 
 	var payload requests.SentOTPRequest
 	if !bindAndValidateJson(ctx, &payload) {
 		return
 	}
 
-	serviceResponse := handler.authService.SentOTP(payload)
+	serviceResponse := handler.authService.SendOTP(payload)
 	if isErrorResponse(ctx, serviceResponse) {
 		return
 	}

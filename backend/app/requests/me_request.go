@@ -21,7 +21,7 @@ func (r MeRequest) IsValid() error {
 		return err
 	}
 	if !Validate.IsValidID(r.AvatarId) {
-		return errors.New("Invalid avatar id!")
+		return errors.New("invalid avatar id")
 	}
 	return nil
 }
@@ -35,13 +35,13 @@ type SettingsRequest struct {
 
 func (r SettingsRequest) IsValid() error {
 	if strings.TrimSpace(r.CurrencyCode) == "" {
-		return errors.New("Invalid currency code!")
+		return errors.New("invalid currency code")
 	}
 	if !r.DecimalPlaces.IsValid() {
-		return errors.New("Invalid decimal places!")
+		return errors.New("invalid decimal places")
 	}
 	if !r.NumberFormat.IsValid() {
-		return errors.New("Invalid number format!")
+		return errors.New("invalid number format")
 	}
 	return nil
 }

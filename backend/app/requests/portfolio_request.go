@@ -15,7 +15,7 @@ func (r PortfolioRequest) IsValid() error {
 		return err
 	}
 	if !Validate.IsValidID(r.AvatarId) {
-		return errors.New("Invalid avatar id!")
+		return errors.New("invalid avatar id")
 	}
 	return nil
 }

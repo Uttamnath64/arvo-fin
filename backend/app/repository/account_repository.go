@@ -51,7 +51,7 @@ func (repo *Account) Create(account models.Account) (uint, error) {
 	return account.ID, nil
 }
 
-func (repo *Account) Update(id, userId uint, payload requests.AccountUpdateRequest) (bool, error) {
+func (repo *Account) Update(id, userId uint, payload requests.AccountUpdateRequest) error {
 	result := repo.container.Config.ReadWriteDB.Model(&models.Account{}).
 		Where("id = ? AND user_id = ?", id, userId).
 		Updates(map[string]interface{}{
@@ -63,18 +63,24 @@ func (repo *Account) Update(id, userId uint, payload requests.AccountUpdateReque
 		})
 
 	if result.Error != nil {
-		return false, result.Error
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
 
-	return result.RowsAffected > 0, nil
+	return nil
 }
 
-func (repo *Account) Delete(id, userId uint) (bool, error) {
+func (repo *Account) Delete(id, userId uint) error {
 	result := repo.container.Config.ReadWriteDB.Where("id = ? AND user_id = ?", id, userId).Delete(&models.Account{})
 
 	if result.Error != nil {
-		return false, result.Error
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
 
-	return result.RowsAffected > 0, nil
+	return nil
 }

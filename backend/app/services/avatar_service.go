@@ -25,114 +25,69 @@ func NewAvatar(container *storage.Container) *Avatar {
 
 func (service *Avatar) Get(id uint) responses.ServiceResponse {
 
-	var avatar models.Avatar
-	err := service.repoAvatar.Get(id, &avatar)
-	if err == gorm.ErrRecordNotFound {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Avatar not found!",
-			Error:      err,
-		}
-	}
-
+	response, err := service.repoAvatar.Get(id)
 	if err != nil {
-		service.container.Logger.Error("auth.service.avatar-Get", err.Error(), id)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", err)
 		}
+
+		service.container.Logger.Error("avatar.appService.get-Get", "error", err.Error(), "id", id)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Avatar records found!",
-		Data:       avatar,
-	}
+	return responses.SuccessResponse("Avatar records found!", response)
 }
 
 func (service *Avatar) GetAvatarsByType(avatarType commonType.AvatarType) responses.ServiceResponse {
 	response, err := service.repoAvatar.GetAvatarsByType(avatarType)
-	if err == gorm.ErrRecordNotFound {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Avatars not found by type!",
-			Error:      err,
-		}
-	}
-
 	if err != nil {
-		service.container.Logger.Error("auth.service.avatar-GetByType", err.Error(), avatarType)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Avatars not found by type!", err)
 		}
+
+		service.container.Logger.Error("avatar.appService.getAvatarsByType-GetAvatarsByType", "error", err.Error(), "avatarType", avatarType, "avatarTypeName", avatarType.String())
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Avatars found by type!",
-		Data:       response,
-	}
+	return responses.SuccessResponse("Avatars found by type!", response)
 }
 
 func (service *Avatar) Creatre(payload requests.AvatarRequest) responses.ServiceResponse {
 
-	err := service.repoAvatar.Create(models.Avatar{
+	avatarId, err := service.repoAvatar.Create(models.Avatar{
 		Name: payload.Name,
 		Type: payload.Type,
 		Icon: payload.Icon,
 	})
-	if err == gorm.ErrRecordNotFound {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Avatar not found!",
-			Error:      err,
-		}
-	}
-
 	if err != nil {
-		service.container.Logger.Error("auth.service.avater-Creatre", err.Error())
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", err)
 		}
+
+		service.container.Logger.Error("avatar.appService.creatre-Creatre", "error", err.Error(), "payload", payload)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Avatar is created!",
-	}
+	response, _ := service.repoAvatar.Get(avatarId)
+	return responses.SuccessResponse("Avatar is created!", response)
 }
 
 func (service *Avatar) Update(id uint, payload requests.AvatarRequest) responses.ServiceResponse {
 
 	err := service.repoAvatar.Update(id, payload)
-	if err == gorm.ErrRecordNotFound {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Avatar not found!",
-			Error:      err,
-		}
-	}
-
 	if err != nil {
-		service.container.Logger.Error("auth.service.avatar-Update", err.Error(), id)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", err)
 		}
+
+		service.container.Logger.Error("avatar.appService.update-Update", "error", err.Error(), "id", id, "payload", payload)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Avatar is updated!",
-	}
+	response, _ := service.repoAvatar.Get(id)
+	return responses.SuccessResponse("Avatar is updated!", response)
 }

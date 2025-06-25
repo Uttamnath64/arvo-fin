@@ -29,143 +29,82 @@ func NewUser(container *storage.Container) *User {
 }
 
 func (service *User) Get(userId uint) responses.ServiceResponse {
-	response, err := service.repoUser.Get(userId)
-	if err == gorm.ErrRecordNotFound {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "User not found!",
-			Error:      err,
-		}
-	}
 
+	response, err := service.repoUser.Get(userId)
 	if err != nil {
-		service.container.Logger.Error("auth.service.user-Get", err.Error(), userId)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "User not found!", err)
 		}
+		service.container.Logger.Error("user.appService.get-Get", "error", err.Error(), "userId", userId)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "User records found!",
-		Data:       response,
-	}
+	return responses.SuccessResponse("User records found!", response)
 }
 
 func (service *User) GetSettings(userId uint) responses.ServiceResponse {
 	response, err := service.repoUser.GetSettings(userId)
-	if err == gorm.ErrRecordNotFound {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "User not found!",
-			Error:      err,
-		}
-	}
-
 	if err != nil {
-		service.container.Logger.Error("auth.service.user-GetSettings", err.Error(), userId)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "User not found!", err)
 		}
+
+		service.container.Logger.Error("user.appService.getSettings-GetSettings", "error", err.Error(), "userId", userId)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "User records found!",
-		Data:       response,
-	}
+	return responses.SuccessResponse("User settings found!", response)
 }
 
 func (service *User) Update(payload requests.MeRequest, userId uint) responses.ServiceResponse {
 
-	ok, err := service.repoAvatar.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypeUser)
-	if err != nil {
-		service.container.Logger.Error("auth.service.user-Update", err.Error(), payload)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later!",
-			Error:      err,
+	// Check avatar
+	if err := service.repoAvatar.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypeUser); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", errors.New("avatar not found"))
 		}
-	}
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Avatar not found!",
-			Error:      errors.New("Avatar not found!"),
-		}
+		service.container.Logger.Error("user.appService.update-GetSettings", "error", err.Error(), "avatarId", payload.AvatarId, "avatarType", commonType.AvatarTypeUser, "avatarTypeName", commonType.AvatarTypeUser.String())
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
-	err = service.repoUser.Update(userId, payload)
-	if err == gorm.ErrRecordNotFound {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "User not found!",
-			Error:      err,
+	// update
+	if err := service.repoUser.Update(userId, payload); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "User not found!", err)
 		}
-	}
 
-	if err != nil {
-		service.container.Logger.Error("auth.service.user-GetSettings", err.Error(), userId)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
-		}
+		service.container.Logger.Error("user.appService.update-GetSettings", "error", err.Error(), "userId", userId, "payload", payload)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "User records updated!",
-	}
+	return responses.SuccessResponse("User records updated!", nil)
 }
 
 func (service *User) UpdateSettings(payload requests.SettingsRequest, userId uint) responses.ServiceResponse {
 
-	ok, err := service.repoCurrency.CodeExists(payload.CurrencyCode)
-	if err != nil {
-		service.container.Logger.Error("auth.service.user-UpdateSettings", err.Error(), payload)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later!",
-			Error:      err,
+	// Check currencyCode
+	if err := service.repoCurrency.CodeExists(payload.CurrencyCode); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Currency not found!", err)
 		}
-	}
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Currency not found!",
-			Error:      err,
-		}
+
+		service.container.Logger.Error("user.appService.updateSettings-CodeExists", "error", err.Error(), "userId", userId, "currencyCode", payload.CurrencyCode)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
-	err = service.repoUser.UpdateSettings(userId, payload)
-	if err == gorm.ErrRecordNotFound {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "User not found!",
-			Error:      err,
+	// Update
+	if err := service.repoUser.UpdateSettings(userId, payload); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "User not found!", err)
 		}
-	}
 
-	if err != nil {
-		service.container.Logger.Error("auth.service.user-GetSettings", err.Error(), userId)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
-		}
+		service.container.Logger.Error("user.appService.updateSettings-UpdateSettings", "error", err.Error(), "userId", userId, "payload", payload)
+		return responses.ErrorResponse(common.StatusServerError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "User setting updated!",
-	}
+	return responses.SuccessResponse("User setting updated!", nil)
 }

@@ -15,9 +15,9 @@ func NewTestCurrency(container *storage.Container) *TestCurrency {
 	}
 }
 
-func (repo *TestCurrency) CodeExists(code string) (bool, error) {
+func (repo *TestCurrency) CodeExists(code string) error {
 	if code != "INR" {
-		return false, gorm.ErrRecordNotFound
+		return gorm.ErrRecordNotFound
 	}
-	return true, nil
+	return nil
 }

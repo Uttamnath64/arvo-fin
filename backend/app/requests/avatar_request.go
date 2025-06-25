@@ -18,10 +18,10 @@ func (r AvatarRequest) IsValid() error {
 		return err
 	}
 	if strings.TrimSpace(r.Icon) == "" {
-		return errors.New("Invalid icon!")
+		return errors.New("invalid icon")
 	}
 	if !r.Type.IsValid() {
-		return errors.New("Invalid avatar type!")
+		return errors.New("invalid avatar type")
 	}
 
 	return nil

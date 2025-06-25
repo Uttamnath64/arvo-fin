@@ -20,9 +20,9 @@ func NewTestAvatar(container *storage.Container) *TestAvatar {
 	}
 }
 
-func (repo *TestAvatar) Get(id uint, avatar *models.Avatar) error {
+func (repo *TestAvatar) Get(id uint) (*models.Avatar, error) {
 	if id == 1 {
-		*avatar = models.Avatar{
+		return &models.Avatar{
 			BaseModel: models.BaseModel{
 				ID:        1,
 				CreatedAt: time.Now().Add(-2 * time.Hour),
@@ -31,10 +31,9 @@ func (repo *TestAvatar) Get(id uint, avatar *models.Avatar) error {
 			Name: "Default Avatar",
 			Icon: "🧠",
 			Type: commonType.AvatarTypeUser,
-		}
-		return nil
+		}, nil
 	}
-	return gorm.ErrRecordNotFound
+	return nil, gorm.ErrRecordNotFound
 }
 
 func (repo *TestAvatar) GetByNameAndType(name string, avatarType commonType.AvatarType) *models.Avatar {
@@ -45,11 +44,11 @@ func (repo *TestAvatar) GetByNameAndType(name string, avatarType commonType.Avat
 	}
 }
 
-func (repo *TestAvatar) AvatarByTypeExists(id uint, avatarType commonType.AvatarType) (bool, error) {
+func (repo *TestAvatar) AvatarByTypeExists(id uint, avatarType commonType.AvatarType) error {
 	if id == 1 {
-		return true, nil
+		return nil
 	}
-	return false, gorm.ErrRecordNotFound
+	return gorm.ErrRecordNotFound
 }
 
 func (repo *TestAvatar) GetAvatarsByType(avatarType commonType.AvatarType) (*[]models.Avatar, error) {
@@ -78,8 +77,8 @@ func (repo *TestAvatar) GetAvatarsByType(avatarType commonType.AvatarType) (*[]m
 	return &responses, nil
 }
 
-func (repo *TestAvatar) Create(payload models.Avatar) error {
-	return nil
+func (repo *TestAvatar) Create(payload models.Avatar) (uint, error) {
+	return 1, nil
 }
 
 func (repo *TestAvatar) Update(id uint, payload requests.AvatarRequest) error {

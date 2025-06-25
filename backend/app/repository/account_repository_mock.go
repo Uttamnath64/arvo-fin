@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"errors"
 	"time"
 
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
@@ -123,18 +122,18 @@ func (repo *TestAccount) Create(account models.Account) (uint, error) {
 	return 1, nil
 }
 
-func (repo *TestAccount) Update(id, userId uint, payload requests.AccountUpdateRequest) (bool, error) {
+func (repo *TestAccount) Update(id, userId uint, payload requests.AccountUpdateRequest) error {
 	if id != 1 || userId != 1 {
-		return false, errors.New("Error!")
+		return gorm.ErrRecordNotFound
 	}
 
-	return true, nil
+	return nil
 }
 
-func (repo *TestAccount) Delete(id, userId uint) (bool, error) {
+func (repo *TestAccount) Delete(id, userId uint) error {
 	if id != 1 || userId != 1 {
-		return false, errors.New("Error!")
+		return gorm.ErrRecordNotFound
 	}
 
-	return true, nil
+	return nil
 }

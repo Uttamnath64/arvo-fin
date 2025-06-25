@@ -1,11 +1,10 @@
 package repository
 
 import (
-	"errors"
-
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/models"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
+	"gorm.io/gorm"
 )
 
 type Auth struct {
@@ -36,8 +35,12 @@ func (repo *Auth) GetSessionByRefreshToken(refreshToken string, userType commonT
 	return &session, nil
 }
 
-func (repo *Auth) CreateSession(session *models.Session) error {
-	return repo.container.Config.ReadWriteDB.Create(session).Error
+func (repo *Auth) CreateSession(session *models.Session) (uint, error) {
+	err := repo.container.Config.ReadWriteDB.Create(session).Error
+	if err != nil {
+		return 0, err
+	}
+	return session.ID, nil
 }
 
 func (repo *Auth) DeleteSession(sessionID uint) error {
@@ -57,7 +60,7 @@ func (repo *Auth) UpdateSession(id uint, refreshToken string, expiresAt int64) e
 	}
 
 	if result.RowsAffected == 0 {
-		return errors.New("Session not found!")
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }

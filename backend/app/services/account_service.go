@@ -34,55 +34,32 @@ func NewAccount(container *storage.Container) *Account {
 func (service *Account) Get(id uint) responses.ServiceResponse {
 
 	response, err := service.repoAccount.Get(id)
-	if err == gorm.ErrRecordNotFound {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Account not found!",
-			Error:      err,
-		}
-	}
-
 	if err != nil {
-		service.container.Logger.Error("account.service.get", err.Error(), id)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Account not found!", err)
 		}
+
+		service.container.Logger.Error("account.appService.get-Get", "error", err.Error(), "id", id)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Account records found!",
-		Data:       response,
-	}
+	return responses.SuccessResponse("Account records found!", response)
 }
 
 func (service *Account) GetList(portfolioId, userId uint) responses.ServiceResponse {
 	response, err := service.repoAccount.GetList(portfolioId, userId)
-	if err == gorm.ErrRecordNotFound {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Accounts not found!",
-			Error:      err,
-		}
-	}
 	if err != nil {
-		service.container.Logger.Error("account.service.get-list", err.Error(), userId)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later.",
-			Error:      err,
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Accounts not found!", err)
 		}
+
+		service.container.Logger.Error("account.appService.getList-GetList", "error", err.Error(), "portfolioId", portfolioId, "userId", userId)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Accounts found!",
-		Data:       response,
-	}
+	return responses.SuccessResponse("Accounts found!", response)
 }
 
 func (service *Account) AccountTypes() responses.ServiceResponse {
@@ -119,63 +96,37 @@ func (service *Account) AccountTypes() responses.ServiceResponse {
 	}
 
 	// Response
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Account type found!",
-		Data:       accountTypes,
-	}
+	return responses.SuccessResponse("Account type found!", accountTypes)
 }
 
 func (service *Account) Create(userId uint, payload requests.AccountRequest) responses.ServiceResponse {
-	ok, err := service.repoPortfolio.UserPortfolioExists(payload.PortfolioId, userId)
-	if err != nil {
-		service.container.Logger.Error("account.service.create", err.Error(), payload)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later!",
-			Error:      err,
+
+	// Check portfolio
+	if err := service.repoPortfolio.UserPortfolioExists(payload.PortfolioId, userId); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Portfolio not found!", errors.New("portfolio not found"))
 		}
-	}
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Portfolio not found with this user!",
-			Error:      errors.New("portfolio not found with this user"),
-		}
+		service.container.Logger.Error("account.appService.create-UserPortfolioExists", "error", err.Error(), "payload", payload, "userId", userId)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
-	ok, err = service.repoAvatar.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio)
-	if err != nil {
-		service.container.Logger.Error("account.service.create", err.Error(), payload)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later!",
-			Error:      err,
+	// Check avatar
+	if err := service.repoAvatar.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", errors.New("avatar not found"))
 		}
-	}
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Avatar not found!",
-			Error:      errors.New("avatar not found"),
-		}
+
+		service.container.Logger.Error("account.appService.create-AvatarByTypeExists", "error", err.Error(), "avatarId", payload.AvatarId, "avatarType", commonType.AvatarTypePortfolio, "avatarTypeName", commonType.AvatarTypePortfolio.String())
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
-	ok, err = service.repoCurrency.CodeExists(payload.CurrencyCode)
-	if err != nil {
-		service.container.Logger.Error("account.service.create", err.Error(), payload)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later!",
-			Error:      err,
+	// Check currencyCode
+	if err := service.repoCurrency.CodeExists(payload.CurrencyCode); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Currency not found!", errors.New("currency not found"))
 		}
-	}
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Currency not found!",
-			Error:      err,
-		}
+		service.container.Logger.Error("account.appService.create-CodeExists", "error", err.Error(), "currencyCode", payload.CurrencyCode, "userId", userId)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	id, err := service.repoAccount.Create(models.Account{
@@ -188,105 +139,55 @@ func (service *Account) Create(userId uint, payload requests.AccountRequest) res
 		OpeningBalance: payload.OpeningBalance,
 		Note:           payload.Note,
 	})
-
 	if err != nil {
-		service.container.Logger.Error("account.service.create", err.Error(), payload)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later!",
-			Error:      err,
-		}
+		service.container.Logger.Error("account.appService.create-Create", "error", err.Error(), "payload", payload, "userId", userId)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	response, _ := service.repoAccount.Get(id)
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Account is created!",
-		Data:       response,
-	}
+	return responses.SuccessResponse("Account is created!", response)
 }
 
 func (service *Account) Update(id, userId uint, payload requests.AccountUpdateRequest) responses.ServiceResponse {
 
-	ok, err := service.repoAvatar.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio)
-	if err != nil {
-		service.container.Logger.Error("account.service.update", err.Error(), payload)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later!",
-			Error:      err,
+	// Check avatar
+	if err := service.repoAvatar.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypePortfolio); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", errors.New("avatar not found"))
 		}
-	}
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Avatar not found!",
-			Error:      errors.New("avatar not found"),
-		}
+		service.container.Logger.Error("account.appService.update-AvatarByTypeExists", "error", err.Error(), "avatarId", payload.AvatarId, "avatarType", commonType.AvatarTypePortfolio, "avatarTypeName", commonType.AvatarTypePortfolio.String())
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
-	ok, err = service.repoCurrency.CodeExists(payload.CurrencyCode)
-	if err != nil {
-		service.container.Logger.Error("account.service.update", err.Error(), payload, userId)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    "Oops! Something went wrong. Please try again later!",
-			Error:      err,
+	// Check currencyCode
+	if err := service.repoCurrency.CodeExists(payload.CurrencyCode); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Currency not found!", errors.New("currency not found"))
 		}
-	}
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Currency not found!",
-			Error:      err,
-		}
+		service.container.Logger.Error("account.appService.update-CodeExists", "error", err.Error(), "currencyCode", payload.CurrencyCode, "userId", userId)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
-	ok, err = service.repoAccount.Update(id, userId, payload)
-	if err != nil {
-		service.container.Logger.Error("account.service.update", err.Error(), id, userId, payload)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    err.Error(),
-			Error:      err,
+	if err := service.repoAccount.Update(id, userId, payload); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Account not updated!", errors.New("account not updated"))
 		}
-	}
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Account not updated!",
-			Error:      errors.New("account not updated"),
-		}
+		service.container.Logger.Error("account.appService.update-Update", "error", err.Error(), "id", id, "userId", userId, "id", payload)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	response, _ := service.repoAccount.Get(id)
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Account record updated!",
-		Data:       response,
-	}
+	return responses.SuccessResponse("Account record updated!", response)
 }
 
 func (service *Account) Delete(id, userId uint) responses.ServiceResponse {
-	ok, err := service.repoAccount.Delete(id, userId)
-	if err != nil {
-		service.container.Logger.Error("account.service.deleted", err.Error(), id, userId)
-		return responses.ServiceResponse{
-			StatusCode: common.StatusServerError,
-			Message:    err.Error(),
-			Error:      err,
+	if err := service.repoAccount.Delete(id, userId); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return responses.ErrorResponse(common.StatusNotFound, "Account is not deleted!", errors.New("account not deleted"))
 		}
-	}
-	if !ok {
-		return responses.ServiceResponse{
-			StatusCode: common.StatusNotFound,
-			Message:    "Account not deleted!",
-			Error:      errors.New("account not deleted"),
-		}
+		service.container.Logger.Error("account.appService.delete-Delete", "error", err.Error(), "id", id, "userId", userId)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
-	return responses.ServiceResponse{
-		StatusCode: common.StatusSuccess,
-		Message:    "Account deleted!",
-	}
+	return responses.SuccessResponse("Account is deleted!", nil)
 }
