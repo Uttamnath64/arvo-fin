@@ -20,18 +20,18 @@ func NewAvatar(container *storage.Container) *Avatar {
 	}
 }
 
-func (service *Avatar) Get(id uint) responses.ServiceResponse {
-	return service.avatarService.Get(id)
+func (service *Avatar) Get(rctx *requests.RequestContext, id uint) responses.ServiceResponse {
+	return service.avatarService.Get(rctx, id)
 }
 
-func (service *Avatar) GetAvatarsByType(avatarType commonType.AvatarType) responses.ServiceResponse {
-	return service.avatarService.GetAvatarsByType(avatarType)
+func (service *Avatar) GetAvatarsByType(rctx *requests.RequestContext, avatarType commonType.AvatarType) responses.ServiceResponse {
+	return service.avatarService.GetAvatarsByType(rctx, avatarType)
 }
 
-func (service *Avatar) Create(payload requests.AvatarRequest) responses.ServiceResponse {
-	return service.avatarService.Creatre(payload)
+func (service *Avatar) Create(rctx *requests.RequestContext, payload requests.AvatarRequest) responses.ServiceResponse {
+	return service.avatarService.Creatre(rctx, payload)
 }
 
-func (service *Avatar) Update(id uint, payload requests.AvatarRequest) responses.ServiceResponse {
-	return service.avatarService.Update(id, payload)
+func (service *Avatar) Update(rctx *requests.RequestContext, id uint, payload requests.AvatarRequest) responses.ServiceResponse {
+	return service.avatarService.Update(rctx, id, payload)
 }

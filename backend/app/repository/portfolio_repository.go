@@ -19,10 +19,10 @@ func NewPortfolio(container *storage.Container) *Portfolio {
 	}
 }
 
-func (repo *Portfolio) UserPortfolioExists(id, userId uint) error {
+func (repo *Portfolio) UserPortfolioExists(rctx *requests.RequestContext, id, userId uint) error {
 	var count int64
 
-	err := repo.container.Config.ReadOnlyDB.Model(&models.Portfolio{}).
+	err := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Model(&models.Portfolio{}).
 		Where("id = ? and user_id = ?", id, userId).Count(&count).Error
 
 	if err != nil {
@@ -34,13 +34,13 @@ func (repo *Portfolio) UserPortfolioExists(id, userId uint) error {
 	return nil
 }
 
-func (repo *Portfolio) GetList(userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error) {
+func (repo *Portfolio) GetList(rctx *requests.RequestContext, userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error) {
 	var portfolio models.Portfolio
 	var avatar models.Avatar
 
 	var portfolios []responses.PortfolioResponse
 
-	query := repo.container.Config.ReadOnlyDB.Table(portfolio.GetName() + " p").
+	query := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Table(portfolio.GetName() + " p").
 		Joins("JOIN " + avatar.GetName() + " a ON a.id = p.avatar_id")
 	if userType == commonType.UserTypeUser {
 		query = query.Where("p.user_id = ? ", userId)
@@ -57,13 +57,13 @@ func (repo *Portfolio) GetList(userId uint, userType commonType.UserType) (*[]re
 	return &portfolios, nil
 }
 
-func (repo *Portfolio) Get(id, userId uint, userType commonType.UserType) (*responses.PortfolioResponse, error) {
+func (repo *Portfolio) Get(rctx *requests.RequestContext, id, userId uint, userType commonType.UserType) (*responses.PortfolioResponse, error) {
 	var portfolio models.Portfolio
 	var avatar models.Avatar
 
 	var portfolios responses.PortfolioResponse
 
-	query := repo.container.Config.ReadOnlyDB.Table(portfolio.GetName()+" p").
+	query := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Table(portfolio.GetName()+" p").
 		Joins("JOIN "+avatar.GetName()+" a ON a.id = p.avatar_id").Where("p.id = ?", id)
 	if userType == commonType.UserTypeUser {
 		query = query.Where("p.user_id = ?", userId)
@@ -80,12 +80,12 @@ func (repo *Portfolio) Get(id, userId uint, userType commonType.UserType) (*resp
 	return &portfolios, nil
 }
 
-func (repo *Portfolio) Create(portfolio models.Portfolio) error {
-	return repo.container.Config.ReadWriteDB.Create(&portfolio).Error
+func (repo *Portfolio) Create(rctx *requests.RequestContext, portfolio models.Portfolio) error {
+	return repo.container.Config.ReadWriteDB.WithContext(rctx.Ctx).Create(&portfolio).Error
 }
 
-func (repo *Portfolio) Update(id, userId uint, payload requests.PortfolioRequest) error {
-	result := repo.container.Config.ReadWriteDB.Model(&models.Portfolio{}).
+func (repo *Portfolio) Update(rctx *requests.RequestContext, id, userId uint, payload requests.PortfolioRequest) error {
+	result := repo.container.Config.ReadWriteDB.WithContext(rctx.Ctx).Model(&models.Portfolio{}).
 		Where("id = ? AND user_id = ?", id, userId).
 		Updates(map[string]interface{}{
 			"name":      payload.Name,
@@ -102,8 +102,8 @@ func (repo *Portfolio) Update(id, userId uint, payload requests.PortfolioRequest
 	return nil
 }
 
-func (repo *Portfolio) Delete(id, userId uint) error {
-	result := repo.container.Config.ReadWriteDB.Where("id = ? AND user_id = ?", id, userId).Delete(&models.Portfolio{})
+func (repo *Portfolio) Delete(rctx *requests.RequestContext, id, userId uint) error {
+	result := repo.container.Config.ReadWriteDB.WithContext(rctx.Ctx).Where("id = ? AND user_id = ?", id, userId).Delete(&models.Portfolio{})
 
 	if result.Error != nil {
 		return result.Error

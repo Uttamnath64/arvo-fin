@@ -24,149 +24,153 @@ func NewPortfolio(container *storage.Container) *Portfolio {
 	}
 }
 
-func (handler *Portfolio) GetList(ctx *gin.Context) {
+func (handler *Portfolio) GetList(c *gin.Context) {
 
-	userInfo, ok := getUserInfo(ctx)
+	rctx, ok := getRequestContext(c)
 	if !ok {
 		return
 	}
 
-	serviceResponse := handler.portfolioService.GetList(userInfo.userId, userInfo.userType)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.portfolioService.GetList(rctx, rctx.UserID, rctx.UserType)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
 	portfolioResponse, _ := serviceResponse.Data.(*[]responses.PortfolioResponse)
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: portfolioResponse,
 	})
 }
 
-func (handler *Portfolio) Get(ctx *gin.Context) {
+func (handler *Portfolio) Get(c *gin.Context) {
 
-	userInfo, ok := getUserInfo(ctx)
+	rctx, ok := getRequestContext(c)
 	if !ok {
 		return
 	}
 
-	id, err := strconv.Atoi(ctx.Param("id"))
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
-		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
 			Message: "Invalid portfolio id!",
 		})
 		return
 	}
 
-	serviceResponse := handler.portfolioService.Get(uint(id), userInfo.userId, userInfo.userType)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.portfolioService.Get(rctx, uint(id), rctx.UserID, rctx.UserType)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
 	portfolioResponse, _ := serviceResponse.Data.(*responses.PortfolioResponse)
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: portfolioResponse,
 	})
 }
 
-func (handler *Portfolio) Create(ctx *gin.Context) {
+func (handler *Portfolio) Create(c *gin.Context) {
 
-	var payload requests.PortfolioRequest
-	if !bindAndValidateJson(ctx, &payload) {
-		return
-	}
-
-	userInfo, ok := getUserInfo(ctx)
+	rctx, ok := getRequestContext(c)
 	if !ok {
 		return
 	}
-	if userInfo.userType != commonType.UserTypeUser {
-		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
+
+	var payload requests.PortfolioRequest
+	if !bindAndValidateJson(c, &payload) {
+		return
+	}
+
+	if rctx.UserType != commonType.UserTypeUser {
+		c.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "Only users can add portfolios!",
 		})
 	}
 
-	serviceResponse := handler.portfolioService.Create(payload, userInfo.userId)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.portfolioService.Create(rctx, payload, rctx.UserID)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:  true,
 		Message: serviceResponse.Message,
 	})
 }
 
-func (handler *Portfolio) Update(ctx *gin.Context) {
+func (handler *Portfolio) Update(c *gin.Context) {
 
-	var payload requests.PortfolioRequest
-	if !bindAndValidateJson(ctx, &payload) {
+	rctx, ok := getRequestContext(c)
+	if !ok {
 		return
 	}
 
-	id, err := strconv.Atoi(ctx.Param("id"))
+	var payload requests.PortfolioRequest
+	if !bindAndValidateJson(c, &payload) {
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
-		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
 			Message: "Invalid portfolio id!",
 		})
 		return
 	}
 
-	userInfo, ok := getUserInfo(ctx)
-	if !ok {
-		return
-	}
-	if userInfo.userType != commonType.UserTypeUser {
-		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
+	if rctx.UserType != commonType.UserTypeUser {
+		c.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "You are not allowed to update this portfolio!",
 		})
 	}
 
-	serviceResponse := handler.portfolioService.Update(uint(id), userInfo.userId, payload)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.portfolioService.Update(rctx, uint(id), rctx.UserID, payload)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:  true,
 		Message: serviceResponse.Message,
 	})
 }
 
-func (handler *Portfolio) Delete(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+func (handler *Portfolio) Delete(c *gin.Context) {
+
+	rctx, ok := getRequestContext(c)
+	if !ok {
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
-		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
 			Message: "Invalid portfolio id!",
 		})
 		return
 	}
 
-	userInfo, ok := getUserInfo(ctx)
-	if !ok {
-		return
-	}
-	if userInfo.userType != commonType.UserTypeUser {
-		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
+	if rctx.UserType != commonType.UserTypeUser {
+		c.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "You are not authorized to delete a portfolio!",
 		})
 	}
 
-	serviceResponse := handler.portfolioService.Delete(uint(id), userInfo.userId)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.portfolioService.Delete(rctx, uint(id), rctx.UserID)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:  true,
 		Message: serviceResponse.Message,
 	})

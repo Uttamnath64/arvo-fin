@@ -20,7 +20,7 @@ func NewTestAvatar(container *storage.Container) *TestAvatar {
 	}
 }
 
-func (repo *TestAvatar) Get(id uint) (*models.Avatar, error) {
+func (repo *TestAvatar) Get(rctx *requests.RequestContext, id uint) (*models.Avatar, error) {
 	if id == 1 {
 		return &models.Avatar{
 			BaseModel: models.BaseModel{
@@ -36,7 +36,7 @@ func (repo *TestAvatar) Get(id uint) (*models.Avatar, error) {
 	return nil, gorm.ErrRecordNotFound
 }
 
-func (repo *TestAvatar) GetByNameAndType(name string, avatarType commonType.AvatarType) *models.Avatar {
+func (repo *TestAvatar) GetByNameAndType(rctx *requests.RequestContext, name string, avatarType commonType.AvatarType) *models.Avatar {
 	return &models.Avatar{
 		Name: name,
 		Type: avatarType,
@@ -44,14 +44,14 @@ func (repo *TestAvatar) GetByNameAndType(name string, avatarType commonType.Avat
 	}
 }
 
-func (repo *TestAvatar) AvatarByTypeExists(id uint, avatarType commonType.AvatarType) error {
+func (repo *TestAvatar) AvatarByTypeExists(rctx *requests.RequestContext, id uint, avatarType commonType.AvatarType) error {
 	if id == 1 {
 		return nil
 	}
 	return gorm.ErrRecordNotFound
 }
 
-func (repo *TestAvatar) GetAvatarsByType(avatarType commonType.AvatarType) (*[]models.Avatar, error) {
+func (repo *TestAvatar) GetAvatarsByType(rctx *requests.RequestContext, avatarType commonType.AvatarType) (*[]models.Avatar, error) {
 	responses := []models.Avatar{
 		{
 			BaseModel: models.BaseModel{
@@ -77,11 +77,11 @@ func (repo *TestAvatar) GetAvatarsByType(avatarType commonType.AvatarType) (*[]m
 	return &responses, nil
 }
 
-func (repo *TestAvatar) Create(payload models.Avatar) (uint, error) {
+func (repo *TestAvatar) Create(rctx *requests.RequestContext, payload models.Avatar) (uint, error) {
 	return 1, nil
 }
 
-func (repo *TestAvatar) Update(id uint, payload requests.AvatarRequest) error {
+func (repo *TestAvatar) Update(rctx *requests.RequestContext, id uint, payload requests.AvatarRequest) error {
 	if id != 1 {
 		return gorm.ErrRecordNotFound
 	}

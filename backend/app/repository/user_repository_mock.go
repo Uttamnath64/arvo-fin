@@ -20,7 +20,7 @@ func NewTestUser(container *storage.Container) *TestUser {
 	}
 }
 
-func (repo *TestUser) GetUserByUsernameOrEmail(username string, email string, user *models.User) error {
+func (repo *TestUser) GetUserByUsernameOrEmail(rctx *requests.RequestContext, username string, email string, user *models.User) error {
 	if username == "uttam.nath" || email == "uttam@example.com" {
 		now := time.Now()
 		*user = models.User{
@@ -39,29 +39,29 @@ func (repo *TestUser) GetUserByUsernameOrEmail(username string, email string, us
 	return gorm.ErrRecordNotFound
 }
 
-func (repo *TestUser) UsernameExists(username string) error {
+func (repo *TestUser) UsernameExists(rctx *requests.RequestContext, username string) error {
 	if username == "uttam.nath" {
 		return nil
 	}
 	return gorm.ErrRecordNotFound
 }
 
-func (repo *TestUser) EmailExists(email string) error {
+func (repo *TestUser) EmailExists(rctx *requests.RequestContext, email string) error {
 	if email == "uttam@example.com" {
 		return nil
 	}
 	return gorm.ErrRecordNotFound
 }
 
-func (repo *TestUser) CreateUser(user *models.User) (uint, error) {
+func (repo *TestUser) CreateUser(rctx *requests.RequestContext, user *models.User) (uint, error) {
 	return 1, nil
 }
 
-func (repo *TestUser) UpdatePasswordByEmail(email, newPassword string) error {
+func (repo *TestUser) UpdatePasswordByEmail(rctx *requests.RequestContext, email, newPassword string) error {
 	return nil
 }
 
-func (repo *TestUser) GetUser(userId uint, user *models.User) error {
+func (repo *TestUser) GetUser(rctx *requests.RequestContext, userId uint, user *models.User) error {
 	now := time.Now()
 	*user = models.User{
 		BaseModel: models.BaseModel{
@@ -77,7 +77,7 @@ func (repo *TestUser) GetUser(userId uint, user *models.User) error {
 	return nil
 }
 
-func (repo *TestUser) Get(userId uint) (*responses.MeResponse, error) {
+func (repo *TestUser) Get(rctx *requests.RequestContext, userId uint) (*responses.MeResponse, error) {
 	if userId != 1 {
 		return nil, gorm.ErrRecordNotFound
 	}
@@ -89,7 +89,7 @@ func (repo *TestUser) Get(userId uint) (*responses.MeResponse, error) {
 	}, nil
 }
 
-func (repo *TestUser) GetSettings(userId uint) (*responses.SettingsResponse, error) {
+func (repo *TestUser) GetSettings(rctx *requests.RequestContext, userId uint) (*responses.SettingsResponse, error) {
 	if userId != 1 {
 		return nil, gorm.ErrRecordNotFound
 	}
@@ -104,14 +104,14 @@ func (repo *TestUser) GetSettings(userId uint) (*responses.SettingsResponse, err
 	}, nil
 }
 
-func (repo *TestUser) Update(userId uint, payload requests.MeRequest) error {
+func (repo *TestUser) Update(rctx *requests.RequestContext, userId uint, payload requests.MeRequest) error {
 	if userId != 1 {
 		return gorm.ErrRecordNotFound
 	}
 	return nil
 }
 
-func (repo *TestUser) UpdateSettings(userId uint, payload requests.SettingsRequest) error {
+func (repo *TestUser) UpdateSettings(rctx *requests.RequestContext, userId uint, payload requests.SettingsRequest) error {
 	if userId != 1 {
 		return gorm.ErrRecordNotFound
 	}

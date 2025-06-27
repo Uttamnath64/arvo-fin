@@ -1,10 +1,14 @@
 package routes
 
-import "github.com/Uttamnath64/arvo-fin/fin-api/internal/handlers"
+import (
+	"github.com/Uttamnath64/arvo-fin/fin-api/internal/handlers"
+	"github.com/Uttamnath64/arvo-fin/fin-api/internal/middleware"
+)
 
 func (routes *Routes) AuthRoutes() {
 	handler := handlers.NewAuth(routes.container)
-	userGroup := routes.server.Group("/auth")
+	middle := middleware.New(routes.container)
+	userGroup := routes.server.Group("/auth").Use(middle.AuthMiddleware())
 	{
 		userGroup.POST("/login", handler.Login)
 		userGroup.POST("/token", handler.Token)

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"os"
 
 	"github.com/Uttamnath64/arvo-fin/app/config"
@@ -14,7 +13,6 @@ import (
 func getContainer() (*storage.Container, error) {
 	var err error
 	var con config.Config
-	ctx := context.Background()
 
 	// load env
 	env, err := config.LoadEnv(".env")
@@ -30,13 +28,7 @@ func getContainer() (*storage.Container, error) {
 		return nil, err
 	}
 
-	// load redis
-	redis, err := storage.NewRedisClient(ctx, env.Server.RedisAddr, "", 0)
-	if err != nil {
-		return nil, err
-	}
-
-	return storage.NewContainer(ctx, &con, log, redis, &env), nil
+	return storage.NewContainer(&con, log, nil, &env), nil
 }
 
 func main() {
@@ -78,5 +70,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	container.Logger.Info("app-migrate-done", "👍 Migration completed!")
+	container.Logger.Info("app-migrate-done", "message", "👍 Migration completed!")
 }

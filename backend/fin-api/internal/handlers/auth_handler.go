@@ -22,100 +22,125 @@ func NewAuth(container *storage.Container) *Auth {
 	}
 }
 
-func (handler *Auth) Login(ctx *gin.Context) {
+func (handler *Auth) Login(c *gin.Context) {
+
+	rctx, ok := getRequestContext(c)
+	if !ok {
+		return
+	}
 
 	var payload requests.LoginRequest
-	if !bindAndValidateJson(ctx, &payload) {
+	if !bindAndValidateJson(c, &payload) {
 		return
 	}
 
-	serviceResponse := handler.authService.Login(payload, ctx.Request.UserAgent(), ctx.ClientIP())
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.authService.Login(rctx, payload, c.Request.UserAgent(), c.ClientIP())
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
 	authR, _ := serviceResponse.Data.(responses.AuthResponse)
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: authR,
 	})
 }
 
-func (handler *Auth) Register(ctx *gin.Context) {
+func (handler *Auth) Register(c *gin.Context) {
+
+	rctx, ok := getRequestContext(c)
+	if !ok {
+		return
+	}
 
 	var payload requests.RegisterRequest
-	if !bindAndValidateJson(ctx, &payload) {
+	if !bindAndValidateJson(c, &payload) {
 		return
 	}
 
-	serviceResponse := handler.authService.Register(payload, ctx.Request.UserAgent(), ctx.ClientIP())
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.authService.Register(rctx, payload, c.Request.UserAgent(), c.ClientIP())
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
 	authR, _ := serviceResponse.Data.(responses.AuthResponse)
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: authR,
 	})
 }
 
-func (handler *Auth) SendOTP(ctx *gin.Context) {
+func (handler *Auth) SendOTP(c *gin.Context) {
+
+	rctx, ok := getRequestContext(c)
+	if !ok {
+		return
+	}
 
 	var payload requests.SentOTPRequest
-	if !bindAndValidateJson(ctx, &payload) {
+	if !bindAndValidateJson(c, &payload) {
 		return
 	}
 
-	serviceResponse := handler.authService.SendOTP(payload)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.authService.SendOTP(rctx, payload)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:  true,
 		Message: "OTP sent successfully to the email address!",
 	})
 }
 
-func (handler *Auth) ResetPassword(ctx *gin.Context) {
+func (handler *Auth) ResetPassword(c *gin.Context) {
+
+	rctx, ok := getRequestContext(c)
+	if !ok {
+		return
+	}
 
 	var payload requests.ResetPasswordRequest
-	if !bindAndValidateJson(ctx, &payload) {
+	if !bindAndValidateJson(c, &payload) {
 		return
 	}
 
 	// Reset password
-	serviceResponse := handler.authService.ResetPassword(payload, ctx.Request.UserAgent(), ctx.ClientIP())
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.authService.ResetPassword(rctx, payload, c.Request.UserAgent(), c.ClientIP())
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
 	authR, _ := serviceResponse.Data.(responses.AuthResponse)
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: authR,
 	})
 }
 
-func (handler *Auth) Token(ctx *gin.Context) {
+func (handler *Auth) Token(c *gin.Context) {
+
+	rctx, ok := getRequestContext(c)
+	if !ok {
+		return
+	}
 
 	var payload requests.TokenRequest
-	if !bindAndValidateJson(ctx, &payload) {
+	if !bindAndValidateJson(c, &payload) {
 		return
 	}
 
 	// Get token
-	serviceResponse := handler.authService.GetToken(payload, ctx.Request.UserAgent(), ctx.ClientIP())
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.authService.GetToken(rctx, payload, c.Request.UserAgent(), c.ClientIP())
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
 	authR, _ := serviceResponse.Data.(responses.AuthResponse)
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: authR,

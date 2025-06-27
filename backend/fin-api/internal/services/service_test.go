@@ -1,7 +1,6 @@
 package services
 
 import (
-	"context"
 	"os"
 
 	"github.com/Uttamnath64/arvo-fin/app/config"
@@ -12,8 +11,6 @@ import (
 
 func getTestContainer() (*storage.Container, bool) {
 	var con config.Config
-	var redis *storage.RedisClient
-	ctx := context.Background()
 	requests.NewResponse()
 
 	// load env
@@ -33,5 +30,5 @@ func getTestContainer() (*storage.Container, bool) {
 		return nil, false
 	}
 
-	return storage.NewContainer(ctx, &con, log, redis, &env), true
+	return storage.NewContainer(&con, log, nil, &env), true
 }

@@ -24,34 +24,44 @@ func NewAvatar(container *storage.Container) *Avatar {
 	}
 }
 
-func (handler *Avatar) Get(ctx *gin.Context) {
+func (handler *Avatar) Get(c *gin.Context) {
 
-	id, err := strconv.Atoi(ctx.Param("id"))
+	rctx, ok := getRequestContext(c)
+	if !ok {
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
-		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
 			Message: "Invalid avatar id!",
 		})
 		return
 	}
 
-	serviceResponse := handler.avatarService.Get(uint(id))
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.avatarService.Get(rctx, uint(id))
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: serviceResponse.Data,
 	})
 }
 
-func (handler *Avatar) GetAvatarsByType(ctx *gin.Context) {
+func (handler *Avatar) GetAvatarsByType(c *gin.Context) {
 
-	typeInt, err := strconv.Atoi(ctx.Param("type"))
+	rctx, ok := getRequestContext(c)
+	if !ok {
+		return
+	}
+
+	typeInt, err := strconv.Atoi(c.Param("type"))
 	if err != nil || typeInt <= 0 {
-		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
 			Message: "Invalid type!",
 		})
@@ -60,91 +70,91 @@ func (handler *Avatar) GetAvatarsByType(ctx *gin.Context) {
 
 	avatarType := commonType.AvatarType(typeInt)
 	if !avatarType.IsValid() {
-		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
 			Message: "Invalid avatar type!",
 		})
 		return
 	}
 
-	serviceResponse := handler.avatarService.GetAvatarsByType(avatarType)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.avatarService.GetAvatarsByType(rctx, avatarType)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: serviceResponse.Data,
 	})
 }
 
-func (handler *Avatar) Create(ctx *gin.Context) {
+func (handler *Avatar) Create(c *gin.Context) {
 
-	var payload requests.AvatarRequest
-	if !bindAndValidateJson(ctx, &payload) {
-		return
-	}
-
-	userInfo, ok := getUserInfo(ctx)
+	rctx, ok := getRequestContext(c)
 	if !ok {
 		return
 	}
 
-	if userInfo.userType != commonType.UserTypeAdmin {
-		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
+	var payload requests.AvatarRequest
+	if !bindAndValidateJson(c, &payload) {
+		return
+	}
+
+	if rctx.UserType != commonType.UserTypeAdmin {
+		c.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "Only admin can add avatar!",
 		})
 		return
 	}
 
-	serviceResponse := handler.avatarService.Create(payload)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.avatarService.Create(rctx, payload)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:  true,
 		Message: serviceResponse.Message,
 	})
 }
 
-func (handler *Avatar) Update(ctx *gin.Context) {
+func (handler *Avatar) Update(c *gin.Context) {
 
-	var payload requests.AvatarRequest
-	if !bindAndValidateJson(ctx, &payload) {
+	rctx, ok := getRequestContext(c)
+	if !ok {
 		return
 	}
 
-	id, err := strconv.Atoi(ctx.Param("id"))
+	var payload requests.AvatarRequest
+	if !bindAndValidateJson(c, &payload) {
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
-		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
 			Message: "Invalid avatar id!",
 		})
 		return
 	}
 
-	userInfo, ok := getUserInfo(ctx)
-	if !ok {
-		return
-	}
-
-	if userInfo.userType != commonType.UserTypeAdmin {
-		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
+	if rctx.UserType != commonType.UserTypeAdmin {
+		c.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "Only admin can update avatar!",
 		})
 		return
 	}
 
-	serviceResponse := handler.avatarService.Update(uint(id), payload)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.avatarService.Update(rctx, uint(id), payload)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:  true,
 		Message: serviceResponse.Message,
 	})

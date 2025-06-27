@@ -19,18 +19,18 @@ func NewUser(container *storage.Container) *User {
 	}
 }
 
-func (service *User) Get(userId uint) responses.ServiceResponse {
-	return service.userService.Get(userId)
+func (service *User) Get(rctx *requests.RequestContext, userId uint) responses.ServiceResponse {
+	return service.userService.Get(rctx, userId)
 }
 
-func (service *User) GetSettings(userId uint) responses.ServiceResponse {
-	return service.userService.GetSettings(userId)
+func (service *User) GetSettings(rctx *requests.RequestContext, userId uint) responses.ServiceResponse {
+	return service.userService.GetSettings(rctx, userId)
 }
 
-func (service *User) Update(payload requests.MeRequest, userId uint) responses.ServiceResponse {
-	return service.userService.Update(payload, userId)
+func (service *User) Update(rctx *requests.RequestContext, payload requests.MeRequest, userId uint) responses.ServiceResponse {
+	return service.userService.Update(rctx, payload, userId)
 }
 
-func (service *User) UpdateSettings(payload requests.SettingsRequest, userId uint) responses.ServiceResponse {
-	return service.userService.UpdateSettings(payload, userId)
+func (service *User) UpdateSettings(rctx *requests.RequestContext, payload requests.SettingsRequest, userId uint) responses.ServiceResponse {
+	return service.userService.UpdateSettings(rctx, payload, userId)
 }

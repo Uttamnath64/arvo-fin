@@ -18,21 +18,21 @@ func NewAvatar(container *storage.Container) *Avatar {
 	}
 }
 
-func (repo *Avatar) Get(id uint) (*models.Avatar, error) {
+func (repo *Avatar) Get(rctx *requests.RequestContext, id uint) (*models.Avatar, error) {
 	var avatar models.Avatar
-	return &avatar, repo.container.Config.ReadOnlyDB.Where("id = ?", id).First(&avatar).Error
+	return &avatar, repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Where("id = ?", id).First(&avatar).Error
 }
 
-func (repo *Avatar) GetByNameAndType(name string, avatarType commonType.AvatarType) *models.Avatar {
+func (repo *Avatar) GetByNameAndType(rctx *requests.RequestContext, name string, avatarType commonType.AvatarType) *models.Avatar {
 	var avatar models.Avatar
-	repo.container.Config.ReadOnlyDB.Where("name = ? and type = ?", name, avatarType).First(&avatar)
+	repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Where("name = ? and type = ?", name, avatarType).First(&avatar)
 	return &avatar
 }
 
-func (repo *Avatar) AvatarByTypeExists(id uint, avatarType commonType.AvatarType) error {
+func (repo *Avatar) AvatarByTypeExists(rctx *requests.RequestContext, id uint, avatarType commonType.AvatarType) error {
 	var count int64
 
-	err := repo.container.Config.ReadOnlyDB.Model(&models.Avatar{}).
+	err := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Model(&models.Avatar{}).
 		Where("id = ? AND type = ?", id, avatarType).Count(&count).Error
 
 	if err != nil {
@@ -44,9 +44,9 @@ func (repo *Avatar) AvatarByTypeExists(id uint, avatarType commonType.AvatarType
 	return nil
 }
 
-func (repo *Avatar) GetAvatarsByType(avatarType commonType.AvatarType) (*[]models.Avatar, error) {
+func (repo *Avatar) GetAvatarsByType(rctx *requests.RequestContext, avatarType commonType.AvatarType) (*[]models.Avatar, error) {
 	var response []models.Avatar
-	if err := repo.container.Config.ReadOnlyDB.Model(&models.Avatar{}).Where("type = ?", avatarType).Scan(&response).Error; err != nil {
+	if err := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Model(&models.Avatar{}).Where("type = ?", avatarType).Scan(&response).Error; err != nil {
 		return nil, err
 	}
 
@@ -56,12 +56,12 @@ func (repo *Avatar) GetAvatarsByType(avatarType commonType.AvatarType) (*[]model
 	return &response, nil
 }
 
-func (repo *Avatar) Create(avatar models.Avatar) (uint, error) {
-	return avatar.ID, repo.container.Config.ReadWriteDB.Create(&avatar).Error
+func (repo *Avatar) Create(rctx *requests.RequestContext, avatar models.Avatar) (uint, error) {
+	return avatar.ID, repo.container.Config.ReadWriteDB.WithContext(rctx.Ctx).Create(&avatar).Error
 }
 
-func (repo *Avatar) Update(id uint, payload requests.AvatarRequest) error {
-	result := repo.container.Config.ReadWriteDB.Model(&models.Avatar{}).
+func (repo *Avatar) Update(rctx *requests.RequestContext, id uint, payload requests.AvatarRequest) error {
+	result := repo.container.Config.ReadWriteDB.WithContext(rctx.Ctx).Model(&models.Avatar{}).
 		Where("id = ?", id).
 		Updates(map[string]interface{}{
 			"name": payload.Name,

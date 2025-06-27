@@ -19,14 +19,14 @@ func NewTestPortfolio(container *storage.Container) *TestPortfolio {
 	}
 }
 
-func (repo *TestPortfolio) UserPortfolioExists(id, userId uint) error {
+func (repo *TestPortfolio) UserPortfolioExists(rctx *requests.RequestContext, id, userId uint) error {
 	if userId == 1 {
 		return nil
 	}
 	return gorm.ErrRecordNotFound
 }
 
-func (repo *TestPortfolio) GetList(userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error) {
+func (repo *TestPortfolio) GetList(rctx *requests.RequestContext, userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error) {
 	if userId == 1 && userType == commonType.UserTypeUser {
 		portfolios := []responses.PortfolioResponse{
 			{
@@ -47,7 +47,7 @@ func (repo *TestPortfolio) GetList(userId uint, userType commonType.UserType) (*
 	return nil, gorm.ErrRecordNotFound
 }
 
-func (repo *TestPortfolio) Get(id, userId uint, userType commonType.UserType) (*responses.PortfolioResponse, error) {
+func (repo *TestPortfolio) Get(rctx *requests.RequestContext, id, userId uint, userType commonType.UserType) (*responses.PortfolioResponse, error) {
 	if id == 1 && userId == 1 && userType == commonType.UserTypeUser {
 		portfolios := responses.PortfolioResponse{
 			Id:         1,
@@ -60,18 +60,18 @@ func (repo *TestPortfolio) Get(id, userId uint, userType commonType.UserType) (*
 	return nil, gorm.ErrRecordNotFound
 }
 
-func (repo *TestPortfolio) Create(portfolio models.Portfolio) error {
+func (repo *TestPortfolio) Create(rctx *requests.RequestContext, portfolio models.Portfolio) error {
 	return nil
 }
 
-func (repo *TestPortfolio) Update(id, userId uint, payload requests.PortfolioRequest) error {
+func (repo *TestPortfolio) Update(rctx *requests.RequestContext, id, userId uint, payload requests.PortfolioRequest) error {
 	if id == 1 && userId == 1 {
 		return nil
 	}
 	return gorm.ErrRecordNotFound
 }
 
-func (repo *TestPortfolio) Delete(id, userId uint) error {
+func (repo *TestPortfolio) Delete(rctx *requests.RequestContext, id, userId uint) error {
 	if id == 1 && userId == 1 {
 		return nil
 	}

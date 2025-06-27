@@ -23,9 +23,9 @@ func NewAvatar(container *storage.Container) *Avatar {
 	}
 }
 
-func (service *Avatar) Get(id uint) responses.ServiceResponse {
+func (service *Avatar) Get(rctx *requests.RequestContext, id uint) responses.ServiceResponse {
 
-	response, err := service.repoAvatar.Get(id)
+	response, err := service.repoAvatar.Get(rctx, id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", err)
@@ -39,14 +39,14 @@ func (service *Avatar) Get(id uint) responses.ServiceResponse {
 	return responses.SuccessResponse("Avatar records found!", response)
 }
 
-func (service *Avatar) GetAvatarsByType(avatarType commonType.AvatarType) responses.ServiceResponse {
-	response, err := service.repoAvatar.GetAvatarsByType(avatarType)
+func (service *Avatar) GetAvatarsByType(rctx *requests.RequestContext, avatarType commonType.AvatarType) responses.ServiceResponse {
+	response, err := service.repoAvatar.GetAvatarsByType(rctx, avatarType)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return responses.ErrorResponse(common.StatusNotFound, "Avatars not found by type!", err)
 		}
 
-		service.container.Logger.Error("avatar.appService.getAvatarsByType-GetAvatarsByType", "error", err.Error(), "avatarType", avatarType, "avatarTypeName", avatarType.String())
+		service.container.Logger.Error("avatar.appService.getAvatarsByType-GetAvatarsByType", "error", err.Error(), "avatarType", avatarType)
 		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
@@ -54,9 +54,9 @@ func (service *Avatar) GetAvatarsByType(avatarType commonType.AvatarType) respon
 	return responses.SuccessResponse("Avatars found by type!", response)
 }
 
-func (service *Avatar) Creatre(payload requests.AvatarRequest) responses.ServiceResponse {
+func (service *Avatar) Creatre(rctx *requests.RequestContext, payload requests.AvatarRequest) responses.ServiceResponse {
 
-	avatarId, err := service.repoAvatar.Create(models.Avatar{
+	avatarId, err := service.repoAvatar.Create(rctx, models.Avatar{
 		Name: payload.Name,
 		Type: payload.Type,
 		Icon: payload.Icon,
@@ -71,13 +71,13 @@ func (service *Avatar) Creatre(payload requests.AvatarRequest) responses.Service
 	}
 
 	// Response
-	response, _ := service.repoAvatar.Get(avatarId)
+	response, _ := service.repoAvatar.Get(rctx, avatarId)
 	return responses.SuccessResponse("Avatar is created!", response)
 }
 
-func (service *Avatar) Update(id uint, payload requests.AvatarRequest) responses.ServiceResponse {
+func (service *Avatar) Update(rctx *requests.RequestContext, id uint, payload requests.AvatarRequest) responses.ServiceResponse {
 
-	err := service.repoAvatar.Update(id, payload)
+	err := service.repoAvatar.Update(rctx, id, payload)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", err)
@@ -88,6 +88,6 @@ func (service *Avatar) Update(id uint, payload requests.AvatarRequest) responses
 	}
 
 	// Response
-	response, _ := service.repoAvatar.Get(id)
+	response, _ := service.repoAvatar.Get(rctx, id)
 	return responses.SuccessResponse("Avatar is updated!", response)
 }

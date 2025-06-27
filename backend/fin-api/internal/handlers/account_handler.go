@@ -24,40 +24,45 @@ func NewAccount(container *storage.Container) *Account {
 	}
 }
 
-func (handler *Account) Get(ctx *gin.Context) {
+func (handler *Account) Get(c *gin.Context) {
 
-	id, err := strconv.Atoi(ctx.Param("id"))
+	rctx, ok := getRequestContext(c)
+	if !ok {
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
-		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
 			Message: "Invalid account id!",
 		})
 		return
 	}
 
-	serviceResponse := handler.accountService.Get(uint(id))
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.accountService.Get(rctx, uint(id))
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: serviceResponse.Data,
 	})
 }
 
-func (handler *Account) GetList(ctx *gin.Context) {
+func (handler *Account) GetList(c *gin.Context) {
 
-	userInfo, ok := getUserInfo(ctx)
+	rctx, ok := getRequestContext(c)
 	if !ok {
 		return
 	}
-	userId := userInfo.userId
+	userId := rctx.UserID
 
-	portfolioId, err := strconv.Atoi(ctx.Param("portfolioId"))
+	portfolioId, err := strconv.Atoi(c.Param("portfolioId"))
 	if err != nil || portfolioId <= 0 {
-		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
 			Message: "Invalid portfolio id!",
 		})
@@ -65,10 +70,10 @@ func (handler *Account) GetList(ctx *gin.Context) {
 	}
 
 	// User is admin then
-	if userInfo.userType == commonType.UserTypeAdmin {
-		id, err := strconv.Atoi(ctx.Param("userId"))
+	if rctx.UserType == commonType.UserTypeAdmin {
+		id, err := strconv.Atoi(c.Param("userId"))
 		if err != nil || id <= 0 {
-			ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+			c.JSON(http.StatusBadRequest, responses.ApiResponse{
 				Status:  false,
 				Message: "Invalid user id!",
 			})
@@ -77,135 +82,140 @@ func (handler *Account) GetList(ctx *gin.Context) {
 		userId = uint(id)
 	}
 
-	serviceResponse := handler.accountService.GetList(uint(portfolioId), userId)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.accountService.GetList(rctx, uint(portfolioId), userId)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: serviceResponse.Data,
 	})
 }
 
-func (handler *Account) AccountTypes(ctx *gin.Context) {
+func (handler *Account) AccountTypes(c *gin.Context) {
 
-	serviceResponse := handler.accountService.AccountTypes()
-	if isErrorResponse(ctx, serviceResponse) {
+	rctx, ok := getRequestContext(c)
+	if !ok {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	serviceResponse := handler.accountService.AccountTypes(rctx)
+	if isErrorResponse(c, serviceResponse) {
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: serviceResponse.Data,
 	})
 }
 
-func (handler *Account) Create(ctx *gin.Context) {
+func (handler *Account) Create(c *gin.Context) {
+
+	rctx, ok := getRequestContext(c)
+	if !ok {
+		return
+	}
 
 	var payload requests.AccountRequest
-	if !bindAndValidateJson(ctx, &payload) {
+	if !bindAndValidateJson(c, &payload) {
 		return
 	}
 
-	userInfo, ok := getUserInfo(ctx)
-	if !ok {
-		return
-	}
-
-	if userInfo.userType != commonType.UserTypeUser {
-		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
+	if rctx.UserType != commonType.UserTypeUser {
+		c.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "Only user can update account!",
 		})
 		return
 	}
 
-	serviceResponse := handler.accountService.Create(userInfo.userId, payload)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.accountService.Create(rctx, rctx.UserID, payload)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: serviceResponse.Data,
 	})
 }
 
-func (handler *Account) Update(ctx *gin.Context) {
+func (handler *Account) Update(c *gin.Context) {
+
+	rctx, ok := getRequestContext(c)
+	if !ok {
+		return
+	}
 
 	var payload requests.AccountUpdateRequest
-	if !bindAndValidateJson(ctx, &payload) {
+	if !bindAndValidateJson(c, &payload) {
 		return
 	}
 
-	id, err := strconv.Atoi(ctx.Param("id"))
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
-		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
 			Message: "Invalid account id!",
 		})
 		return
 	}
 
-	userInfo, ok := getUserInfo(ctx)
-	if !ok {
-		return
-	}
-
-	if userInfo.userType != commonType.UserTypeUser {
-		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
+	if rctx.UserType != commonType.UserTypeUser {
+		c.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "Only user can update account!",
 		})
 		return
 	}
 
-	serviceResponse := handler.accountService.Update(uint(id), userInfo.userId, payload)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.accountService.Update(rctx, uint(id), rctx.UserID, payload)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: serviceResponse.Data,
 	})
 }
 
-func (handler *Account) Delete(ctx *gin.Context) {
+func (handler *Account) Delete(c *gin.Context) {
 
-	id, err := strconv.Atoi(ctx.Param("id"))
+	rctx, ok := getRequestContext(c)
+	if !ok {
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
-		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
 			Message: "Invalid account id!",
 		})
 		return
 	}
 
-	userInfo, ok := getUserInfo(ctx)
-	if !ok {
-		return
-	}
-
-	if userInfo.userType != commonType.UserTypeUser {
-		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
+	if rctx.UserType != commonType.UserTypeUser {
+		c.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "Only user can update account!",
 		})
 		return
 	}
 
-	serviceResponse := handler.accountService.Delete(uint(id), userInfo.userId)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.accountService.Delete(rctx, uint(id), rctx.UserID)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: serviceResponse.Data,

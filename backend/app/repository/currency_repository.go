@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/Uttamnath64/arvo-fin/app/models"
+	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"gorm.io/gorm"
 )
@@ -16,10 +17,10 @@ func NewCurrency(container *storage.Container) *Currency {
 	}
 }
 
-func (repo *Currency) CodeExists(code string) error {
+func (repo *Currency) CodeExists(rctx *requests.RequestContext, code string) error {
 	var count int64
 
-	err := repo.container.Config.ReadOnlyDB.Model(&models.Currency{}).
+	err := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Model(&models.Currency{}).
 		Where("code = ?", code).Count(&count).Error
 
 	if err != nil {

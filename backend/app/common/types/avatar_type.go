@@ -11,7 +11,7 @@ const (
 )
 
 func (t AvatarType) String() string {
-	names := [...]string{"Default", "User", "Category", "Portfolio"}
+	names := [...]string{"", "Default", "User", "Category", "Portfolio"}
 	if !t.IsValid() {
 		return "Unknown"
 	}

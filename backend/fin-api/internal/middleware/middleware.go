@@ -1,11 +1,15 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/Uttamnath64/arvo-fin/app/common"
+	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
+	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/responses"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"github.com/gin-gonic/gin"
@@ -23,15 +27,19 @@ func New(container *storage.Container) *Middleware {
 }
 
 func (m *Middleware) Middleware() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
+	return func(c *gin.Context) {
 
-		tokenString := ctx.GetHeader("Authorization")
+		// ⏳ Create a context with timeout (e.g., 5 seconds)
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+
+		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" {
-			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
 				Message: "Missing access token!",
 			})
-			ctx.Abort()
+			c.Abort()
 			return
 		}
 
@@ -46,11 +54,11 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
 				Message: "Invalid access token: " + err.Error(),
 			})
-			ctx.Abort()
+			c.Abort()
 			return
 		}
 
@@ -58,28 +66,63 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			m.container.Logger.Error("api-middleware-MapClaims", "Invalid token claims format! Token payload:", token.Claims)
-			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
 				Message: "Invalid token claims format!",
 			})
-			ctx.Abort()
+			c.Abort()
 			return
 		}
 
 		// ✅ Check token expiration manually
 		exp, ok := claims["exp"].(float64)
 		if !ok || int64(exp) < time.Now().Unix() {
-			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
 				Message: "Access token expired!",
 			})
-			ctx.Abort()
+			c.Abort()
 			return
 		}
 
-		ctx.Set("user_id", claims["user_id"])
-		ctx.Set("user_type", claims["user_type"])
-		ctx.Set("session_id", claims["session_id"])
-		ctx.Next()
+		userIDFloat, ok := claims[string(common.CtxUserID)].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Invalid user_id format!",
+			})
+			c.Abort()
+			return
+		}
+
+		sessionIDFloat, ok := claims[string(common.CtxSessionID)].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Invalid session_id format!",
+			})
+			c.Abort()
+			return
+		}
+
+		userTypeFloat, ok := claims[string(common.CtxUserType)].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
+				Status:  false,
+				Message: "Invalid user_type format!",
+			})
+			c.Abort()
+			return
+		}
+
+		rctx := &requests.RequestContext{
+			Ctx:       ctx,
+			UserID:    uint(userIDFloat),
+			UserType:  commonType.UserType(int8(userTypeFloat)),
+			SessionID: uint(sessionIDFloat),
+		}
+
+		c.Set("rctx", rctx)
+		c.Next()
 	}
 }

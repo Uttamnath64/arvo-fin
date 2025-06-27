@@ -28,9 +28,9 @@ func NewUser(container *storage.Container) *User {
 	}
 }
 
-func (service *User) Get(userId uint) responses.ServiceResponse {
+func (service *User) Get(rctx *requests.RequestContext, userId uint) responses.ServiceResponse {
 
-	response, err := service.repoUser.Get(userId)
+	response, err := service.repoUser.Get(rctx, userId)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return responses.ErrorResponse(common.StatusNotFound, "User not found!", err)
@@ -43,8 +43,8 @@ func (service *User) Get(userId uint) responses.ServiceResponse {
 	return responses.SuccessResponse("User records found!", response)
 }
 
-func (service *User) GetSettings(userId uint) responses.ServiceResponse {
-	response, err := service.repoUser.GetSettings(userId)
+func (service *User) GetSettings(rctx *requests.RequestContext, userId uint) responses.ServiceResponse {
+	response, err := service.repoUser.GetSettings(rctx, userId)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return responses.ErrorResponse(common.StatusNotFound, "User not found!", err)
@@ -58,19 +58,19 @@ func (service *User) GetSettings(userId uint) responses.ServiceResponse {
 	return responses.SuccessResponse("User settings found!", response)
 }
 
-func (service *User) Update(payload requests.MeRequest, userId uint) responses.ServiceResponse {
+func (service *User) Update(rctx *requests.RequestContext, payload requests.MeRequest, userId uint) responses.ServiceResponse {
 
 	// Check avatar
-	if err := service.repoAvatar.AvatarByTypeExists(payload.AvatarId, commonType.AvatarTypeUser); err != nil {
+	if err := service.repoAvatar.AvatarByTypeExists(rctx, payload.AvatarId, commonType.AvatarTypeUser); err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", errors.New("avatar not found"))
 		}
-		service.container.Logger.Error("user.appService.update-GetSettings", "error", err.Error(), "avatarId", payload.AvatarId, "avatarType", commonType.AvatarTypeUser, "avatarTypeName", commonType.AvatarTypeUser.String())
+		service.container.Logger.Error("user.appService.update-GetSettings", "error", err.Error(), "avatarId", payload.AvatarId, "avatarType", commonType.AvatarTypeUser)
 		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
 	}
 
 	// update
-	if err := service.repoUser.Update(userId, payload); err != nil {
+	if err := service.repoUser.Update(rctx, userId, payload); err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return responses.ErrorResponse(common.StatusNotFound, "User not found!", err)
 		}
@@ -83,10 +83,10 @@ func (service *User) Update(payload requests.MeRequest, userId uint) responses.S
 	return responses.SuccessResponse("User records updated!", nil)
 }
 
-func (service *User) UpdateSettings(payload requests.SettingsRequest, userId uint) responses.ServiceResponse {
+func (service *User) UpdateSettings(rctx *requests.RequestContext, payload requests.SettingsRequest, userId uint) responses.ServiceResponse {
 
 	// Check currencyCode
-	if err := service.repoCurrency.CodeExists(payload.CurrencyCode); err != nil {
+	if err := service.repoCurrency.CodeExists(rctx, payload.CurrencyCode); err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return responses.ErrorResponse(common.StatusNotFound, "Currency not found!", err)
 		}
@@ -96,7 +96,7 @@ func (service *User) UpdateSettings(payload requests.SettingsRequest, userId uin
 	}
 
 	// Update
-	if err := service.repoUser.UpdateSettings(userId, payload); err != nil {
+	if err := service.repoUser.UpdateSettings(rctx, userId, payload); err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return responses.ErrorResponse(common.StatusNotFound, "User not found!", err)
 		}

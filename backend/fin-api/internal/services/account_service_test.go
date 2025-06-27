@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"testing"
 
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
@@ -9,20 +10,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func NewTestAccount() (*Account, bool) {
+func NewTestAccount() (*Account, *requests.RequestContext, bool) {
 	container, ok := getTestContainer()
 	if !ok {
-		return nil, false
+		return nil, nil, false
 	}
 
 	return &Account{
-		container:      container,
-		accountService: commonServices.NewTestAccount(container),
-	}, true
+			container:      container,
+			accountService: commonServices.NewTestAccount(container),
+		}, &requests.RequestContext{
+			Ctx:       context.Background(),
+			UserID:    1,
+			UserType:  commonType.UserTypeUser,
+			SessionID: 1,
+		}, true
 }
 
 func TestGetList_Account(t *testing.T) {
-	service, ok := NewTestAccount()
+	service, rctx, ok := NewTestAccount()
 	if !ok {
 		return
 	}
@@ -50,14 +56,14 @@ func TestGetList_Account(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := service.GetList(tt.userId, tt.portfolioId)
+			serviceResponse := service.GetList(rctx, tt.userId, tt.portfolioId)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestGet_Account(t *testing.T) {
-	service, ok := NewTestAccount()
+	service, rctx, ok := NewTestAccount()
 	if !ok {
 		return
 	}
@@ -82,14 +88,14 @@ func TestGet_Account(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := service.Get(tt.Id)
+			serviceResponse := service.Get(rctx, tt.Id)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestCreate_Account(t *testing.T) {
-	service, ok := NewTestAccount()
+	service, rctx, ok := NewTestAccount()
 	if !ok {
 		return
 	}
@@ -134,14 +140,14 @@ func TestCreate_Account(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := service.Create(tt.userId, tt.payload)
+			serviceResponse := service.Create(rctx, tt.userId, tt.payload)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestUpdate_Account(t *testing.T) {
-	service, ok := NewTestAccount()
+	service, rctx, ok := NewTestAccount()
 	if !ok {
 		return
 	}
@@ -184,14 +190,14 @@ func TestUpdate_Account(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := service.Update(tt.Id, tt.userId, tt.payload)
+			serviceResponse := service.Update(rctx, tt.Id, tt.userId, tt.payload)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestDelete_Account(t *testing.T) {
-	service, ok := NewTestAccount()
+	service, rctx, ok := NewTestAccount()
 	if !ok {
 		return
 	}
@@ -219,7 +225,7 @@ func TestDelete_Account(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := service.Delete(tt.Id, tt.userId)
+			serviceResponse := service.Delete(rctx, tt.Id, tt.userId)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}

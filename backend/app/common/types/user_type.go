@@ -9,7 +9,7 @@ const (
 )
 
 func (t UserType) String() string {
-	names := [...]string{"User", "Admin"}
+	names := [...]string{"", "User", "Admin"}
 	if !t.IsValid() {
 		return "Unknown"
 	}

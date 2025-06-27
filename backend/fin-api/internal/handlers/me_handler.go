@@ -24,19 +24,19 @@ func NewMe(container *storage.Container) *Me {
 	}
 }
 
-func (handler *Me) Get(ctx *gin.Context) {
+func (handler *Me) Get(c *gin.Context) {
 
-	userInfo, ok := getUserInfo(ctx)
+	rctx, ok := getRequestContext(c)
 	if !ok {
 		return
 	}
-	userId := userInfo.userId
+	userId := rctx.UserID
 
 	// User is admin then
-	if userInfo.userType == commonType.UserTypeAdmin {
-		id, err := strconv.Atoi(ctx.Param("userId"))
+	if rctx.UserType == commonType.UserTypeAdmin {
+		id, err := strconv.Atoi(c.Param("userId"))
 		if err != nil || id <= 0 {
-			ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+			c.JSON(http.StatusBadRequest, responses.ApiResponse{
 				Status:  false,
 				Message: "Invalid user id!",
 			})
@@ -45,32 +45,32 @@ func (handler *Me) Get(ctx *gin.Context) {
 		userId = uint(id)
 	}
 
-	serviceResponse := handler.userService.Get(userId)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.userService.Get(rctx, userId)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
 	response, _ := serviceResponse.Data.(*responses.MeResponse)
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: response,
 	})
 }
 
-func (handler *Me) GetSettings(ctx *gin.Context) {
+func (handler *Me) GetSettings(c *gin.Context) {
 
-	userInfo, ok := getUserInfo(ctx)
+	rctx, ok := getRequestContext(c)
 	if !ok {
 		return
 	}
-	userId := userInfo.userId
+	userId := rctx.UserID
 
 	// User is admin then
-	if userInfo.userType == commonType.UserTypeAdmin {
-		id, err := strconv.Atoi(ctx.Param("userId"))
+	if rctx.UserType == commonType.UserTypeAdmin {
+		id, err := strconv.Atoi(c.Param("userId"))
 		if err != nil || id <= 0 {
-			ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+			c.JSON(http.StatusBadRequest, responses.ApiResponse{
 				Status:  false,
 				Message: "Invalid user id!",
 			})
@@ -79,74 +79,74 @@ func (handler *Me) GetSettings(ctx *gin.Context) {
 		userId = uint(id)
 	}
 
-	serviceResponse := handler.userService.GetSettings(userId)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.userService.GetSettings(rctx, userId)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
 	response, _ := serviceResponse.Data.(*responses.SettingsResponse)
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
 		Metadata: response,
 	})
 }
 
-func (handler *Me) Update(ctx *gin.Context) {
+func (handler *Me) Update(c *gin.Context) {
 
-	var payload requests.MeRequest
-	if !bindAndValidateJson(ctx, &payload) {
-		return
-	}
-
-	userInfo, ok := getUserInfo(ctx)
+	rctx, ok := getRequestContext(c)
 	if !ok {
 		return
 	}
 
-	if userInfo.userType != commonType.UserTypeUser {
-		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
+	var payload requests.MeRequest
+	if !bindAndValidateJson(c, &payload) {
+		return
+	}
+
+	if rctx.UserType != commonType.UserTypeUser {
+		c.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "Only users can update profile!",
 		})
 	}
 
-	serviceResponse := handler.userService.Update(payload, userInfo.userId)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.userService.Update(rctx, payload, rctx.UserID)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:  true,
 		Message: serviceResponse.Message,
 	})
 }
 
-func (handler *Me) UpdateSettings(ctx *gin.Context) {
+func (handler *Me) UpdateSettings(c *gin.Context) {
 
-	var payload requests.SettingsRequest
-	if !bindAndValidateJson(ctx, &payload) {
-		return
-	}
-
-	userInfo, ok := getUserInfo(ctx)
+	rctx, ok := getRequestContext(c)
 	if !ok {
 		return
 	}
 
-	if userInfo.userType != commonType.UserTypeUser {
-		ctx.JSON(http.StatusForbidden, responses.ApiResponse{
+	var payload requests.SettingsRequest
+	if !bindAndValidateJson(c, &payload) {
+		return
+	}
+
+	if rctx.UserType != commonType.UserTypeUser {
+		c.JSON(http.StatusForbidden, responses.ApiResponse{
 			Status:  false,
 			Message: "Only users can update setting!",
 		})
 	}
 
-	serviceResponse := handler.userService.UpdateSettings(payload, userInfo.userId)
-	if isErrorResponse(ctx, serviceResponse) {
+	serviceResponse := handler.userService.UpdateSettings(rctx, payload, rctx.UserID)
+	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:  true,
 		Message: serviceResponse.Message,
 	})
