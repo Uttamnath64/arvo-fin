@@ -11,7 +11,7 @@ const (
 )
 
 func (t FrequencyType) String() string {
-	names := [...]string{"Daily", "Weekly", "Monthly", "Yearly"}
+	names := [...]string{"", "Daily", "Weekly", "Monthly", "Yearly"}
 	if !t.IsValid() {
 		return "Unknown"
 	}

@@ -8,6 +8,7 @@ import (
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/models"
 	"github.com/Uttamnath64/arvo-fin/app/repository"
+	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"github.com/golang-jwt/jwt"
 )
@@ -31,13 +32,13 @@ func New(container *storage.Container, authRepo repository.AuthRepository) *Auth
 	}
 }
 
-func (auth *Auth) GenerateToken(userId uint, userType commonType.UserType, deviceInfo, ipAddress string) (string, string, error) {
+func (auth *Auth) GenerateToken(rctx *requests.RequestContext, userId uint, userType commonType.UserType, deviceInfo, ipAddress string) (string, string, error) {
 
 	var accessExpiresAt = time.Now().Add(auth.container.Env.Auth.AccessTokenExpired).Unix()
 	var refreshExpiresAt = time.Now().Add(auth.container.Env.Auth.RefreshTokenExpired).Unix()
 
 	// create settion
-	sessionId, err := auth.authRepo.CreateSession(&models.Session{
+	sessionId, err := auth.authRepo.CreateSession(rctx, &models.Session{
 		UserID:     userId,
 		UserType:   userType,
 		DeviceInfo: deviceInfo,
@@ -75,14 +76,14 @@ func (auth *Auth) GenerateToken(userId uint, userType commonType.UserType, devic
 		return "", "", err
 	}
 
-	if err := auth.authRepo.UpdateSession(sessionId, refreshToken, refreshExpiresAt); err != nil {
+	if err := auth.authRepo.UpdateSession(rctx, sessionId, refreshToken, refreshExpiresAt); err != nil {
 		return "", "", err
 	}
 
 	return accessToken, refreshToken, nil
 }
 
-func (auth *Auth) VerifyRefreshToken(refreshToken string) (interface{}, error) {
+func (auth *Auth) VerifyRefreshToken(rctx *requests.RequestContext, refreshToken string) (interface{}, error) {
 
 	token, err := jwt.ParseWithClaims(
 		refreshToken,
@@ -103,15 +104,15 @@ func (auth *Auth) VerifyRefreshToken(refreshToken string) (interface{}, error) {
 		return nil, errors.New("invalid refresh token claims")
 	}
 
-	if err := auth.isValidRefreshToken(claims.SessionID, claims.UserType, refreshToken); err != nil {
+	if err := auth.isValidRefreshToken(rctx, claims.SessionID, claims.UserType, refreshToken); err != nil {
 		return nil, err
 	}
 
 	return claims, nil
 }
 
-func (auth *Auth) isValidRefreshToken(sessionID uint, userType commonType.UserType, refreshToken string) error {
-	session, err := auth.authRepo.GetSessionByRefreshToken(refreshToken, userType)
+func (auth *Auth) isValidRefreshToken(rctx *requests.RequestContext, sessionID uint, userType commonType.UserType, refreshToken string) error {
+	session, err := auth.authRepo.GetSessionByRefreshToken(rctx, refreshToken, userType)
 	if err != nil {
 		return err
 	}

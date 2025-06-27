@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/Uttamnath64/arvo-fin/app/common"
-	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/responses"
 	"github.com/gin-gonic/gin"
@@ -168,61 +167,6 @@ func TestBindAndValidateJson(t *testing.T) {
 			default:
 				t.Fatalf("unsupported type for test: %T", tt.body)
 			}
-		})
-	}
-}
-
-func TestGetUserInfo(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	tests := []struct {
-		name       string
-		userId     interface{}
-		userType   interface{}
-		exUserId   uint
-		exUserType commonType.UserType
-		isValid    bool
-	}{
-		{
-			name:       "Invalid UserId",
-			userId:     -1,
-			userType:   1,
-			exUserId:   uint(0),
-			exUserType: commonType.UserTypeUser,
-			isValid:    false,
-		},
-		{
-			name:       "Invalid UserType",
-			userId:     uint(10),
-			userType:   10,
-			exUserId:   uint(10),
-			exUserType: commonType.UserTypeAdmin,
-			isValid:    false,
-		},
-		{
-			name:       "Valid User",
-			userId:     uint(10),
-			userType:   1,
-			exUserId:   uint(10),
-			exUserType: commonType.UserTypeUser,
-			isValid:    true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			w := httptest.NewRecorder()
-			ctx, _ := gin.CreateTestContext(w)
-			ctx.Set("user_id", tt.userId)
-			ctx.Set("user_type", tt.userType)
-
-			user, ok := getUserInfo(ctx)
-			assert.Equal(t, tt.isValid, ok && user.userType.IsValid())
-			if tt.isValid {
-				assert.Equal(t, tt.exUserId, user.userId)
-				assert.Equal(t, tt.exUserType, user.userType)
-			}
-
 		})
 	}
 }

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"gorm.io/gorm"
 )
@@ -15,7 +16,7 @@ func NewTestCurrency(container *storage.Container) *TestCurrency {
 	}
 }
 
-func (repo *TestCurrency) CodeExists(code string) error {
+func (repo *TestCurrency) CodeExists(rctx *requests.RequestContext, code string) error {
 	if code != "INR" {
 		return gorm.ErrRecordNotFound
 	}

@@ -33,12 +33,12 @@ func RunMigrations(container *storage.Container) error {
 		{"Categories", categories},
 	}
 	for _, seed := range seeds {
-		container.Logger.Info("🔄 Running migration:", seed.Name)
+		container.Logger.Info("🔄 Running migration:", "name", seed.Name)
 		if err := seed.Func(container); err != nil {
 			container.Logger.Fatal("❌ Migration failed:", seed.Name, "->", err)
 			return err // Exit early on failure
 		}
-		container.Logger.Info("✅ Migration done:", seed.Name)
+		container.Logger.Info("✅ Migration done:", "name", seed.Name)
 	}
 
 	container.Logger.Info("🎉 All migrations completed successfully.")

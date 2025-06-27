@@ -9,7 +9,7 @@ const (
 )
 
 func (t TransactionType) String() string {
-	names := [...]string{"Income", "Expense"}
+	names := [...]string{"", "Income", "Expense"}
 	if !t.IsValid() {
 		return "Unknown"
 	}

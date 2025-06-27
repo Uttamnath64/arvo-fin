@@ -17,10 +17,10 @@ func NewAccount(container *storage.Container) *Account {
 	}
 }
 
-func (repo *Account) GetList(portfolioId, userId uint) (*[]models.Account, error) {
+func (repo *Account) GetList(rctx *requests.RequestContext, portfolioId, userId uint) (*[]models.Account, error) {
 	var account []models.Account
 
-	if err := repo.container.Config.ReadOnlyDB.Preload("Avatar").Preload("Currency").Where("user_id = ? AND portfolio_id = ?", userId, portfolioId).
+	if err := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Preload("Avatar").Preload("Currency").Where("user_id = ? AND portfolio_id = ?", userId, portfolioId).
 		Find(&account).Error; err != nil {
 		return nil, err // Other errors
 	}
@@ -30,10 +30,10 @@ func (repo *Account) GetList(portfolioId, userId uint) (*[]models.Account, error
 	return &account, nil
 }
 
-func (repo *Account) Get(id uint) (*models.Account, error) {
+func (repo *Account) Get(rctx *requests.RequestContext, id uint) (*models.Account, error) {
 	var account models.Account
 
-	if err := repo.container.Config.ReadOnlyDB.Preload("Avatar").Preload("Currency").Where("id = ?", id).
+	if err := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Preload("Avatar").Preload("Currency").Where("id = ?", id).
 		First(&account).Error; err != nil {
 		return nil, err // Other errors
 	}
@@ -43,16 +43,16 @@ func (repo *Account) Get(id uint) (*models.Account, error) {
 	return &account, nil
 }
 
-func (repo *Account) Create(account models.Account) (uint, error) {
-	err := repo.container.Config.ReadWriteDB.Create(&account).Error
+func (repo *Account) Create(rctx *requests.RequestContext, account models.Account) (uint, error) {
+	err := repo.container.Config.ReadWriteDB.WithContext(rctx.Ctx).Create(&account).Error
 	if err != nil {
 		return 0, err
 	}
 	return account.ID, nil
 }
 
-func (repo *Account) Update(id, userId uint, payload requests.AccountUpdateRequest) error {
-	result := repo.container.Config.ReadWriteDB.Model(&models.Account{}).
+func (repo *Account) Update(rctx *requests.RequestContext, id, userId uint, payload requests.AccountUpdateRequest) error {
+	result := repo.container.Config.ReadWriteDB.WithContext(rctx.Ctx).Model(&models.Account{}).
 		Where("id = ? AND user_id = ?", id, userId).
 		Updates(map[string]interface{}{
 			"name":          payload.Name,
@@ -72,8 +72,8 @@ func (repo *Account) Update(id, userId uint, payload requests.AccountUpdateReque
 	return nil
 }
 
-func (repo *Account) Delete(id, userId uint) error {
-	result := repo.container.Config.ReadWriteDB.Where("id = ? AND user_id = ?", id, userId).Delete(&models.Account{})
+func (repo *Account) Delete(rctx *requests.RequestContext, id, userId uint) error {
+	result := repo.container.Config.ReadWriteDB.WithContext(rctx.Ctx).Where("id = ? AND user_id = ?", id, userId).Delete(&models.Account{})
 
 	if result.Error != nil {
 		return result.Error

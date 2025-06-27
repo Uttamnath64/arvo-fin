@@ -20,7 +20,7 @@ func NewTestAccount(container *storage.Container) *TestAccount {
 	}
 }
 
-func (repo *TestAccount) GetList(portfolioId, userId uint) (*[]models.Account, error) {
+func (repo *TestAccount) GetList(rctx *requests.RequestContext, portfolioId, userId uint) (*[]models.Account, error) {
 	if userId != 1 || portfolioId != 1 {
 		return nil, gorm.ErrRecordNotFound
 	}
@@ -84,7 +84,7 @@ func (repo *TestAccount) GetList(portfolioId, userId uint) (*[]models.Account, e
 	}, nil
 }
 
-func (repo *TestAccount) Get(id uint) (*models.Account, error) {
+func (repo *TestAccount) Get(rctx *requests.RequestContext, id uint) (*models.Account, error) {
 	if id != 1 {
 		return nil, gorm.ErrRecordNotFound
 	}
@@ -118,11 +118,11 @@ func (repo *TestAccount) Get(id uint) (*models.Account, error) {
 	}, nil
 }
 
-func (repo *TestAccount) Create(account models.Account) (uint, error) {
+func (repo *TestAccount) Create(rctx *requests.RequestContext, account models.Account) (uint, error) {
 	return 1, nil
 }
 
-func (repo *TestAccount) Update(id, userId uint, payload requests.AccountUpdateRequest) error {
+func (repo *TestAccount) Update(rctx *requests.RequestContext, id, userId uint, payload requests.AccountUpdateRequest) error {
 	if id != 1 || userId != 1 {
 		return gorm.ErrRecordNotFound
 	}
@@ -130,7 +130,7 @@ func (repo *TestAccount) Update(id, userId uint, payload requests.AccountUpdateR
 	return nil
 }
 
-func (repo *TestAccount) Delete(id, userId uint) error {
+func (repo *TestAccount) Delete(rctx *requests.RequestContext, id, userId uint) error {
 	if id != 1 || userId != 1 {
 		return gorm.ErrRecordNotFound
 	}

@@ -75,7 +75,7 @@ func (a *Application) Initialize() bool {
 		return false
 	}
 
-	a.container = storage.NewContainer(ctx, &con, log, redis, &env)
+	a.container = storage.NewContainer(&con, log, redis, &env)
 
 	return true
 

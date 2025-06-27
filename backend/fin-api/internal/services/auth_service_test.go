@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"testing"
 
 	"github.com/Uttamnath64/arvo-fin/app/auth"
@@ -11,26 +12,31 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func NewTestAuth() (*Auth, bool) {
+func NewTestAuth() (*Auth, *requests.RequestContext, bool) {
 	container, ok := getTestContainer()
 	if !ok {
-		return nil, false
+		return nil, nil, false
 	}
 
 	authRepo := repository.NewTestAuth(container)
 	return &Auth{
-		container:    container,
-		userRepo:     repository.NewTestUser(container),
-		authRepo:     authRepo,
-		avatarRepo:   repository.NewTestAvatar(container),
-		authHelper:   auth.New(container, authRepo),
-		otpService:   appService.NewTestOTP(container.Redis, 300),
-		emailService: appService.NewTestEmail(container),
-	}, true
+			container:    container,
+			userRepo:     repository.NewTestUser(container),
+			authRepo:     authRepo,
+			avatarRepo:   repository.NewTestAvatar(container),
+			authHelper:   auth.New(container, authRepo),
+			otpService:   appService.NewTestOTP(container.Redis, 300),
+			emailService: appService.NewTestEmail(container),
+		}, &requests.RequestContext{
+			Ctx:       context.Background(),
+			UserID:    1,
+			UserType:  commonType.UserTypeUser,
+			SessionID: 1,
+		}, true
 }
 
 func TestLogin_Auth(t *testing.T) {
-	authService, ok := NewTestAuth()
+	authService, rctx, ok := NewTestAuth()
 	if !ok {
 		return
 	}
@@ -61,14 +67,14 @@ func TestLogin_Auth(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := authService.Login(tt.payload, "", "")
+			serviceResponse := authService.Login(rctx, tt.payload, "", "")
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestRegister_Auth(t *testing.T) {
-	authService, ok := NewTestAuth()
+	authService, rctx, ok := NewTestAuth()
 	if !ok {
 		return
 	}
@@ -107,14 +113,14 @@ func TestRegister_Auth(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := authService.Register(tt.payload, "", "")
+			serviceResponse := authService.Register(rctx, tt.payload, "", "")
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestSentOTP_Auth(t *testing.T) {
-	authService, ok := NewTestAuth()
+	authService, rctx, ok := NewTestAuth()
 	if !ok {
 		return
 	}
@@ -137,14 +143,14 @@ func TestSentOTP_Auth(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := authService.SendOTP(tt.payload)
+			serviceResponse := authService.SendOTP(rctx, tt.payload)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestResetPassword_Auth(t *testing.T) {
-	authService, ok := NewTestAuth()
+	authService, rctx, ok := NewTestAuth()
 	if !ok {
 		return
 	}
@@ -195,14 +201,14 @@ func TestResetPassword_Auth(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := authService.ResetPassword(tt.payload, "", "")
+			serviceResponse := authService.ResetPassword(rctx, tt.payload, "", "")
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestGetToken_Auth(t *testing.T) {
-	authService, ok := NewTestAuth()
+	authService, rctx, ok := NewTestAuth()
 	if !ok {
 		return
 	}
@@ -231,7 +237,7 @@ func TestGetToken_Auth(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := authService.GetToken(tt.payload, "", "")
+			serviceResponse := authService.GetToken(rctx, tt.payload, "", "")
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}

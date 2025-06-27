@@ -1,26 +1,33 @@
 package services
 
 import (
+	"context"
 	"testing"
 
+	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/services"
 	"github.com/stretchr/testify/assert"
 )
 
-func NewTestUser() (*User, bool) {
+func NewTestUser() (*User, *requests.RequestContext, bool) {
 	container, ok := getTestContainer()
 	if !ok {
-		return nil, false
+		return nil, nil, false
 	}
 	return &User{
-		container:   container,
-		userService: services.NewTestUser(container),
-	}, true
+			container:   container,
+			userService: services.NewTestUser(container),
+		}, &requests.RequestContext{
+			Ctx:       context.Background(),
+			UserID:    1,
+			UserType:  commonType.UserTypeUser,
+			SessionID: 1,
+		}, true
 }
 
 func TestGet_User(t *testing.T) {
-	userService, ok := NewTestUser()
+	userService, rctx, ok := NewTestUser()
 	if !ok {
 		return
 	}
@@ -45,14 +52,14 @@ func TestGet_User(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := userService.Get(tt.userId)
+			serviceResponse := userService.Get(rctx, tt.userId)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestGetSetting_User(t *testing.T) {
-	userService, ok := NewTestUser()
+	userService, rctx, ok := NewTestUser()
 	if !ok {
 		return
 	}
@@ -77,14 +84,14 @@ func TestGetSetting_User(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := userService.GetSettings(tt.userId)
+			serviceResponse := userService.GetSettings(rctx, tt.userId)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestUpdate_User(t *testing.T) {
-	userService, ok := NewTestUser()
+	userService, rctx, ok := NewTestUser()
 	if !ok {
 		return
 	}
@@ -121,14 +128,14 @@ func TestUpdate_User(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := userService.Update(tt.payload, tt.userId)
+			serviceResponse := userService.Update(rctx, tt.payload, tt.userId)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestUpdateSetting_User(t *testing.T) {
-	userService, ok := NewTestUser()
+	userService, rctx, ok := NewTestUser()
 	if !ok {
 		return
 	}
@@ -167,7 +174,7 @@ func TestUpdateSetting_User(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := userService.UpdateSettings(tt.payload, tt.userId)
+			serviceResponse := userService.UpdateSettings(rctx, tt.payload, tt.userId)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}

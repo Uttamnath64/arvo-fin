@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"testing"
 
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
@@ -9,20 +10,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func NewTestAvatar() (*Avatar, bool) {
+func NewTestAvatar() (*Avatar, *requests.RequestContext, bool) {
 	container, ok := getTestContainer()
 	if !ok {
-		return nil, false
+		return nil, nil, false
 	}
 
 	return &Avatar{
-		container:     container,
-		avatarService: services.NewTestAvatar(container),
-	}, true
+			container:     container,
+			avatarService: services.NewTestAvatar(container),
+		}, &requests.RequestContext{
+			Ctx:       context.Background(),
+			UserID:    1,
+			UserType:  commonType.UserTypeUser,
+			SessionID: 1,
+		}, true
 }
 
 func TestGetAvatarsByType_Avatar(t *testing.T) {
-	service, ok := NewTestAvatar()
+	service, rctx, ok := NewTestAvatar()
 	if !ok {
 		return
 	}
@@ -48,14 +54,14 @@ func TestGetAvatarsByType_Avatar(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := service.GetAvatarsByType(tt.avatarType)
+			serviceResponse := service.GetAvatarsByType(rctx, tt.avatarType)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestGet_Avatar(t *testing.T) {
-	service, ok := NewTestAvatar()
+	service, rctx, ok := NewTestAvatar()
 	if !ok {
 		return
 	}
@@ -80,14 +86,14 @@ func TestGet_Avatar(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := service.Get(tt.Id)
+			serviceResponse := service.Get(rctx, tt.Id)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestCreate_Avatar(t *testing.T) {
-	service, ok := NewTestAvatar()
+	service, rctx, ok := NewTestAvatar()
 	if !ok {
 		return
 	}
@@ -120,14 +126,14 @@ func TestCreate_Avatar(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := service.Create(tt.payload)
+			serviceResponse := service.Create(rctx, tt.payload)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestUpdate_Avatar(t *testing.T) {
-	service, ok := NewTestAvatar()
+	service, rctx, ok := NewTestAvatar()
 	if !ok {
 		return
 	}
@@ -169,7 +175,7 @@ func TestUpdate_Avatar(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := service.Update(tt.Id, tt.payload)
+			serviceResponse := service.Update(rctx, tt.Id, tt.payload)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}

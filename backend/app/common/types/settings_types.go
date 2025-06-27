@@ -49,7 +49,7 @@ func AllNumberFormats() []NumberFormat {
 }
 
 func (t NumberFormat) String() string {
-	names := [...]string{"First 2,10,343.20", "Second 2.10.343,20", "Third 2 10 343,20", "Fourth 2 10 343.20"}
+	names := [...]string{"", "First 2,10,343.20", "Second 2.10.343,20", "Third 2 10 343,20", "Fourth 2 10 343.20"}
 	if !t.IsValid() {
 		return "Unknown"
 	}

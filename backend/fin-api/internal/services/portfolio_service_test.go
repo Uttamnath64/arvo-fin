@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"testing"
 
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
@@ -10,22 +11,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func NewTestPortfolio() (*Portfolio, bool) {
+func NewTestPortfolio() (*Portfolio, *requests.RequestContext, bool) {
 	container, ok := getTestContainer()
 	if !ok {
-		return nil, false
+		return nil, nil, false
 	}
 
 	return &Portfolio{
-		container:        container,
-		portfolioService: commonServices.NewTestPortfolio(container),
-		portfolioRepo:    repository.NewTestPortfolio(container),
-		avatarRepo:       repository.NewTestAvatar(container),
-	}, true
+			container:        container,
+			portfolioService: commonServices.NewTestPortfolio(container),
+			portfolioRepo:    repository.NewTestPortfolio(container),
+			avatarRepo:       repository.NewTestAvatar(container),
+		}, &requests.RequestContext{
+			Ctx:       context.Background(),
+			UserID:    1,
+			UserType:  commonType.UserTypeUser,
+			SessionID: 1,
+		}, true
 }
 
 func TestGetList_Portfolio(t *testing.T) {
-	portfolioService, ok := NewTestPortfolio()
+	portfolioService, rctx, ok := NewTestPortfolio()
 	if !ok {
 		return
 	}
@@ -53,14 +59,14 @@ func TestGetList_Portfolio(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := portfolioService.GetList(tt.userId, tt.userType)
+			serviceResponse := portfolioService.GetList(rctx, tt.userId, tt.userType)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestGet_Portfolio(t *testing.T) {
-	portfolioService, ok := NewTestPortfolio()
+	portfolioService, rctx, ok := NewTestPortfolio()
 	if !ok {
 		return
 	}
@@ -91,14 +97,14 @@ func TestGet_Portfolio(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := portfolioService.Get(tt.Id, tt.userId, tt.userType)
+			serviceResponse := portfolioService.Get(rctx, tt.Id, tt.userId, tt.userType)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestCreate_Portfolio(t *testing.T) {
-	portfolioService, ok := NewTestPortfolio()
+	portfolioService, rctx, ok := NewTestPortfolio()
 	if !ok {
 		return
 	}
@@ -133,14 +139,14 @@ func TestCreate_Portfolio(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := portfolioService.Create(tt.payload, tt.userId)
+			serviceResponse := portfolioService.Create(rctx, tt.payload, tt.userId)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestUpdate_Portfolio(t *testing.T) {
-	portfolioService, ok := NewTestPortfolio()
+	portfolioService, rctx, ok := NewTestPortfolio()
 	if !ok {
 		return
 	}
@@ -177,14 +183,14 @@ func TestUpdate_Portfolio(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := portfolioService.Update(tt.Id, tt.userId, tt.payload)
+			serviceResponse := portfolioService.Update(rctx, tt.Id, tt.userId, tt.payload)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
 func TestDelete_Portfolio(t *testing.T) {
-	portfolioService, ok := NewTestPortfolio()
+	portfolioService, rctx, ok := NewTestPortfolio()
 	if !ok {
 		return
 	}
@@ -212,7 +218,7 @@ func TestDelete_Portfolio(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := portfolioService.Delete(tt.Id, tt.userId)
+			serviceResponse := portfolioService.Delete(rctx, tt.Id, tt.userId)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}

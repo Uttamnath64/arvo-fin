@@ -4,17 +4,12 @@ import (
 	"net/http"
 
 	"github.com/Uttamnath64/arvo-fin/app/common"
-	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
+	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/responses"
 	"github.com/gin-gonic/gin"
 )
 
-type userInfo struct {
-	userId   uint
-	userType commonType.UserType
-}
-
-func isErrorResponse(ctx *gin.Context, serviceResponse responses.ServiceResponse) bool {
+func isErrorResponse(c *gin.Context, serviceResponse responses.ServiceResponse) bool {
 
 	if serviceResponse.HasError() {
 		apiResponse := responses.ApiResponse{
@@ -25,20 +20,20 @@ func isErrorResponse(ctx *gin.Context, serviceResponse responses.ServiceResponse
 
 		switch serviceResponse.StatusCode {
 		case common.StatusNotFound:
-			ctx.JSON(http.StatusNotFound, apiResponse)
+			c.JSON(http.StatusNotFound, apiResponse)
 		case common.StatusValidationError:
-			ctx.JSON(http.StatusUnauthorized, apiResponse)
+			c.JSON(http.StatusUnauthorized, apiResponse)
 		case common.StatusServerError:
-			ctx.JSON(http.StatusInternalServerError, apiResponse)
+			c.JSON(http.StatusInternalServerError, apiResponse)
 		}
 		return true
 	}
 	return false
 }
 
-func bindAndValidateJson[T any](ctx *gin.Context, payload *T) bool {
-	if err := ctx.ShouldBindJSON(payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+func bindAndValidateJson[T any](c *gin.Context, payload *T) bool {
+	if err := c.ShouldBindJSON(payload); err != nil {
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
 			Message: "Invalid request payload. Please check the input data format!",
 			Details: err.Error(),
@@ -49,7 +44,7 @@ func bindAndValidateJson[T any](ctx *gin.Context, payload *T) bool {
 	// Validate only if the struct has an IsValid() method
 	if validatable, ok := interface{}(payload).(interface{ IsValid() error }); ok {
 		if err := validatable.IsValid(); err != nil {
-			ctx.JSON(http.StatusBadRequest, responses.ApiResponse{
+			c.JSON(http.StatusBadRequest, responses.ApiResponse{
 				Status:  false,
 				Message: err.Error(),
 			})
@@ -59,54 +54,22 @@ func bindAndValidateJson[T any](ctx *gin.Context, payload *T) bool {
 	return true
 }
 
-func getUserInfo(ctx *gin.Context) (*userInfo, bool) {
-	userIdValue, exists := ctx.Get("user_id")
-	userTypeValue, existsType := ctx.Get("user_type")
-
-	if !exists || !existsType {
-		ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
+func getRequestContext(c *gin.Context) (*requests.RequestContext, bool) {
+	val, exists := c.Get("rctx")
+	if !exists {
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
-			Message: "Unauthorized",
+			Message: "Invalid token!",
 		})
-		ctx.Abort()
 		return nil, false
 	}
-
-	userId, ok := userIdValue.(uint)
+	rctx, ok := val.(*requests.RequestContext)
 	if !ok {
-		// Try to convert from float64 (common in JWT claims)
-		if floatId, isFloat := userIdValue.(float64); isFloat {
-			userId = uint(floatId)
-		} else {
-			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
-				Status:  false,
-				Message: "Invalid user_id format",
-			})
-			ctx.Abort()
-			return nil, false
-		}
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
+			Status:  false,
+			Message: "Invalid token!",
+		})
+		return nil, false
 	}
-
-	// Handle userType safely
-	userTypeInt, ok := userTypeValue.(int)
-	if !ok {
-		// Handle case where it's a float64 (common in JWT claims)
-		if userTypeFloat, isFloat := userTypeValue.(float64); isFloat {
-			userTypeInt = int(userTypeFloat) // Convert float64 → int
-		} else {
-			ctx.JSON(http.StatusUnauthorized, responses.ApiResponse{
-				Status:  false,
-				Message: "Invalid userType format",
-			})
-			ctx.Abort()
-			return nil, false
-		}
-	}
-	userType := commonType.UserType(userTypeInt)
-
-	// Return parsed values
-	return &userInfo{
-		userId:   userId,
-		userType: userType,
-	}, true
+	return rctx, true
 }

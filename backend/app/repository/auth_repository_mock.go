@@ -5,6 +5,7 @@ import (
 
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/models"
+	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"gorm.io/gorm"
 )
@@ -19,7 +20,7 @@ func NewTestAuth(container *storage.Container) *TestAuth {
 	}
 }
 
-func (repo *TestAuth) GetSessionByUser(userId uint, userType commonType.UserType, signedToken string) (*models.Session, error) {
+func (repo *TestAuth) GetSessionByUser(rctx *requests.RequestContext, userId uint, userType commonType.UserType, signedToken string) (*models.Session, error) {
 	if userId == 1 && userType == commonType.UserTypeUser {
 		session := models.Session{
 			BaseModel: models.BaseModel{
@@ -39,7 +40,7 @@ func (repo *TestAuth) GetSessionByUser(userId uint, userType commonType.UserType
 	return nil, gorm.ErrRecordNotFound
 }
 
-func (repo *TestAuth) GetSessionByRefreshToken(refreshToken string, userType commonType.UserType) (*models.Session, error) {
+func (repo *TestAuth) GetSessionByRefreshToken(rctx *requests.RequestContext, refreshToken string, userType commonType.UserType) (*models.Session, error) {
 	if refreshToken != "" && userType == commonType.UserTypeUser {
 		session := models.Session{
 			BaseModel: models.BaseModel{
@@ -59,14 +60,14 @@ func (repo *TestAuth) GetSessionByRefreshToken(refreshToken string, userType com
 	return nil, gorm.ErrRecordNotFound
 }
 
-func (repo *TestAuth) CreateSession(session *models.Session) (uint, error) {
+func (repo *TestAuth) CreateSession(rctx *requests.RequestContext, session *models.Session) (uint, error) {
 	return 1, nil
 }
 
-func (repo *TestAuth) DeleteSession(sessionID uint) error {
+func (repo *TestAuth) DeleteSession(rctx *requests.RequestContext, sessionID uint) error {
 	return nil
 }
 
-func (repo *TestAuth) UpdateSession(id uint, refreshToken string, expiresAt int64) error {
+func (repo *TestAuth) UpdateSession(rctx *requests.RequestContext, id uint, refreshToken string, expiresAt int64) error {
 	return nil
 }
