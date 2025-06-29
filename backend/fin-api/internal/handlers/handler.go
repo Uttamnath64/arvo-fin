@@ -67,7 +67,7 @@ func getRequestContext(c *gin.Context) (*requests.RequestContext, bool) {
 	if !ok {
 		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
-			Message: "Invalid authorization token.!",
+			Message: "Invalid authorization token.",
 		})
 		return nil, false
 	}

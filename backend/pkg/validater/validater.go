@@ -88,7 +88,7 @@ func (v *Validater) IsValidOTP(data string) error {
 
 func (v *Validater) IsValidMobileNumber(data string) error {
 	if !MobileNumber.MatchString(data) {
-		return errors.New("Please enter a valid mobile number.!")
+		return errors.New("Please enter a valid mobile number.")
 	}
 	return nil
 }

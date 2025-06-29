@@ -61,7 +61,7 @@ func (service *Auth) Login(rctx *requests.RequestContext, payload requests.Login
 	accessToken, refreshToken, err := service.authHelper.GenerateToken(rctx, user.ID, commonType.UserTypeUser, deviceInfo, ip)
 	if err != nil {
 		service.container.Logger.Error("auth.service.login-GenerateToken", "error", err.Error(), "userId", user.ID, "userType", commonType.UserTypeUser, "deviceInfo", deviceInfo, "ip", ip)
-		return responses.ErrorResponse(common.StatusServerError, "Welcome back! 👋 You’re logged in", err)
+		return responses.ErrorResponse(common.StatusServerError, "Failed to generate tokens. Please try again later.", err)
 	}
 
 	// Response
@@ -135,7 +135,7 @@ func (service *Auth) Register(rctx *requests.RequestContext, payload requests.Re
 	}
 
 	// Response
-	service.container.Logger.Info("auth.service.register.success", "messgae", "Welcome aboard! 👋 Your account has been created.", "userId", userId, "type", commonType.UserTypeUser, "ip", ip)
+	service.container.Logger.Info("auth.service.register.success", "message", "Welcome aboard! 👋 Your account has been created.", "userId", userId, "type", commonType.UserTypeUser, "ip", ip)
 	return responses.SuccessResponse("Welcome aboard! 👋 Your account has been created.", responses.AuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
@@ -173,7 +173,7 @@ func (service *Auth) SendOTP(rctx *requests.RequestContext, payload requests.Sen
 	}
 
 	// Response
-	service.container.Logger.Info("auth.service.sendOTP.success", "messgae", "Done! 🎉 The OTP has been sent to your email address.", "email", payload.Email, "type", payload.Type)
+	service.container.Logger.Info("auth.service.sendOTP.success", "message", "Done! 🎉 The OTP has been sent to your email address.", "email", payload.Email, "type", payload.Type)
 	return responses.SuccessResponse("Done! 🎉 The OTP has been sent to your email address.", nil)
 }
 
@@ -196,7 +196,7 @@ func (service *Auth) ResetPassword(rctx *requests.RequestContext, payload reques
 
 	// Verify OTP
 	if err := service.otpService.VerifyOTP(payload.Email, commonType.OtpTypeResetPassword, payload.OTP); err != nil {
-		return responses.ErrorResponse(common.StatusValidationError, "The OTP you entered is incorrect or has expired. Please try again.!", err)
+		return responses.ErrorResponse(common.StatusValidationError, "The OTP you entered is incorrect or has expired. Please try again.", err)
 	}
 
 	// Hash password

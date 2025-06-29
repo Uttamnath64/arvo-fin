@@ -98,7 +98,7 @@ func (service *User) UpdateSettings(rctx *requests.RequestContext, payload reque
 	// Update
 	if err := service.repoUser.UpdateSettings(rctx, userId, payload); err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return responses.ErrorResponse(common.StatusNotFound, "Oops! That user doesn’t exist.!", err)
+			return responses.ErrorResponse(common.StatusNotFound, "Oops! That user doesn’t exist.", err)
 		}
 
 		service.container.Logger.Error("user.appService.updateSettings-UpdateSettings", "error", err.Error(), "userId", userId, "payload", payload)
