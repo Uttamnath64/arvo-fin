@@ -45,13 +45,11 @@ func TestGetList_Portfolio(t *testing.T) {
 		{
 			name:        "Valid",
 			userId:      1,
-			userType:    commonType.UserTypeUser,
 			expectError: false,
 		},
 		{
 			name:        "Not Found",
-			userId:      1,
-			userType:    commonType.UserTypeAdmin,
+			userId:      2,
 			expectError: true,
 		},
 	}
@@ -59,7 +57,7 @@ func TestGetList_Portfolio(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := portfolioService.GetList(rctx, tt.userId, tt.userType)
+			serviceResponse := portfolioService.GetList(rctx, tt.userId)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
