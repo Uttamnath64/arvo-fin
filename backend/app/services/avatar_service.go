@@ -28,15 +28,15 @@ func (service *Avatar) Get(rctx *requests.RequestContext, id uint) responses.Ser
 	response, err := service.repoAvatar.Get(rctx, id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", err)
+			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found. Please choose a valid one.", err)
 		}
 
 		service.container.Logger.Error("avatar.appService.get-Get", "error", err.Error(), "id", id)
-		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong on our end. Please try again in a moment.", err)
 	}
 
 	// Response
-	return responses.SuccessResponse("Avatar records found!", response)
+	return responses.SuccessResponse("Avatar details retrieved successfully.", response)
 }
 
 func (service *Avatar) GetAvatarsByType(rctx *requests.RequestContext, avatarType commonType.AvatarType) responses.ServiceResponse {
@@ -47,14 +47,14 @@ func (service *Avatar) GetAvatarsByType(rctx *requests.RequestContext, avatarTyp
 		}
 
 		service.container.Logger.Error("avatar.appService.getAvatarsByType-GetAvatarsByType", "error", err.Error(), "avatarType", avatarType)
-		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong on our end. Please try again in a moment.", err)
 	}
 
 	// Response
-	return responses.SuccessResponse("Avatars found by type!", response)
+	return responses.SuccessResponse("Avatars retrieved successfully by type.", response)
 }
 
-func (service *Avatar) Creatre(rctx *requests.RequestContext, payload requests.AvatarRequest) responses.ServiceResponse {
+func (service *Avatar) Create(rctx *requests.RequestContext, payload requests.AvatarRequest) responses.ServiceResponse {
 
 	avatarId, err := service.repoAvatar.Create(rctx, models.Avatar{
 		Name: payload.Name,
@@ -63,16 +63,16 @@ func (service *Avatar) Creatre(rctx *requests.RequestContext, payload requests.A
 	})
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", err)
+			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found. Please choose a valid one.", err)
 		}
 
 		service.container.Logger.Error("avatar.appService.creatre-Creatre", "error", err.Error(), "payload", payload)
-		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong on our end. Please try again in a moment.", err)
 	}
 
 	// Response
 	response, _ := service.repoAvatar.Get(rctx, avatarId)
-	return responses.SuccessResponse("Avatar is created!", response)
+	return responses.SuccessResponse("Success! The avatar was created.", response)
 }
 
 func (service *Avatar) Update(rctx *requests.RequestContext, id uint, payload requests.AvatarRequest) responses.ServiceResponse {
@@ -80,14 +80,14 @@ func (service *Avatar) Update(rctx *requests.RequestContext, id uint, payload re
 	err := service.repoAvatar.Update(rctx, id, payload)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found!", err)
+			return responses.ErrorResponse(common.StatusNotFound, "Avatar not found. Please choose a valid one.", err)
 		}
 
 		service.container.Logger.Error("avatar.appService.update-Update", "error", err.Error(), "id", id, "payload", payload)
-		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong. Please try again later.", err)
+		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong on our end. Please try again in a moment.", err)
 	}
 
 	// Response
 	response, _ := service.repoAvatar.Get(rctx, id)
-	return responses.SuccessResponse("Avatar is updated!", response)
+	return responses.SuccessResponse("Avatar information saved successfully.", response)
 }

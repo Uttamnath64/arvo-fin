@@ -39,11 +39,10 @@ func (handler *Auth) Login(c *gin.Context) {
 		return
 	}
 
-	authR, _ := serviceResponse.Data.(responses.AuthResponse)
 	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
-		Metadata: authR,
+		Metadata: serviceResponse.Data,
 	})
 }
 
@@ -64,11 +63,10 @@ func (handler *Auth) Register(c *gin.Context) {
 		return
 	}
 
-	authR, _ := serviceResponse.Data.(responses.AuthResponse)
 	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
-		Metadata: authR,
+		Metadata: serviceResponse.Data,
 	})
 }
 
@@ -91,7 +89,7 @@ func (handler *Auth) SendOTP(c *gin.Context) {
 
 	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:  true,
-		Message: "OTP sent successfully to the email address!",
+		Message: serviceResponse.Message,
 	})
 }
 
@@ -113,11 +111,10 @@ func (handler *Auth) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	authR, _ := serviceResponse.Data.(responses.AuthResponse)
 	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
-		Metadata: authR,
+		Metadata: serviceResponse.Data,
 	})
 }
 
@@ -139,11 +136,10 @@ func (handler *Auth) Token(c *gin.Context) {
 		return
 	}
 
-	authR, _ := serviceResponse.Data.(responses.AuthResponse)
 	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
-		Metadata: authR,
+		Metadata: serviceResponse.Data,
 	})
 
 }

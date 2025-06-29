@@ -37,7 +37,7 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
-				Message: "Missing access token!",
+				Message: "Missing access token.",
 			})
 			c.Abort()
 			return
@@ -48,7 +48,7 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
 			return m.container.Env.Auth.AccessPublicKey, nil
 		})
@@ -56,7 +56,7 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
-				Message: "Invalid access token: " + err.Error(),
+				Message: "Invalid or expired access token.",
 			})
 			c.Abort()
 			return
@@ -65,10 +65,10 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 		// Check if token claims exist and have the expected format
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			m.container.Logger.Error("api-middleware-MapClaims", "Invalid token claims format! Token payload:", token.Claims)
+			m.container.Logger.Error("middleware-claims-format", "token", token.Raw)
 			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
-				Message: "Invalid token claims format!",
+				Message: "Invalid token claims format.",
 			})
 			c.Abort()
 			return
@@ -79,7 +79,7 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 		if !ok || int64(exp) < time.Now().Unix() {
 			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
-				Message: "Access token expired!",
+				Message: "Access token has expired.",
 			})
 			c.Abort()
 			return
@@ -89,7 +89,7 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 		if !ok {
 			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
-				Message: "Invalid user_id format!",
+				Message: "Invalid user ID in token.",
 			})
 			c.Abort()
 			return
@@ -99,7 +99,7 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 		if !ok {
 			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
-				Message: "Invalid session_id format!",
+				Message: "Invalid session ID in token.",
 			})
 			c.Abort()
 			return
@@ -109,7 +109,7 @@ func (m *Middleware) Middleware() gin.HandlerFunc {
 		if !ok {
 			c.JSON(http.StatusUnauthorized, responses.ApiResponse{
 				Status:  false,
-				Message: "Invalid user_type format!",
+				Message: "Invalid user type in token.",
 			})
 			c.Abort()
 			return

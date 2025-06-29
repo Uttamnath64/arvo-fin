@@ -31,7 +31,7 @@ func (service *OTP) SaveOTP(email string, otpType commonType.OtpType, otp string
 	key := fmt.Sprintf("OTP:email=%s&type=%d", email, otpType)
 	err := service.RedisClient.SetValue(key, otp, service.TTL)
 	if err != nil {
-		return fmt.Errorf("failed to save OTP: %v", err)
+		return fmt.Errorf("failed to save OTP: %w", err)
 	}
 	return nil
 }

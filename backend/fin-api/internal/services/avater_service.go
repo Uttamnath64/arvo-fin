@@ -29,7 +29,7 @@ func (service *Avatar) GetAvatarsByType(rctx *requests.RequestContext, avatarTyp
 }
 
 func (service *Avatar) Create(rctx *requests.RequestContext, payload requests.AvatarRequest) responses.ServiceResponse {
-	return service.avatarService.Creatre(rctx, payload)
+	return service.avatarService.Create(rctx, payload)
 }
 
 func (service *Avatar) Update(rctx *requests.RequestContext, id uint, payload requests.AvatarRequest) responses.ServiceResponse {

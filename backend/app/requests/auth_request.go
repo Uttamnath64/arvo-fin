@@ -51,7 +51,7 @@ func (r RegisterRequest) IsValid() error {
 		return err
 	}
 	if !Validate.IsValidID(r.AvatarId) {
-		return errors.New("invalid avatar id")
+		return errors.New("Please select a valid avatar.")
 	}
 	if err := Validate.IsValidPassword(r.Password); err != nil {
 		return err
@@ -73,7 +73,7 @@ func (r SentOTPRequest) IsValid() error {
 		return err
 	}
 	if !r.Type.IsValid() {
-		return errors.New("invalid otp type")
+		return errors.New("Invalid OTP type.")
 	}
 	return nil
 }
@@ -105,7 +105,7 @@ type TokenRequest struct {
 
 func (r TokenRequest) IsValid() error {
 	if strings.TrimSpace(r.RefreshToken) == "" {
-		return errors.New("invalid refresh_token")
+		return errors.New("Refresh token is required.")
 	}
 	return nil
 }
