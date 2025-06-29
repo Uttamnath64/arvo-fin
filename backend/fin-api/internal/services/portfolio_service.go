@@ -30,8 +30,8 @@ func NewPortfolio(container *storage.Container) *Portfolio {
 	}
 }
 
-func (service *Portfolio) GetList(rctx *requests.RequestContext, userId uint, userType commonType.UserType) responses.ServiceResponse {
-	return service.portfolioService.GetList(rctx, userId, userType)
+func (service *Portfolio) GetList(rctx *requests.RequestContext, userId uint) responses.ServiceResponse {
+	return service.portfolioService.GetList(rctx, userId)
 }
 
 func (service *Portfolio) Get(rctx *requests.RequestContext, id, userId uint, userType commonType.UserType) responses.ServiceResponse {

@@ -24,15 +24,15 @@ func NewPortfolio(container *storage.Container) *Portfolio {
 	}
 }
 
-func (service *Portfolio) GetList(rctx *requests.RequestContext, userId uint, userType commonType.UserType) responses.ServiceResponse {
+func (service *Portfolio) GetList(rctx *requests.RequestContext, userId uint) responses.ServiceResponse {
 
-	response, err := service.portfolioRepo.GetList(rctx, userId, userType)
+	response, err := service.portfolioRepo.GetList(rctx, userId)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return responses.ErrorResponse(common.StatusNotFound, "You haven’t created any portfolios yet.", err)
 		}
 
-		service.container.Logger.Error("portfolio.appService.getList-GetList", "error", err.Error(), "userId", userId, "userType", userType)
+		service.container.Logger.Error("portfolio.appService.getList-GetList", "error", err.Error(), "userId", userId)
 		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong on our end. Please try again in a moment.", err)
 	}
 

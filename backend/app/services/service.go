@@ -22,7 +22,7 @@ type OTPService interface {
 }
 
 type PortfolioService interface {
-	GetList(rctx *requests.RequestContext, userId uint, userType commonType.UserType) responses.ServiceResponse
+	GetList(rctx *requests.RequestContext, userId uint) responses.ServiceResponse
 	Get(rctx *requests.RequestContext, id, userId uint, userType commonType.UserType) responses.ServiceResponse
 }
 

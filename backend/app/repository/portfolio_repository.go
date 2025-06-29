@@ -4,7 +4,6 @@ import (
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/models"
 	"github.com/Uttamnath64/arvo-fin/app/requests"
-	"github.com/Uttamnath64/arvo-fin/app/responses"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"gorm.io/gorm"
 )
@@ -34,19 +33,11 @@ func (repo *Portfolio) UserPortfolioExists(rctx *requests.RequestContext, id, us
 	return nil
 }
 
-func (repo *Portfolio) GetList(rctx *requests.RequestContext, userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error) {
-	var portfolio models.Portfolio
-	var avatar models.Avatar
+func (repo *Portfolio) GetList(rctx *requests.RequestContext, userId uint) (*[]models.Portfolio, error) {
+	var portfolios []models.Portfolio
 
-	var portfolios []responses.PortfolioResponse
-
-	query := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Table(portfolio.GetName() + " p").
-		Joins("JOIN " + avatar.GetName() + " a ON a.id = p.avatar_id")
-	if userType == commonType.UserTypeUser {
-		query = query.Where("p.user_id = ? ", userId)
-	}
-	err := query.Select("p.id, p.name, a.id as avatar_id, a.icon as avatar_icon").
-		Scan(&portfolios).Error
+	err := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Preload("Avatar").Where("user_id = ? ", userId).
+		Find(&portfolios).Error
 
 	if err != nil {
 		return nil, err // Other errors
@@ -57,27 +48,22 @@ func (repo *Portfolio) GetList(rctx *requests.RequestContext, userId uint, userT
 	return &portfolios, nil
 }
 
-func (repo *Portfolio) Get(rctx *requests.RequestContext, id, userId uint, userType commonType.UserType) (*responses.PortfolioResponse, error) {
+func (repo *Portfolio) Get(rctx *requests.RequestContext, id, userId uint, userType commonType.UserType) (*models.Portfolio, error) {
 	var portfolio models.Portfolio
-	var avatar models.Avatar
 
-	var portfolios responses.PortfolioResponse
-
-	query := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Table(portfolio.GetName()+" p").
-		Joins("JOIN "+avatar.GetName()+" a ON a.id = p.avatar_id").Where("p.id = ?", id)
+	query := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Preload("Avatar").Where("id = ?", id)
 	if userType == commonType.UserTypeUser {
-		query = query.Where("p.user_id = ?", userId)
+		query = query.Where("user_id = ?", userId)
 	}
-	err := query.Select("p.id, p.name, a.id as avatar_id, a.icon as avatar_icon").
-		Scan(&portfolios).Error
+	err := query.First(&portfolio).Error
 
 	if err != nil {
 		return nil, err // Other errors
 	}
-	if portfolios.Id == 0 {
+	if portfolio.ID == 0 {
 		return nil, gorm.ErrRecordNotFound
 	}
-	return &portfolios, nil
+	return &portfolio, nil
 }
 
 func (repo *Portfolio) Create(rctx *requests.RequestContext, portfolio models.Portfolio) error {

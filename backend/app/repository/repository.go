@@ -26,8 +26,8 @@ type AvatarRepository interface {
 
 type PortfolioRepository interface {
 	UserPortfolioExists(rctx *requests.RequestContext, id, userId uint) error
-	GetList(rctx *requests.RequestContext, userId uint, userType commonType.UserType) (*[]responses.PortfolioResponse, error)
-	Get(rctx *requests.RequestContext, id, userId uint, userType commonType.UserType) (*responses.PortfolioResponse, error)
+	GetList(rctx *requests.RequestContext, userId uint) (*[]models.Portfolio, error)
+	Get(rctx *requests.RequestContext, id, userId uint, userType commonType.UserType) (*models.Portfolio, error)
 	Create(rctx *requests.RequestContext, portfolio models.Portfolio) error
 	Update(rctx *requests.RequestContext, id, userId uint, payload requests.PortfolioRequest) error
 	Delete(rctx *requests.RequestContext, id, userId uint) error

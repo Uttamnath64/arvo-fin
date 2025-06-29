@@ -2,9 +2,13 @@ package models
 
 type Portfolio struct {
 	BaseModel
-	UserId               uint
-	AvatarId             uint
-	Name                 string                 `gorm:"not null"`
+	UserId   uint   `json:"user_id"`
+	AvatarId uint   `json:"avatar_id"`
+	Name     string `json:"name" gorm:"not null"`
+
+	// Relationships
+	Avatar Avatar `json:"avatar" gorm:"foreignKey:AvatarId"`
+
 	Account              []Account              `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`
 	Budget               []Budget               `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`
 	Transaction          []Transaction          `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`

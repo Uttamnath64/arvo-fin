@@ -30,17 +30,29 @@ func (handler *Portfolio) GetList(c *gin.Context) {
 	if !ok {
 		return
 	}
+	userId := rctx.UserID
 
-	serviceResponse := handler.portfolioService.GetList(rctx, rctx.UserID, rctx.UserType)
+	if rctx.UserType == commonType.UserTypeAdmin {
+		userIdInt, err := strconv.Atoi(c.Param("userId"))
+		if err != nil || userIdInt <= 0 {
+			c.JSON(http.StatusBadRequest, responses.ApiResponse{
+				Status:  false,
+				Message: "Invalid user id!",
+			})
+			return
+		}
+		userId = uint(userIdInt)
+	}
+
+	serviceResponse := handler.portfolioService.GetList(rctx, userId)
 	if isErrorResponse(c, serviceResponse) {
 		return
 	}
 
-	portfolioResponse, _ := serviceResponse.Data.(*[]responses.PortfolioResponse)
 	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
-		Metadata: portfolioResponse,
+		Metadata: serviceResponse.Data,
 	})
 }
 
@@ -65,11 +77,10 @@ func (handler *Portfolio) Get(c *gin.Context) {
 		return
 	}
 
-	portfolioResponse, _ := serviceResponse.Data.(*responses.PortfolioResponse)
 	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
 		Message:  serviceResponse.Message,
-		Metadata: portfolioResponse,
+		Metadata: serviceResponse.Data,
 	})
 }
 

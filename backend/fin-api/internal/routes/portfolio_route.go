@@ -11,6 +11,7 @@ func (routes *Routes) PortfolioRoutes() {
 	userGroup := routes.server.Group("/portfolio").Use(middle.Middleware())
 	{
 		userGroup.GET("/", handler.GetList)
+		userGroup.GET("/user/:userId", handler.GetList)
 
 		userGroup.GET("/:id", handler.Get)
 		userGroup.POST("/", handler.Create)
