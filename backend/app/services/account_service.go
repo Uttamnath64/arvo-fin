@@ -115,7 +115,7 @@ func (service *Account) Create(rctx *requests.RequestContext, userId uint, paylo
 	// Check avatar
 	if err := service.repoAvatar.AvatarByTypeExists(rctx, payload.AvatarId, commonType.AvatarTypePortfolio); err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return responses.ErrorResponse(common.StatusNotFound, "Selected avatar not found. Please choose a valid one.!", errors.New("avatar not found"))
+			return responses.ErrorResponse(common.StatusNotFound, "Selected avatar not found. Please choose a valid one.", errors.New("avatar not found"))
 		}
 
 		service.container.Logger.Error("account.appService.create-AvatarByTypeExists", "error", err.Error(), "avatarId", payload.AvatarId, "avatarType", commonType.AvatarTypePortfolio)
@@ -125,7 +125,7 @@ func (service *Account) Create(rctx *requests.RequestContext, userId uint, paylo
 	// Check currencyCode
 	if err := service.repoCurrency.CodeExists(rctx, payload.CurrencyCode); err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return responses.ErrorResponse(common.StatusNotFound, "The specified currency code is invalid or not supported.!", errors.New("currency not found"))
+			return responses.ErrorResponse(common.StatusNotFound, "The specified currency code is invalid or not supported.", errors.New("currency not found"))
 		}
 		service.container.Logger.Error("account.appService.create-CodeExists", "error", err.Error(), "currencyCode", payload.CurrencyCode, "userId", userId)
 		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong on our end. Please try again in a moment.", err)
@@ -185,7 +185,7 @@ func (service *Account) Update(rctx *requests.RequestContext, id, userId uint, p
 func (service *Account) Delete(rctx *requests.RequestContext, id, userId uint) responses.ServiceResponse {
 	if err := service.repoAccount.Delete(rctx, id, userId); err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return responses.ErrorResponse(common.StatusNotFound, "Account deletion failed. Please try again.!", errors.New("account not deleted"))
+			return responses.ErrorResponse(common.StatusNotFound, "Account deletion failed. Please try again.", errors.New("account not deleted"))
 		}
 		service.container.Logger.Error("account.appService.delete-Delete", "error", err.Error(), "id", id, "userId", userId)
 		return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong on our end. Please try again in a moment.", err)
