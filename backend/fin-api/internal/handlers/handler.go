@@ -35,7 +35,7 @@ func bindAndValidateJson[T any](c *gin.Context, payload *T) bool {
 	if err := c.ShouldBindJSON(payload); err != nil {
 		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
-			Message: "Invalid request payload. Please check the input data format!",
+			Message: "Invalid request payload. Please check the input format.",
 			Details: err.Error(),
 		})
 		return false
@@ -59,7 +59,7 @@ func getRequestContext(c *gin.Context) (*requests.RequestContext, bool) {
 	if !exists {
 		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
-			Message: "Invalid token!",
+			Message: "Authorization token is missing.",
 		})
 		return nil, false
 	}
@@ -67,7 +67,7 @@ func getRequestContext(c *gin.Context) (*requests.RequestContext, bool) {
 	if !ok {
 		c.JSON(http.StatusBadRequest, responses.ApiResponse{
 			Status:  false,
-			Message: "Invalid token!",
+			Message: "Invalid authorization token.!",
 		})
 		return nil, false
 	}

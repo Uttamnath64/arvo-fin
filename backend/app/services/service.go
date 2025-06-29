@@ -36,7 +36,7 @@ type UserService interface {
 type AvatarService interface {
 	Get(rctx *requests.RequestContext, id uint) responses.ServiceResponse
 	GetAvatarsByType(rctx *requests.RequestContext, avatarType commonType.AvatarType) responses.ServiceResponse
-	Creatre(rctx *requests.RequestContext, payload requests.AvatarRequest) responses.ServiceResponse
+	Create(rctx *requests.RequestContext, payload requests.AvatarRequest) responses.ServiceResponse
 	Update(rctx *requests.RequestContext, id uint, payload requests.AvatarRequest) responses.ServiceResponse
 }
 

@@ -29,21 +29,21 @@ func New() *Validater {
 
 func (v *Validater) IsValidEmail(data string) error {
 	if !Email.MatchString(data) {
-		return errors.New("Invalid email address!")
+		return errors.New("Please enter a valid email address.")
 	}
 	return nil
 }
 
 func (v *Validater) IsValidUsername(data string) error {
 	if !Username.MatchString(data) {
-		return errors.New("Invalid username!")
+		return errors.New("Username must be alphanumeric and meet the required format.")
 	}
 	return nil
 }
 
 func (v *Validater) IsValidName(data string) error {
 	if !Name.MatchString(data) {
-		return errors.New("Invalid name!")
+		return errors.New("Name contains invalid characters.")
 	}
 	return nil
 }
@@ -51,7 +51,7 @@ func (v *Validater) IsValidName(data string) error {
 func (v *Validater) IsValidPassword(data string) error {
 
 	if len(data) < 6 || len(data) > 20 {
-		return errors.New("Password must be 6 to 20 characters long!")
+		return errors.New("Password must be between 6 and 20 characters long.")
 	}
 
 	hasDigit := false
@@ -73,7 +73,7 @@ func (v *Validater) IsValidPassword(data string) error {
 	}
 
 	if !(hasDigit && hasLower && hasUpper && hasSpecial) {
-		return errors.New("Password must include upper & lower case, a number, and a special character")
+		return errors.New("Password must include at least one uppercase letter, one lowercase letter, one digit, and one special character (!@#$%^&*).")
 	}
 
 	return nil
@@ -81,14 +81,14 @@ func (v *Validater) IsValidPassword(data string) error {
 
 func (v *Validater) IsValidOTP(data string) error {
 	if !OTP.MatchString(data) {
-		return errors.New("Invalid otp!")
+		return errors.New("Invalid OTP. Please enter the correct code.")
 	}
 	return nil
 }
 
 func (v *Validater) IsValidMobileNumber(data string) error {
 	if !MobileNumber.MatchString(data) {
-		return errors.New("Invalid mobile number!")
+		return errors.New("Please enter a valid mobile number.!")
 	}
 	return nil
 }
@@ -100,7 +100,7 @@ func (v *Validater) IsValidID(id uint) bool {
 func (v *Validater) HashPassword(password string) (string, error) {
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", errors.New("could not hash password " + err.Error())
+		return "", errors.New("Failed to hash password: " + err.Error())
 	}
 	return string(hashPassword), nil
 }
