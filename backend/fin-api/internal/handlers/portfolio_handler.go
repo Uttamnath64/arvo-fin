@@ -33,11 +33,19 @@ func (handler *Portfolio) GetList(c *gin.Context) {
 	userId := rctx.UserID
 
 	if rctx.UserType == commonType.UserTypeAdmin {
-		userIdInt, err := strconv.Atoi(c.Param("userId"))
+		userIdStr := c.Query("userId")
+		if userIdStr == "" {
+			c.JSON(http.StatusBadRequest, responses.ApiResponse{
+				Status:  false,
+				Message: "userId query param is required for admin users!",
+			})
+			return
+		}
+		userIdInt, err := strconv.Atoi(userIdStr)
 		if err != nil || userIdInt <= 0 {
 			c.JSON(http.StatusBadRequest, responses.ApiResponse{
 				Status:  false,
-				Message: "Invalid user id!",
+				Message: "Invalid userId!",
 			})
 			return
 		}
@@ -109,8 +117,9 @@ func (handler *Portfolio) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, responses.ApiResponse{
-		Status:  true,
-		Message: serviceResponse.Message,
+		Status:   true,
+		Message:  serviceResponse.Message,
+		Metadata: serviceResponse.Data,
 	})
 }
 
@@ -148,8 +157,9 @@ func (handler *Portfolio) Update(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, responses.ApiResponse{
-		Status:  true,
-		Message: serviceResponse.Message,
+		Status:   true,
+		Message:  serviceResponse.Message,
+		Metadata: serviceResponse.Data,
 	})
 }
 
@@ -182,7 +192,8 @@ func (handler *Portfolio) Delete(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, responses.ApiResponse{
-		Status:  true,
-		Message: serviceResponse.Message,
+		Status:   true,
+		Message:  serviceResponse.Message,
+		Metadata: serviceResponse.Data,
 	})
 }

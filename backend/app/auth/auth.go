@@ -39,7 +39,7 @@ func (auth *Auth) GenerateToken(rctx *requests.RequestContext, userId uint, user
 
 	// create settion
 	sessionId, err := auth.authRepo.CreateSession(rctx, &models.Session{
-		UserID:     userId,
+		UserId:     userId,
 		UserType:   userType,
 		DeviceInfo: deviceInfo,
 		IPAddress:  ipAddress,
@@ -104,14 +104,14 @@ func (auth *Auth) VerifyRefreshToken(rctx *requests.RequestContext, refreshToken
 		return nil, errors.New("invalid refresh token claims")
 	}
 
-	if err := auth.isValidRefreshToken(rctx, claims.SessionID, claims.UserType, refreshToken); err != nil {
+	if err := auth.isValidRefreshToken(rctx, claims.UserType, refreshToken); err != nil {
 		return nil, err
 	}
 
 	return claims, nil
 }
 
-func (auth *Auth) isValidRefreshToken(rctx *requests.RequestContext, sessionID uint, userType commonType.UserType, refreshToken string) error {
+func (auth *Auth) isValidRefreshToken(rctx *requests.RequestContext, userType commonType.UserType, refreshToken string) error {
 	session, err := auth.authRepo.GetSessionByRefreshToken(rctx, refreshToken, userType)
 	if err != nil {
 		return err

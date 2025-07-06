@@ -6,12 +6,16 @@ import (
 
 type Category struct {
 	BaseModel
-	SourceID     uint
-	SourceType   commonType.UserType
-	PortfolioId  *uint
-	CopiedFromID *uint
-	Name         string                     `gorm:"type:varchar(100);not null"`
-	Type         commonType.TransactionType `gorm:"not null"`
+	SourceId     uint                       `json:"source_id" gorm:"not null"`
+	AvatarId     uint                       `json:"avatar_id" gorm:"not null"`
+	SourceType   commonType.UserType        `json:"source_type" gorm:"not null"`
+	PortfolioId  *uint                      `json:"portfolio_id"`
+	CopiedFromId *uint                      `json:"copied_from_id"`
+	Name         string                     `json:"name" gorm:"type:varchar(100);not null"`
+	Type         commonType.TransactionType `json:"type" gorm:"not null"`
+
+	// Relationships
+	Avatar Avatar `json:"avatar" gorm:"foreignKey:AvatarId"`
 }
 
 func (m *Category) GetName() string {

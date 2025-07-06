@@ -121,6 +121,7 @@ func (service *Auth) Register(rctx *requests.RequestContext, payload requests.Re
 		Username: payload.Username,
 		Email:    payload.Email,
 		Password: password,
+		AvatarId: payload.AvatarId,
 	})
 	if err != nil {
 		service.container.Logger.Error("auth.service.register-CreateUser", "error", err.Error(), "payload", payload)

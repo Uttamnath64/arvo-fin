@@ -22,6 +22,12 @@ func getContainer() (*storage.Container, error) {
 
 	log := logger.New(env.Server.Environment)
 
+	// 👇 Create required databases if not exists
+	if err := config.EnsureDatabases(&env, log); err != nil {
+		log.Error("migration-db-init-error", err.Error())
+		os.Exit(1)
+	}
+
 	// load config DB
 	err = config.LoadConfig(env, &con)
 	if err != nil {

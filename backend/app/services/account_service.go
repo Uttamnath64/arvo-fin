@@ -59,7 +59,7 @@ func (service *Account) GetList(rctx *requests.RequestContext, portfolioId, user
 	}
 
 	// Response
-	return responses.SuccessResponse("Account details retrieved successfully.", response)
+	return responses.SuccessResponse("Accounts details retrieved successfully.", response)
 }
 
 func (service *Account) AccountTypes(rctx *requests.RequestContext) responses.ServiceResponse {

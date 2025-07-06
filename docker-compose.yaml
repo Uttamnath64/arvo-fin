@@ -1,4 +1,4 @@
-version: '3.4'
+version: "3.4"
 
 services:
   mysql:
@@ -10,7 +10,6 @@ services:
       MYSQL_DATABASE: ${MYSQL_DB_MAIN}
     volumes:
       - ./mysql_data:/var/lib/mysql
-      - ./backend/docker/init/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "${MYSQL_PORT}:${MYSQL_CONTAINER_PORT}"
 
@@ -62,7 +61,4 @@ services:
   #     - "${CLIENT_ORIGIN_PORT}:${CLIENT_ORIGIN_PORT}"
   #   depends_on:
   #     - fin-api
-
-
-
 # docker-compose --env-file ./backend/app/config/env/.env up --build

@@ -13,6 +13,11 @@ type AppEnv struct {
 		DSNReadWrite string `mapstructure:"DSN_READ_WRITE"`
 		DSNReadOnly  string `mapstructure:"DSN_READ_ONLY"`
 		DSNLogs      string `mapstructure:"DSN_LOGS_DB"`
+		DSNMain      string `mapstructure:"DSN_MAIN"`
+		DB           struct {
+			MainDB string `mapstructure:"MYSQL_DB_MAIN"`
+			LogDB  string `mapstructure:"MYSQL_DB_LOGS"`
+		}
 	}
 
 	Server struct {
@@ -55,7 +60,7 @@ func LoadEnv(fileName string) (env AppEnv, err error) {
 		return
 	}
 
-	configs := []interface{}{&env.Database, &env.Server, &env.Auth, &env.Server.Smtp}
+	configs := []interface{}{&env.Database, &env.Database.DB, &env.Server, &env.Auth, &env.Server.Smtp}
 	for _, config := range configs {
 		err = viper.Unmarshal(config)
 		if err != nil {
