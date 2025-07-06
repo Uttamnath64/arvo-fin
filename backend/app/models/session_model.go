@@ -7,7 +7,7 @@ import (
 type Session struct {
 	BaseModel
 	Theme        int
-	UserID       uint                `gorm:"not null"`
+	UserId       uint                `gorm:"not null"`
 	UserType     commonType.UserType `gorm:"type:VARCHAR(50);not null"`
 	DeviceInfo   string              `gorm:"type:TEXT"`
 	IPAddress    string              `gorm:"type:VARCHAR(45)"`

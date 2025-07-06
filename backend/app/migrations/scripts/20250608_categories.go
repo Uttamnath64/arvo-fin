@@ -10,27 +10,27 @@ import (
 func categories(container *storage.Container) error {
 	return RunOnce("20250608_categories", container.Config.ReadWriteDB, func(db *gorm.DB) error {
 		categories := []models.Category{
+			// Income (use appropriate category icons)
+			{Name: "Salary", Type: commonType.TransactionTypeIncome, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 16},        // 💰
+			{Name: "Freelance", Type: commonType.TransactionTypeIncome, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 17},     // 🛍️
+			{Name: "Investments", Type: commonType.TransactionTypeIncome, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 24},   // ✈️
+			{Name: "Interest", Type: commonType.TransactionTypeIncome, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 30},      // 🎁
+			{Name: "Gifts", Type: commonType.TransactionTypeIncome, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 30},         // 🎁
+			{Name: "Rental Income", Type: commonType.TransactionTypeIncome, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 23}, // ⛽
 
-			{Name: "Salary", Type: commonType.TransactionTypeIncome, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Freelance", Type: commonType.TransactionTypeIncome, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Investments", Type: commonType.TransactionTypeIncome, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Interest", Type: commonType.TransactionTypeIncome, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Gifts", Type: commonType.TransactionTypeIncome, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Rental Income", Type: commonType.TransactionTypeIncome, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-
-			// Expense Categories
-			{Name: "Groceries", Type: commonType.TransactionTypeExpense, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Rent", Type: commonType.TransactionTypeExpense, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Utilities", Type: commonType.TransactionTypeExpense, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Transportation", Type: commonType.TransactionTypeExpense, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Dining Out", Type: commonType.TransactionTypeExpense, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Entertainment", Type: commonType.TransactionTypeExpense, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Healthcare", Type: commonType.TransactionTypeExpense, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Education", Type: commonType.TransactionTypeExpense, SourceID: 1, SourceType: commonType.UserTypeAdmin},
-			{Name: "Subscriptions", Type: commonType.TransactionTypeExpense, SourceID: 1, SourceType: commonType.UserTypeAdmin},
+			// Expense
+			{Name: "Groceries", Type: commonType.TransactionTypeExpense, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 18},      // 🛒
+			{Name: "Rent", Type: commonType.TransactionTypeExpense, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 16},           // 💰
+			{Name: "Utilities", Type: commonType.TransactionTypeExpense, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 34},      // 🛠️
+			{Name: "Transportation", Type: commonType.TransactionTypeExpense, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 22}, // 🚗
+			{Name: "Dining Out", Type: commonType.TransactionTypeExpense, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 19},     // 🍔
+			{Name: "Entertainment", Type: commonType.TransactionTypeExpense, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 25},  // 🎬
+			{Name: "Healthcare", Type: commonType.TransactionTypeExpense, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 28},     // 🏥
+			{Name: "Education", Type: commonType.TransactionTypeExpense, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 31},      // 📚
+			{Name: "Subscriptions", Type: commonType.TransactionTypeExpense, SourceId: 1, SourceType: commonType.UserTypeAdmin, AvatarId: 27},  // 🎵
 		}
 		for _, c := range categories {
-			if err := db.FirstOrCreate(&c, models.Category{Name: c.Name, Type: c.Type, SourceID: c.SourceID, SourceType: c.SourceType}).Error; err != nil {
+			if err := db.FirstOrCreate(&c, models.Category{Name: c.Name, Type: c.Type, SourceId: c.SourceId, SourceType: c.SourceType}).Error; err != nil {
 				return err
 			}
 		}

@@ -57,3 +57,11 @@ type AccountRepository interface {
 	Update(rctx *requests.RequestContext, id, userId uint, payload requests.AccountUpdateRequest) error
 	Delete(rctx *requests.RequestContext, id, userId uint) error
 }
+
+type CategoryRepository interface {
+	GetList(rctx *requests.RequestContext, portfolioId, userId uint) (*[]models.Category, error)
+	Get(rctx *requests.RequestContext, id, userId uint) (*models.Category, error)
+	Create(rctx *requests.RequestContext, category models.Category) (uint, error)
+	Update(rctx *requests.RequestContext, id, userId uint, payload requests.CategoryRequest) error
+	Delete(rctx *requests.RequestContext, id, userId uint) error
+}

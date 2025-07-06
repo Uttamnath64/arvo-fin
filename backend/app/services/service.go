@@ -48,3 +48,11 @@ type AccountService interface {
 	Update(rctx *requests.RequestContext, id, userId uint, payload requests.AccountUpdateRequest) responses.ServiceResponse
 	Delete(rctx *requests.RequestContext, id, userId uint) responses.ServiceResponse
 }
+
+type CategoryService interface {
+	Get(rctx *requests.RequestContext, id uint) responses.ServiceResponse
+	GetList(rctx *requests.RequestContext, portfolioId, userId uint) responses.ServiceResponse
+	Create(rctx *requests.RequestContext, payload requests.CategoryRequest) responses.ServiceResponse
+	Update(rctx *requests.RequestContext, id uint, payload requests.CategoryRequest) responses.ServiceResponse
+	Delete(rctx *requests.RequestContext, portfolioId, id uint) responses.ServiceResponse
+}

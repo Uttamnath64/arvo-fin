@@ -10,15 +10,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func NewTestAccount() (*Account, *requests.RequestContext, bool) {
+func NewTestCategory() (*Category, *requests.RequestContext, bool) {
 	container, ok := getTestContainer()
 	if !ok {
 		return nil, nil, false
 	}
 
-	return &Account{
-			container:      container,
-			accountService: commonServices.NewTestAccount(container),
+	return &Category{
+			container: container,
+			service:   commonServices.NewTestCategory(container),
 		}, &requests.RequestContext{
 			Ctx:       context.Background(),
 			UserID:    1,
@@ -27,8 +27,8 @@ func NewTestAccount() (*Account, *requests.RequestContext, bool) {
 		}, true
 }
 
-func TestGetList_Account(t *testing.T) {
-	service, rctx, ok := NewTestAccount()
+func TestGetList_Category(t *testing.T) {
+	service, rctx, ok := NewTestCategory()
 	if !ok {
 		return
 	}
@@ -62,8 +62,8 @@ func TestGetList_Account(t *testing.T) {
 	}
 }
 
-func TestGet_Account(t *testing.T) {
-	service, rctx, ok := NewTestAccount()
+func TestGet_Category(t *testing.T) {
+	service, rctx, ok := NewTestCategory()
 	if !ok {
 		return
 	}
@@ -94,43 +94,37 @@ func TestGet_Account(t *testing.T) {
 	}
 }
 
-func TestCreate_Account(t *testing.T) {
-	service, rctx, ok := NewTestAccount()
+func TestCreate_Category(t *testing.T) {
+	service, rctx, ok := NewTestCategory()
 	if !ok {
 		return
 	}
 
 	tests := []struct {
 		name        string
-		payload     requests.AccountRequest
+		payload     requests.CategoryRequest
 		userId      uint
 		userType    commonType.UserType
 		expectError bool
 	}{
 		{
 			name: "Valid",
-			payload: requests.AccountRequest{
-				AvatarId:       1,
-				PortfolioId:    1,
-				Name:           "Test Account",
-				Type:           commonType.AccountTypeBank,
-				CurrencyCode:   "INR",
-				OpeningBalance: 100,
-				Note:           "Testing.......",
+			payload: requests.CategoryRequest{
+				AvatarId:    1,
+				PortfolioId: 1,
+				Type:        commonType.TransactionTypeExpense,
+				Name:        "Testing",
 			},
 			userId:      1,
 			expectError: false,
 		},
 		{
 			name: "Not Found",
-			payload: requests.AccountRequest{
-				AvatarId:       1,
-				PortfolioId:    1,
-				Name:           "Test Account",
-				Type:           commonType.AccountTypeBank,
-				CurrencyCode:   "INR",
-				OpeningBalance: 100,
-				Note:           "Testing.......",
+			payload: requests.CategoryRequest{
+				AvatarId:    2,
+				PortfolioId: 2,
+				Type:        commonType.TransactionTypeExpense,
+				Name:        "Testing",
 			},
 			userId:      2,
 			expectError: true,
@@ -140,14 +134,14 @@ func TestCreate_Account(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := service.Create(rctx, tt.userId, tt.payload)
+			serviceResponse := service.Create(rctx, tt.payload)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
-func TestUpdate_Account(t *testing.T) {
-	service, rctx, ok := NewTestAccount()
+func TestUpdate_Category(t *testing.T) {
+	service, rctx, ok := NewTestCategory()
 	if !ok {
 		return
 	}
@@ -156,19 +150,18 @@ func TestUpdate_Account(t *testing.T) {
 		name        string
 		Id          uint
 		userId      uint
-		payload     requests.AccountUpdateRequest
+		payload     requests.CategoryRequest
 		expectError bool
 	}{
 		{
 			name:   "Valid",
 			Id:     1,
 			userId: 1,
-			payload: requests.AccountUpdateRequest{
-				AvatarId:     1,
-				Name:         "Test Account",
-				Type:         commonType.AccountTypeBank,
-				CurrencyCode: "INR",
-				Note:         "Testing.......",
+			payload: requests.CategoryRequest{
+				AvatarId:    1,
+				PortfolioId: 1,
+				Type:        commonType.TransactionTypeExpense,
+				Name:        "Testing",
 			},
 			expectError: false,
 		},
@@ -176,12 +169,11 @@ func TestUpdate_Account(t *testing.T) {
 			name:   "Not Found",
 			Id:     2,
 			userId: 1,
-			payload: requests.AccountUpdateRequest{
-				AvatarId:     2,
-				Name:         "Test Account",
-				Type:         commonType.AccountTypeBank,
-				CurrencyCode: "INR",
-				Note:         "Testing.......",
+			payload: requests.CategoryRequest{
+				AvatarId:    1,
+				PortfolioId: 1,
+				Type:        commonType.TransactionTypeExpense,
+				Name:        "Testing",
 			},
 			expectError: true,
 		},
@@ -190,34 +182,34 @@ func TestUpdate_Account(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := service.Update(rctx, tt.Id, tt.userId, tt.payload)
+			serviceResponse := service.Update(rctx, tt.Id, tt.payload)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}
 }
 
-func TestDelete_Account(t *testing.T) {
-	service, rctx, ok := NewTestAccount()
+func TestDelete_Category(t *testing.T) {
+	service, rctx, ok := NewTestCategory()
 	if !ok {
 		return
 	}
 
 	tests := []struct {
 		name        string
-		Id          uint
-		userId      uint
+		portfolioId uint
+		id          uint
 		expectError bool
 	}{
 		{
 			name:        "Valid",
-			Id:          1,
-			userId:      1,
+			portfolioId: 1,
+			id:          1,
 			expectError: false,
 		},
 		{
 			name:        "Not Found",
-			Id:          2,
-			userId:      1,
+			portfolioId: 2,
+			id:          21,
 			expectError: true,
 		},
 	}
@@ -225,7 +217,7 @@ func TestDelete_Account(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			serviceResponse := service.Delete(rctx, tt.Id, tt.userId)
+			serviceResponse := service.Delete(rctx, tt.portfolioId, tt.id)
 			assert.Equal(t, tt.expectError, serviceResponse.HasError())
 		})
 	}

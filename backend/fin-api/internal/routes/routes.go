@@ -24,4 +24,5 @@ func (routes *Routes) Handlers() {
 	routes.avatarRoutes()
 	routes.PortfolioRoutes()
 	routes.AccountRoutes()
+	routes.CategoryRoutes()
 }
