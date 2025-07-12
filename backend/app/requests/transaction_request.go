@@ -2,12 +2,13 @@ package requests
 
 import (
 	"errors"
+	"time"
 
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 )
 
 type TransactionRequest struct {
-	TransferAccountId uint                       `json:"transfer_account_id,omitempty"`
+	TransferAccountId *uint                      `json:"transfer_account_id,omitempty"`
 	AccountId         uint                       `json:"account_id" binding:"required"`
 	CategoryId        uint                       `json:"category_id" binding:"required"`
 	PortfolioId       uint                       `json:"portfolio_id" binding:"required"`
@@ -36,4 +37,16 @@ func (r TransactionRequest) IsValid() error {
 		return errors.New("invalid account type")
 	}
 	return nil
+}
+
+type TransactionQuery struct {
+	UserId      uint
+	PortfolioId uint
+	AccountId   uint
+	CategoryId  uint
+	DateFrom    time.Time
+	DateTo      time.Time
+	Search      string
+	Type        *commonType.TransactionType
+	Order       commonType.OrderType
 }

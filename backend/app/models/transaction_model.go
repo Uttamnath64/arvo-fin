@@ -4,6 +4,7 @@ import commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 
 type Transaction struct {
 	BaseModel
+	UserId            uint                       `json:"user_id"`
 	TransferAccountId *uint                      `json:"transfer_account_id"`
 	AccountId         uint                       `json:"account_id" gorm:"not null"`
 	CategoryId        uint                       `json:"category_id" gorm:"not null"`

@@ -4,6 +4,7 @@ import (
 	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/responses"
+	"github.com/Uttamnath64/arvo-fin/pkg/pagination"
 	"github.com/Uttamnath64/arvo-fin/pkg/validater"
 )
 
@@ -55,4 +56,12 @@ type CategoryService interface {
 	Create(rctx *requests.RequestContext, payload requests.CategoryRequest) responses.ServiceResponse
 	Update(rctx *requests.RequestContext, id uint, payload requests.CategoryRequest) responses.ServiceResponse
 	Delete(rctx *requests.RequestContext, portfolioId, id uint) responses.ServiceResponse
+}
+
+type TransactionService interface {
+	Get(rctx *requests.RequestContext, id uint) responses.ServiceResponse
+	GetList(rctx *requests.RequestContext, transactionQuery requests.TransactionQuery, pagination pagination.Pagination) responses.ServiceResponse
+	Create(rctx *requests.RequestContext, payload requests.TransactionRequest) responses.ServiceResponse
+	Update(rctx *requests.RequestContext, id uint, payload requests.TransactionRequest) responses.ServiceResponse
+	Delete(rctx *requests.RequestContext, id uint) responses.ServiceResponse
 }

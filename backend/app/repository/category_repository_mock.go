@@ -122,3 +122,10 @@ func (repo *TestCategory) Delete(rctx *requests.RequestContext, id, userId uint)
 
 	return nil
 }
+
+func (repo *TestCategory) UserCategoryExists(rctx *requests.RequestContext, id, portfolioId, userId uint) error {
+	if id == 1 && portfolioId == 1 && userId == 1 {
+		return nil
+	}
+	return gorm.ErrRecordNotFound
+}

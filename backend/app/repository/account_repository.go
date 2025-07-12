@@ -84,3 +84,18 @@ func (repo *Account) Delete(rctx *requests.RequestContext, id, userId uint) erro
 
 	return nil
 }
+
+func (repo *Account) UserAccountExists(rctx *requests.RequestContext, id, portfolioId, userId uint) error {
+	var count int64
+
+	err := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Model(&models.Account{}).
+		Where("id = ? AND portfolio_id = ? AND user_id = ?", id, portfolioId, userId).Count(&count).Error
+
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}

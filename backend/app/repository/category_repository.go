@@ -117,3 +117,23 @@ func (repo *Category) Delete(rctx *requests.RequestContext, id, userId uint) err
 
 	return nil
 }
+
+func (repo *Category) UserCategoryExists(rctx *requests.RequestContext, id, portfolioId, userId uint) error {
+	var count int64
+
+	if err := repo.container.Config.ReadOnlyDB.WithContext(rctx.Ctx).Preload("Avatar").Model(&models.Category{}).
+		Where("id = ? AND (source_type = ? OR (source_type = ? AND source_id = ? AND portfolio_id = ?))",
+			id,
+			commonType.UserTypeAdmin,
+			commonType.UserTypeUser,
+			userId,
+			portfolioId,
+		).
+		Count(&count).Error; err != nil {
+		return err // Other errors
+	}
+	if count == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}

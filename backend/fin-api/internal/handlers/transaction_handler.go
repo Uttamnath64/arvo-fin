@@ -9,18 +9,20 @@ import (
 	"github.com/Uttamnath64/arvo-fin/app/responses"
 	"github.com/Uttamnath64/arvo-fin/app/storage"
 	"github.com/Uttamnath64/arvo-fin/fin-api/internal/services"
+	"github.com/Uttamnath64/arvo-fin/pkg/pagination"
+	"github.com/Uttamnath64/arvo-fin/pkg/query"
 	"github.com/gin-gonic/gin"
 )
 
 type Transaction struct {
 	container *storage.Container
-	service   *services.Account
+	service   *services.Transaction
 }
 
 func NewTransaction(container *storage.Container) *Transaction {
 	return &Transaction{
 		container: container,
-		service:   services.NewAccount(container),
+		service:   services.NewTransaction(container),
 	}
 }
 
@@ -53,54 +55,89 @@ func (handler *Transaction) Get(c *gin.Context) {
 }
 
 func (handler *Transaction) GetList(c *gin.Context) {
-	var queryParams map[string]interface{}
 	var isRequired bool
-	var uid uint
+	var transactionQuery requests.TransactionQuery
 
 	rctx, ok := getRequestContext(c)
 	if !ok {
 		return
 	}
 
+	transactionQuery.UserId = rctx.UserID
+	isRequired = true
+
 	if rctx.UserType == commonType.UserTypeAdmin {
-		uid, ok := getQueryParamId(c, "userId", false)
+		isRequired = false
+		transactionQuery.UserId, ok = query.QId(c, "userId", false)
 		if !ok {
 			return
 		}
-		queryParams["userId"] = uid
-	} else {
-		queryParams["userId"] = rctx.UserID
-		isRequired = true
 	}
 
-	uid, ok = getQueryParamId(c, "portfolioId", isRequired)
+	// portfolioId
+	transactionQuery.PortfolioId, ok = query.QId(c, "portfolioId", isRequired)
 	if !ok {
 		return
 	}
-	queryParams["portfolioId"] = uid
 
-	uid, ok = getQueryParamId(c, "accountId", false)
+	// accountId
+	transactionQuery.AccountId, ok = query.QId(c, "accountId", false)
 	if !ok {
 		return
 	}
-	queryParams["accountId"] = uid
 
-	uid, ok = getQueryParamId(c, "categoryId", false)
+	// categoryId
+	transactionQuery.CategoryId, ok = query.QId(c, "categoryId", false)
 	if !ok {
 		return
 	}
-	queryParams["categoryId"] = uid
 
-	serviceResponse := handler.service.GetList(rctx, queryParams)
+	// dateFrom and dateTo
+	transactionQuery.DateFrom, transactionQuery.DateTo, ok = query.QDateTimeRange(c, "dateFrom", "dateTo", false)
+	if !ok {
+		return
+	}
+
+	// search
+	transactionQuery.Search = c.Query("search")
+
+	// type
+	tType := c.Query("type")
+	if tType != "" {
+		typeInt, err := strconv.Atoi(tType)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, responses.ApiResponse{
+				Status:  false,
+				Message: "Invalid type!",
+			})
+		}
+		tType := commonType.TransactionType(typeInt)
+		if !commonType.OrderType(transactionQuery.Order).IsValid() {
+			c.JSON(http.StatusBadRequest, responses.ApiResponse{
+				Status:  false,
+				Message: "Invalid type!",
+			})
+			return
+		}
+		transactionQuery.Type = &tType
+	}
+
+	// order
+	transactionQuery.Order = commonType.OrderType(c.DefaultQuery("order", "asc"))
+	if !commonType.OrderType(transactionQuery.Order).IsValid() {
+		c.JSON(http.StatusBadRequest, responses.ApiResponse{
+			Status:  false,
+			Message: "Invalid order type. Use 'asc' or 'desc'",
+		})
+		return
+	}
+
+	pagination := pagination.NewPagination(c)
+
+	serviceResponse := handler.service.GetList(rctx, transactionQuery, pagination)
 	if isErrorResponse(c, serviceResponse) {
 		return
 	}
-
-	search := c.Query("search")
-	tType := c.Query("type")
-	dateFrom := c.Query("dateFrom")
-	dateTo := c.Query("dateTo")
-	order := c.DefaultQuery("order", "desc")
 
 	c.JSON(http.StatusOK, responses.ApiResponse{
 		Status:   true,
@@ -116,7 +153,7 @@ func (handler *Transaction) Create(c *gin.Context) {
 		return
 	}
 
-	var payload requests.AccountRequest
+	var payload requests.TransactionRequest
 	if !bindAndValidateJson(c, &payload) {
 		return
 	}
@@ -129,7 +166,7 @@ func (handler *Transaction) Create(c *gin.Context) {
 		return
 	}
 
-	serviceResponse := handler.service.Create(rctx, rctx.UserID, payload)
+	serviceResponse := handler.service.Create(rctx, payload)
 	if isErrorResponse(c, serviceResponse) {
 		return
 	}
@@ -148,7 +185,7 @@ func (handler *Transaction) Update(c *gin.Context) {
 		return
 	}
 
-	var payload requests.AccountUpdateRequest
+	var payload requests.TransactionRequest
 	if !bindAndValidateJson(c, &payload) {
 		return
 	}
@@ -170,7 +207,7 @@ func (handler *Transaction) Update(c *gin.Context) {
 		return
 	}
 
-	serviceResponse := handler.service.Update(rctx, uint(id), rctx.UserID, payload)
+	serviceResponse := handler.service.Update(rctx, uint(id), payload)
 	if isErrorResponse(c, serviceResponse) {
 		return
 	}
@@ -206,7 +243,7 @@ func (handler *Transaction) Delete(c *gin.Context) {
 		return
 	}
 
-	serviceResponse := handler.service.Delete(rctx, uint(id), rctx.UserID)
+	serviceResponse := handler.service.Delete(rctx, uint(id))
 	if isErrorResponse(c, serviceResponse) {
 		return
 	}
