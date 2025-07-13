@@ -1,5 +1,6 @@
 package commonType
 
+// "asc", "desc"
 type OrderType string
 
 const (

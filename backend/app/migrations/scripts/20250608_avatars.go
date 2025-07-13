@@ -65,6 +65,23 @@ func avatars(container *storage.Container) error {
 			{Name: "Cash", Icon: "💵", Type: commonType.AvatarTypePortfolio},
 			{Name: "Credit", Icon: "💳", Type: commonType.AvatarTypePortfolio},
 			{Name: "Loan", Icon: "🤝", Type: commonType.AvatarTypePortfolio},
+
+			// AvatarTypeRegularPayment
+			{Name: "SIP", Icon: "📅", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Mutual Fund", Icon: "📊", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Loan EMI", Icon: "💸", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Installment", Icon: "🔁", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Insurance", Icon: "🛡️", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Recurring Deposit", Icon: "💰", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Auto Save", Icon: "🤖", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Gold Saving", Icon: "🥇", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Stock SIP", Icon: "📈", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Emergency Fund", Icon: "🚨", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Piggy Save", Icon: "🐷", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Credit Payment", Icon: "💳", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Debt Payoff", Icon: "📉", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Random Save", Icon: "🎯", Type: commonType.AvatarTypeRegularPayment},
+			{Name: "Stool Saving", Icon: "🪑", Type: commonType.AvatarTypeRegularPayment},
 		}
 		for _, a := range avatars {
 			if err := db.FirstOrCreate(&a, models.Avatar{Name: a.Name, Type: a.Type}).Error; err != nil {

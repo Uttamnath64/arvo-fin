@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/Uttamnath64/arvo-fin/app/common"
+	commonType "github.com/Uttamnath64/arvo-fin/app/common/types"
 	"github.com/Uttamnath64/arvo-fin/app/models"
 	"github.com/Uttamnath64/arvo-fin/app/repository"
 	"github.com/Uttamnath64/arvo-fin/app/requests"
@@ -153,7 +154,13 @@ func (service *Transaction) Update(rctx *requests.RequestContext, id uint, paylo
 	}
 
 	// Transaction is transfer account
-	if payload.TransferAccountId != nil {
+	if payload.Type == commonType.TransactionTypeTransfer {
+		if payload.TransferAccountId == nil {
+			return responses.ErrorResponse(common.StatusValidationError, "Transaction type is 'Transfer', but transfer account is missing!", errors.New("transfer account is missing"))
+		} else if payload.TransferAccountId == &payload.AccountId {
+			return responses.ErrorResponse(common.StatusValidationError, "Transfer account cannot be the same as the source account!", errors.New("transfer account cannot be the same as the source account"))
+		}
+
 		if err := service.repoAccount.UserAccountExists(rctx, *payload.TransferAccountId, payload.PortfolioId, rctx.UserID); err != nil {
 			if err == gorm.ErrRecordNotFound {
 				return responses.ErrorResponse(common.StatusNotFound, "No transfer account found for this protfolio and user.", errors.New("transfer account not found"))
@@ -161,6 +168,8 @@ func (service *Transaction) Update(rctx *requests.RequestContext, id uint, paylo
 			service.container.Logger.Error("transaction.appService.update-UserAccountExists-TransferAccountId", "error", err.Error(), "payload", payload, "user", rctx, "portfolioId", payload.PortfolioId, "transferAccountId", payload.TransferAccountId)
 			return responses.ErrorResponse(common.StatusDatabaseError, "Oops! Something went wrong on our end. Please try again in a moment.", err)
 		}
+	} else {
+		payload.TransferAccountId = nil
 	}
 
 	if err := service.repo.Update(rctx, id, payload); err != nil {

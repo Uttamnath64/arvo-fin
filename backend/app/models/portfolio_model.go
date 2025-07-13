@@ -9,10 +9,9 @@ type Portfolio struct {
 	// Relationships
 	Avatar *Avatar `json:"avatar,omitempty" gorm:"foreignKey:AvatarId"`
 
-	Account              []Account              `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`
-	Budget               []Budget               `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`
-	Transaction          []Transaction          `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`
-	RecurringTransaction []RecurringTransaction `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`
+	Account     []Account     `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`
+	Budget      []Budget      `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`
+	Transaction []Transaction `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`
 }
 
 func (m Portfolio) GetName() string {

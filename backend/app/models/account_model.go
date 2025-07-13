@@ -19,8 +19,7 @@ type Account struct {
 	Avatar   *Avatar   `json:"avatar,omitempty" gorm:"foreignKey:AvatarId"`
 	Currency *Currency `json:"currency,omitempty" gorm:"foreignKey:CurrencyCode;references:Code"`
 
-	Transaction          []Transaction          `gorm:"foreignKey:AccountId;constraint:OnDelete:CASCADE;"`
-	RecurringTransaction []RecurringTransaction `gorm:"foreignKey:AccountId;constraint:OnDelete:CASCADE;"`
+	Transaction []Transaction `gorm:"foreignKey:AccountId;constraint:OnDelete:CASCADE;"`
 }
 
 func (m *Account) GetName() string {
