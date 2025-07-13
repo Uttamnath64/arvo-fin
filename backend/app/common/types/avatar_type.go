@@ -1,6 +1,6 @@
 package commonType
 
-// Default, User, Category, Portfolio
+// Default, User, Category, Portfolio, RegularPayment
 type AvatarType int8
 
 const (
@@ -8,10 +8,11 @@ const (
 	AvatarTypeUser
 	AvatarTypeCategory
 	AvatarTypePortfolio
+	AvatarTypeRegularPayment
 )
 
 func (t AvatarType) String() string {
-	names := [...]string{"", "Default", "User", "Category", "Portfolio"}
+	names := [...]string{"", "Default", "User", "Category", "Portfolio", "RegularPayment"}
 	if !t.IsValid() {
 		return "Unknown"
 	}
@@ -19,5 +20,5 @@ func (t AvatarType) String() string {
 }
 
 func (t AvatarType) IsValid() bool {
-	return t >= AvatarTypeDefault && t <= AvatarTypePortfolio
+	return t >= AvatarTypeDefault && t <= AvatarTypeRegularPayment
 }

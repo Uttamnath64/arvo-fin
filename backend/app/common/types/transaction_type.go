@@ -1,15 +1,16 @@
 package commonType
 
-// Income, Expense
+// Income, Expense, Transfer
 type TransactionType int8
 
 const (
 	TransactionTypeIncome TransactionType = iota + 1
 	TransactionTypeExpense
+	TransactionTypeTransfer
 )
 
 func (t TransactionType) String() string {
-	names := [...]string{"", "Income", "Expense"}
+	names := [...]string{"", "Income", "Expense", "Transfer"}
 	if !t.IsValid() {
 		return "Unknown"
 	}
@@ -17,5 +18,5 @@ func (t TransactionType) String() string {
 }
 
 func (t TransactionType) IsValid() bool {
-	return t >= TransactionTypeIncome && t <= TransactionTypeExpense
+	return t >= TransactionTypeIncome && t <= TransactionTypeTransfer
 }

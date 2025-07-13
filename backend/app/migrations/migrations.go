@@ -53,10 +53,11 @@ func main() {
 		&models.Avatar{},
 		&models.Transaction{},
 		&models.Session{},
-		&models.RecurringTransaction{},
 		&models.MigrationVersion{},
 		&models.Currency{},
 		&models.Admin{},
+		&models.Installments{},
+		&models.RegularPayments{},
 	)
 	if err != nil {
 		container.Logger.Error("app-migrate-config-error", "Failed to migrate the database", err)
