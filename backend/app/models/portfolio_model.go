@@ -7,7 +7,7 @@ type Portfolio struct {
 	Name     string `json:"name" gorm:"not null"`
 
 	// Relationships
-	Avatar Avatar `json:"avatar" gorm:"foreignKey:AvatarId"`
+	Avatar *Avatar `json:"avatar,omitempty" gorm:"foreignKey:AvatarId"`
 
 	Account              []Account              `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`
 	Budget               []Budget               `gorm:"foreignKey:PortfolioId;constraint:OnDelete:CASCADE;"`

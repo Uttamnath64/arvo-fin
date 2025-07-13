@@ -38,7 +38,7 @@ func (repo *TestCategory) GetList(rctx *requests.RequestContext, portfolioId, us
 			Name:         "Test Account",
 			Type:         commonType.TransactionTypeExpense,
 			CopiedFromId: &copiedFromId,
-			Avatar: models.Avatar{
+			Avatar: &models.Avatar{
 				BaseModel: models.BaseModel{
 					ID:        1,
 					CreatedAt: time.Now().Add(-1 * time.Hour),
@@ -60,7 +60,7 @@ func (repo *TestCategory) GetList(rctx *requests.RequestContext, portfolioId, us
 			PortfolioId: &portfolioId,
 			Name:        "Test Account",
 			Type:        commonType.TransactionTypeExpense,
-			Avatar: models.Avatar{
+			Avatar: &models.Avatar{
 				BaseModel: models.BaseModel{
 					ID:        1,
 					CreatedAt: time.Now().Add(-1 * time.Hour),
@@ -90,7 +90,7 @@ func (repo *TestCategory) Get(rctx *requests.RequestContext, id, userId uint) (*
 		PortfolioId: &portfolioId,
 		Name:        "Test Account",
 		Type:        commonType.TransactionTypeExpense,
-		Avatar: models.Avatar{
+		Avatar: &models.Avatar{
 			BaseModel: models.BaseModel{
 				ID:        1,
 				CreatedAt: time.Now().Add(-1 * time.Hour),

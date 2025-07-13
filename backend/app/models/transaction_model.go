@@ -14,9 +14,9 @@ type Transaction struct {
 	Note              string                     `json:"note" gorm:"type:varchar(255)"`
 
 	// Relationships
-	Account         Account  `json:"account" gorm:"foreignKey:AccountId"`
-	TransferAccount Account  `json:"transfer_account" gorm:"foreignKey:TransferAccountId"`
-	Category        Category `json:"currency" gorm:"foreignKey:CategoryId"`
+	Account         *Account  `json:"account,omitempty" gorm:"foreignKey:AccountId"`
+	TransferAccount *Account  `json:"transfer_account,omitempty" gorm:"foreignKey:TransferAccountId"`
+	Category        *Category `json:"category,omitempty" gorm:"foreignKey:CategoryId"`
 
 	TransactionAudit []TransactionAudit `gorm:"foreignKey:TransactionId;constraint:OnDelete:CASCADE;"`
 }

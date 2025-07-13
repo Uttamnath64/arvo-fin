@@ -15,7 +15,7 @@ type Category struct {
 	Type         commonType.TransactionType `json:"type" gorm:"not null"`
 
 	// Relationships
-	Avatar Avatar `json:"avatar" gorm:"foreignKey:AvatarId"`
+	Avatar *Avatar `json:"avatar,omitempty" gorm:"foreignKey:AvatarId"`
 }
 
 func (m *Category) GetName() string {

@@ -47,7 +47,7 @@ func (repo *Transaction) GetList(rctx *requests.RequestContext, transactionQuery
 	if transactionQuery.Type != nil {
 		query.Where("type = ?", transactionQuery.Type)
 	}
-	query.Limit(pagination.Page).Offset(pagination.GetOffset()).
+	query.Limit(pagination.Limit).Offset(pagination.GetOffset()).
 		Order("updated_at " + transactionQuery.Order)
 
 	err := query.Find(&transactions).Error
@@ -87,7 +87,7 @@ func (repo *Transaction) Create(rctx *requests.RequestContext, transaction model
 }
 
 func (repo *Transaction) Update(rctx *requests.RequestContext, id uint, payload requests.TransactionRequest) error {
-	result := repo.container.Config.ReadWriteDB.WithContext(rctx.Ctx).Model(&models.Account{}).
+	result := repo.container.Config.ReadWriteDB.WithContext(rctx.Ctx).Model(&models.Transaction{}).
 		Where("id = ? AND user_id = ?", id, rctx.UserID).
 		Updates(map[string]interface{}{
 			"transfer_account_id": payload.TransferAccountId,
