@@ -25,4 +25,5 @@ func (routes *Routes) Handlers() {
 	routes.PortfolioRoutes()
 	routes.AccountRoutes()
 	routes.CategoryRoutes()
+	routes.TransactionRoutes()
 }

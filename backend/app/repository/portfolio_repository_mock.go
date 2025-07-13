@@ -39,7 +39,7 @@ func (repo *TestPortfolio) GetList(rctx *requests.RequestContext, userId uint) (
 				UserId:   1,
 				AvatarId: 1,
 				Name:     "Retirement Fund",
-				Avatar: models.Avatar{
+				Avatar: &models.Avatar{
 					BaseModel: models.BaseModel{
 						ID:        2,
 						CreatedAt: time.Now().Add(-1 * time.Hour),
@@ -59,7 +59,7 @@ func (repo *TestPortfolio) GetList(rctx *requests.RequestContext, userId uint) (
 				UserId:   1,
 				AvatarId: 1,
 				Name:     "Retirement Fund",
-				Avatar: models.Avatar{
+				Avatar: &models.Avatar{
 					BaseModel: models.BaseModel{
 						ID:        1,
 						CreatedAt: time.Now().Add(-1 * time.Hour),
@@ -87,7 +87,7 @@ func (repo *TestPortfolio) Get(rctx *requests.RequestContext, id, userId uint, u
 			UserId:   1,
 			AvatarId: 1,
 			Name:     "Retirement Fund",
-			Avatar: models.Avatar{
+			Avatar: &models.Avatar{
 				BaseModel: models.BaseModel{
 					ID:        1,
 					CreatedAt: time.Now().Add(-1 * time.Hour),

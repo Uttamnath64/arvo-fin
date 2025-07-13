@@ -5,6 +5,7 @@ import (
 	"github.com/Uttamnath64/arvo-fin/app/models"
 	"github.com/Uttamnath64/arvo-fin/app/requests"
 	"github.com/Uttamnath64/arvo-fin/app/responses"
+	"github.com/Uttamnath64/arvo-fin/pkg/pagination"
 )
 
 type AuthRepository interface {
@@ -51,6 +52,7 @@ type CurrencyRepository interface {
 }
 
 type AccountRepository interface {
+	UserAccountExists(rctx *requests.RequestContext, id, portfolioId, userId uint) error
 	GetList(rctx *requests.RequestContext, portfolioId, userId uint) (*[]models.Account, error)
 	Get(rctx *requests.RequestContext, id uint) (*models.Account, error)
 	Create(rctx *requests.RequestContext, account models.Account) (uint, error)
@@ -59,9 +61,18 @@ type AccountRepository interface {
 }
 
 type CategoryRepository interface {
+	UserCategoryExists(rctx *requests.RequestContext, id, portfolioId, userId uint) error
 	GetList(rctx *requests.RequestContext, portfolioId, userId uint) (*[]models.Category, error)
 	Get(rctx *requests.RequestContext, id, userId uint) (*models.Category, error)
 	Create(rctx *requests.RequestContext, category models.Category) (uint, error)
 	Update(rctx *requests.RequestContext, id, userId uint, payload requests.CategoryRequest) error
 	Delete(rctx *requests.RequestContext, id, userId uint) error
+}
+
+type TransactionRepository interface {
+	Get(rctx *requests.RequestContext, id uint) (*models.Transaction, error)
+	GetList(rctx *requests.RequestContext, transactionQuery requests.TransactionQuery, pagination pagination.Pagination) (*[]models.Transaction, error)
+	Create(rctx *requests.RequestContext, transaction models.Transaction) (uint, error)
+	Update(rctx *requests.RequestContext, id uint, payload requests.TransactionRequest) error
+	Delete(rctx *requests.RequestContext, id uint) error
 }

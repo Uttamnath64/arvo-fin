@@ -16,8 +16,8 @@ type Account struct {
 	Note           string                 `json:"note" gorm:"type:text"`
 
 	// Relationships
-	Avatar   Avatar   `json:"avatar" gorm:"foreignKey:AvatarId"`
-	Currency Currency `json:"currency" gorm:"foreignKey:CurrencyCode;references:Code"`
+	Avatar   *Avatar   `json:"avatar,omitempty" gorm:"foreignKey:AvatarId"`
+	Currency *Currency `json:"currency,omitempty" gorm:"foreignKey:CurrencyCode;references:Code"`
 
 	Transaction          []Transaction          `gorm:"foreignKey:AccountId;constraint:OnDelete:CASCADE;"`
 	RecurringTransaction []RecurringTransaction `gorm:"foreignKey:AccountId;constraint:OnDelete:CASCADE;"`

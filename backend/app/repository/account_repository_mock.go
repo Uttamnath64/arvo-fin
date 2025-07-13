@@ -37,7 +37,7 @@ func (repo *TestAccount) GetList(rctx *requests.RequestContext, portfolioId, use
 			Type:           commonType.AccountTypeBank,
 			OpeningBalance: 100,
 			Note:           "Testing.......",
-			Avatar: models.Avatar{
+			Avatar: &models.Avatar{
 				BaseModel: models.BaseModel{
 					ID:        1,
 					CreatedAt: time.Now().Add(-1 * time.Hour),
@@ -47,7 +47,7 @@ func (repo *TestAccount) GetList(rctx *requests.RequestContext, portfolioId, use
 				Icon: "T",
 				Type: commonType.AvatarTypeDefault,
 			},
-			Currency: models.Currency{
+			Currency: &models.Currency{
 				Code:   "INR",
 				Name:   "Indian Rupee",
 				Symbol: "₹",
@@ -65,7 +65,7 @@ func (repo *TestAccount) GetList(rctx *requests.RequestContext, portfolioId, use
 			Type:           commonType.AccountTypeCash,
 			OpeningBalance: 200,
 			Note:           "Testing.......",
-			Avatar: models.Avatar{
+			Avatar: &models.Avatar{
 				BaseModel: models.BaseModel{
 					ID:        1,
 					CreatedAt: time.Now().Add(-1 * time.Hour),
@@ -75,7 +75,7 @@ func (repo *TestAccount) GetList(rctx *requests.RequestContext, portfolioId, use
 				Icon: "G",
 				Type: commonType.AvatarTypeDefault,
 			},
-			Currency: models.Currency{
+			Currency: &models.Currency{
 				Code:   "INR",
 				Name:   "Indian Rupee",
 				Symbol: "₹",
@@ -100,7 +100,7 @@ func (repo *TestAccount) Get(rctx *requests.RequestContext, id uint) (*models.Ac
 		Type:           commonType.AccountTypeBank,
 		OpeningBalance: 100,
 		Note:           "Testing.......",
-		Avatar: models.Avatar{
+		Avatar: &models.Avatar{
 			BaseModel: models.BaseModel{
 				ID:        1,
 				CreatedAt: time.Now().Add(-1 * time.Hour),
@@ -110,7 +110,7 @@ func (repo *TestAccount) Get(rctx *requests.RequestContext, id uint) (*models.Ac
 			Icon: "T",
 			Type: commonType.AvatarTypeDefault,
 		},
-		Currency: models.Currency{
+		Currency: &models.Currency{
 			Code:   "INR",
 			Name:   "Indian Rupee",
 			Symbol: "₹",
@@ -136,4 +136,11 @@ func (repo *TestAccount) Delete(rctx *requests.RequestContext, id, userId uint) 
 	}
 
 	return nil
+}
+
+func (repo *TestAccount) UserAccountExists(rctx *requests.RequestContext, id, portfolioId, userId uint) error {
+	if id == 1 && portfolioId == 1 && userId == 1 {
+		return nil
+	}
+	return gorm.ErrRecordNotFound
 }
