@@ -16,12 +16,10 @@ Arvo-Fin is a powerful personal finance management system built in **Golang**, d
 
 ### ⚙️ Advanced Modules
 
-* Category & Subcategory-wise reporting
 * Monthly reports & exporting (PDF, CSV)
 * Search transactions
 * Suggestions using AI/ML
 * Reminders & Alerts (Upcoming bills, savings goal)
-* Offline-first mobile app (data sync on login)
 * Secure Mutations for all data operations
 * Email Notifications
 
@@ -33,7 +31,7 @@ Arvo-Fin is a powerful personal finance management system built in **Golang**, d
 fin-api/        => REST API Service (Gin)
 fin-job/        => Background Job Processor (cron jobs)
 fin-consumer/   => Kafka Consumer Service
-next-app/       => Frontend Web App (Next.js)
+fin-app/       => Frontend Web App (Next.js)
 
 internal/
   |- service/   => Shared services used by all services
@@ -63,8 +61,6 @@ scripts/        => DB migrations, seeders, and tooling
 * **Scheduler:** Cron jobs (in `fin-job`)
 * **Consumers:** Kafka consumers (real-time processing)
 * **Email Notifications:** SMTP-based service
-* **Multi Portfolio Support:** Each user can manage multiple financial portfolios
-* **Mutations:** Secure and validated data mutations for all state-changing operations
 * **REST API:** Comprehensive API layer for integration
 
 ---
@@ -76,7 +72,7 @@ scripts/        => DB migrations, seeders, and tooling
 | fin-api      | Exposes REST API endpoints                 |
 | fin-consumer | Kafka consumer for real-time processing    |
 | fin-job      | Cron jobs (daily sync, reminders, reports) |
-| next-app     | Web UI built in Next.js                    |
+| fin-app     | Web UI built in Next.js                    |
 
 ---
 
@@ -150,9 +146,7 @@ scripts/        => DB migrations, seeders, and tooling
 
 ## 🚧 Upcoming Features
 
-* Sync conflict resolver between mobile and server
 * Integration with email/SMS for reminders
-* GraphQL API (optional)
 * OpenAPI docs (Swagger)
 * Predictive budgeting with ML model
 
